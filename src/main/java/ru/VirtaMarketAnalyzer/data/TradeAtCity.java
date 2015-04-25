@@ -9,6 +9,7 @@ public final class TradeAtCity {
     final private String countryId;
     final private String regionId;
     final private String cityId;
+    final private String cityCaption;
     final private double wealthIndex;
     final private String productId;
     final private String marketIdx;
@@ -29,6 +30,7 @@ public final class TradeAtCity {
             final String countryId
             , final String regionId
             , final String cityId
+            , final String cityCaption
             , final String productId
             , final String marketIdx
             , final long volume
@@ -48,6 +50,7 @@ public final class TradeAtCity {
         this.countryId = countryId;
         this.regionId = regionId;
         this.cityId = cityId;
+        this.cityCaption = cityCaption;
         this.productId = productId;
         this.marketIdx = marketIdx;
         this.volume = volume;
@@ -63,6 +66,10 @@ public final class TradeAtCity {
         this.shopQuality = shopQuality;
         this.shopBrand = shopBrand;
         this.majorSellInCityList = majorSellInCityList;
+    }
+
+    public String getCityCaption() {
+        return cityCaption;
     }
 
     public List<MajorSellInCity> getMajorSellInCityList() {

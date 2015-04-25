@@ -80,6 +80,7 @@ public final class CityParser {
         builder.setCountryId(city.getCountryId());
         builder.setRegionId(city.getRegionId());
         builder.setCityId(city.getId());
+        builder.setCityCaption(city.getCaption());
         builder.setWealthIndex(city.getWealthIndex());
 
         builder.setLocalPercent(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td").eq(4).html()));

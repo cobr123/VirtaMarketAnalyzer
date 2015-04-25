@@ -9,6 +9,7 @@ public final class TradeAtCityBuilder {
     private String countryId;
     private String regionId;
     private String cityId;
+    private String cityCaption;
     private double wealthIndex;
     private String productId;
     private String marketIdx;
@@ -30,6 +31,7 @@ public final class TradeAtCityBuilder {
                 countryId
                 , regionId
                 , cityId
+                , cityCaption
                 , productId
                 , marketIdx
                 , volume
@@ -46,6 +48,11 @@ public final class TradeAtCityBuilder {
                 , shopBrand
                 , majorSellInCityList
         );
+    }
+
+    public TradeAtCityBuilder setCityCaption(final String cityCaption) {
+        this.cityCaption = cityCaption;
+        return this;
     }
 
     public TradeAtCityBuilder setMajorSellInCityList(final List<MajorSellInCity> majorSellInCityList) {
