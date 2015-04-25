@@ -35,20 +35,20 @@ public final class CityParser {
 //        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(0).html());
 //        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(1).html());
 
-        final Element list = doc.select("table[class=\"list\"]").last();
-        System.out.println(list.outerHtml());
-        final Elements bestInTown = list.select("table > tbody > tr");
-        for (Element best : bestInTown) {
-            System.out.println(best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title"));
-            best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).remove();
-            System.out.println(best.select("tr > td:nth-child(1) > div:nth-child(2)").html().replace("&nbsp;", " ").trim());
-            System.out.println(Utils.toLong(best.select("tr > td").eq(1).html()));
-            System.out.println(best.select("tr > td").eq(2).html());
-            System.out.println(Utils.toLong(best.select("tr > td").eq(3).html()));
-            System.out.println(Utils.toDouble(best.select("tr > td").eq(4).html()));
-            System.out.println(Utils.toDouble(best.select("tr > td").eq(5).html()));
-            System.out.println(Utils.toDouble(best.select("tr > td").eq(6).html()));
-        }
+//        final Element list = doc.select("table[class=\"list\"]").last();
+//        System.out.println(list.outerHtml());
+//        final Elements bestInTown = list.select("table > tbody > tr");
+//        for (Element best : bestInTown) {
+//            System.out.println(best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title"));
+//            best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).remove();
+//            System.out.println(best.select("tr > td:nth-child(1) > div:nth-child(2)").html().replace("&nbsp;", " ").trim());
+//            System.out.println(Utils.toLong(best.select("tr > td").eq(1).html()));
+//            System.out.println(best.select("tr > td").eq(2).html());
+//            System.out.println(Utils.toLong(best.select("tr > td").eq(3).html()));
+//            System.out.println(Utils.toDouble(best.select("tr > td").eq(4).html()));
+//            System.out.println(Utils.toDouble(best.select("tr > td").eq(5).html()));
+//            System.out.println(Utils.toDouble(best.select("tr > td").eq(6).html()));
+//        }
     }
 
     public static List<TradeAtCity> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products) throws IOException {
