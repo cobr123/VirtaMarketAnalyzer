@@ -1,7 +1,10 @@
+package ru.VirtaMarketAnalyzer.parser;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import ru.VirtaMarketAnalyzer.main.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +15,7 @@ import java.io.IOException;
 public final class CityListParser {
     public static void main(final String[] args) throws IOException {
         //http://virtonomica.ru/olga/main/geo/citylist/331858
-        final File input = new File("d://citylist.html");
+        final File input = new File(Utils.getDir() + "citylist.html");
         final Document doc = Jsoup.parse(input, "WINDOWS-1251", "http://virtonomica.ru/");
         final Element table = doc.select("table[class=\"grid\"]").last();
         //System.out.println(list.outerHtml());
