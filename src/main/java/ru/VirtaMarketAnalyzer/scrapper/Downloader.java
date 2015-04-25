@@ -13,16 +13,16 @@ import java.util.Date;
  */
 public final class Downloader {
     private static long lastAccess = 0;
-    private static final long timeoutInMillis = 1000;
+    private static final long timeoutInMillis = 2000;
 
     public static File get(final String url) throws IOException {
         final String clearedUrl = url.replace("http://", "").replace("/", File.separator);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
-        Utils.log("Запрошен адрес: ", url);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
             Utils.log("Взят из кэша: ", file.getAbsolutePath());
         } else {
+            Utils.log("Запрошен адрес: ", url);
             final long elapsed = System.currentTimeMillis() - lastAccess;
             if (elapsed < timeoutInMillis) {
                 lastAccess = System.currentTimeMillis();
@@ -37,6 +37,10 @@ public final class Downloader {
             Utils.writeFile(fileToSave, doc.outerHtml());
         }
         return file;
+    }
+    public static Document getDoc(final String url) throws IOException {
+        final File input = Downloader.get(url);
+        return Jsoup.parse(input, "UTF-8", "http://virtonomica.ru/");
     }
 
     public static void main(final String[] args) throws IOException {

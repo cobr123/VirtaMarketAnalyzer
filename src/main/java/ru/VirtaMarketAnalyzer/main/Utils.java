@@ -35,12 +35,12 @@ public final class Utils {
     }
 
     public static String clearNumber(final String text) {
-        return text.replace("$", "").replace("ед.", "").replace("менее", "").replace("около", "").replace("более", "").replaceAll("\\s+", "").trim();
+        return text.replace("$", "").replace("%", "").replace("ед.", "").replace("менее", "").replace("около", "").replace("более", "").replaceAll("\\s+", "").trim();
     }
 
     public static double toDouble(final String text) {
         final String clear = clearNumber(text);
-        if (clear.isEmpty()) {
+        if (clear.isEmpty() || "-".equals(text)) {
             return 0.0;
         } else {
             return Double.valueOf(clear);
