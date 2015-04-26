@@ -57,7 +57,7 @@ public final class Utils {
     }
 
     public static void log(final Object... lineParts) {
-        System.out.println(Arrays.toString(lineParts));
+        //System.out.println(Arrays.toString(lineParts));
     }
 
     public static Date getZeroTimeDate(final Date fecha) {
