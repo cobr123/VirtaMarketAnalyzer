@@ -1,17 +1,13 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import ru.VirtaMarketAnalyzer.data.City;
 import ru.VirtaMarketAnalyzer.data.Country;
-import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.Region;
-import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,26 +29,33 @@ public final class CityInitParser {
         }
     }
 
-    public static List<City> getCities(final String url) throws IOException {
-        final Document doc = Downloader.getDoc(url);
-        final List<City> list = new ArrayList<>();
+    public static List<Region> getRegions(final String url, final List<Country> countries) throws IOException {
+        final List<Region> list = new ArrayList<>();
+        for (final Country country : countries) {
+            final Document doc = Downloader.getDoc(url + country.getId());
 
-        final Elements options = doc.select("option");
-        //System.out.println(list.outerHtml());
-        for (final Element opt : options) {
-            if (opt.attr("value").matches("/\\d+/\\d+/\\d+")) {
-                final String[] data = opt.attr("value").substring(1).split("/");
-                list.add(new City(data[0], data[1], data[2], opt.text()));
+            final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr > td:nth-child(1) > a");
+            //System.out.println(list.outerHtml());
+            for (final Element row : rows) {
+                final String[] data = row.attr("href").split("/");
+                final String caption = row.text();
+                list.add(new Region(country.getId(), data[data.length - 1], caption));
             }
         }
         return list;
     }
 
-    public static List<Region> getRegions(final String url, final List<Country> countries) {
-        return null;
-    }
+    public static List<Country> getCountries(final String url) throws IOException {
+        final Document doc = Downloader.getDoc(url);
+        final List<Country> list = new ArrayList<>();
 
-    public static List<Country> getCountries(final String url) {
-        return null;
+        final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr > td:nth-child(1) > a");
+        //System.out.println(list.outerHtml());
+        for (final Element row : rows) {
+            final String[] data = row.attr("href").split("/");
+            final String caption = row.text();
+            list.add(new Country(data[data.length - 1], caption));
+        }
+        return list;
     }
 }

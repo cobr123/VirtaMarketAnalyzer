@@ -8,13 +8,14 @@ public final class City {
     final private String regionId;
     final private String id;
     final private String caption;
-    private double wealthIndex;
+    final private double wealthIndex;
 
-    public City(final String countryId, final String regionId, final String id, final String caption) {
+    public City(final String countryId, final String regionId, final String id, final String caption, final double wealthIndex) {
         this.countryId = countryId;
         this.regionId = regionId;
         this.id = id;
         this.caption = caption;
+        this.wealthIndex = wealthIndex;
     }
 
     public String getRegionId() {
@@ -35,9 +36,5 @@ public final class City {
 
     public double getWealthIndex() {
         return wealthIndex;
-    }
-
-    public void setWealthIndex(final double wealthIndex) {
-        this.wealthIndex = wealthIndex;
     }
 }

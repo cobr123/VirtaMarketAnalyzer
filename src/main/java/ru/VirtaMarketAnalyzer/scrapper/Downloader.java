@@ -14,7 +14,7 @@ import java.util.Date;
 public final class Downloader {
     private static long lastAccess = 0;
     //1000 milliseconds is one second.
-    private static final long timeoutInMillis = 1000;
+    private static final long timeoutInMillis = 500;
 
     public static File get(final String url) throws IOException {
         final String clearedUrl = url.replace("http://", "").replace("/", File.separator);
@@ -26,7 +26,7 @@ public final class Downloader {
             Utils.log("Запрошен адрес: ", url);
             final long elapsed = System.currentTimeMillis() - lastAccess;
             if (elapsed < timeoutInMillis) {
-                Utils.log("Ожидаем ", timeoutInMillis - elapsed);
+                Utils.log("Ожидаем ", timeoutInMillis - elapsed, "ms");
                 try {
                     Thread.sleep(timeoutInMillis - elapsed); 
                 } catch (InterruptedException ex) {
