@@ -5,7 +5,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import ru.VirtaMarketAnalyzer.data.City;
+import ru.VirtaMarketAnalyzer.data.Country;
 import ru.VirtaMarketAnalyzer.data.Product;
+import ru.VirtaMarketAnalyzer.data.Region;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
@@ -40,9 +42,17 @@ public final class CityInitParser {
         for (final Element opt : options) {
             if (opt.attr("value").matches("/\\d+/\\d+/\\d+")) {
                 final String[] data = opt.attr("value").substring(1).split("/");
-                list.add(new City(data[0], data[1],data[2], opt.text()));
+                list.add(new City(data[0], data[1], data[2], opt.text()));
             }
         }
         return list;
+    }
+
+    public static List<Region> getRegions(final String url, final List<Country> countries) {
+        return null;
+    }
+
+    public static List<Country> getCountries(final String url) {
+        return null;
     }
 }

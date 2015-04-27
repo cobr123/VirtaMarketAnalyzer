@@ -1,9 +1,6 @@
 package ru.VirtaMarketAnalyzer.main;
 
-import com.google.gson.Gson;
-import ru.VirtaMarketAnalyzer.data.City;
-import ru.VirtaMarketAnalyzer.data.Product;
-import ru.VirtaMarketAnalyzer.data.TradeAtCity;
+import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.parser.CityInitParser;
 import ru.VirtaMarketAnalyzer.parser.CityListParser;
 import ru.VirtaMarketAnalyzer.parser.CityParser;
@@ -26,6 +23,7 @@ public final class Wizard {
 //        realms.add("vera");
 //        realms.add("lien");
 //        realms.add("anna");
+//        realms.add("mary");
         for (final String realm : realms) {
             collectToJson(realm);
         }
@@ -34,20 +32,28 @@ public final class Wizard {
 
     public static void collectToJson(final String realm) throws IOException {
         final String baseDir = Utils.getDir() + realm + File.separator;
-        //получаем список доступных городов
+        //страны
+        final List<Country> countries = CityInitParser.getCountries("http://virtonomica.ru/" + realm + "/main/common/main_page/game_info/world");
+        Utils.writeToGson(baseDir + "countries.json", countries);
+        //регионы
+        final List<Region> regions = CityInitParser.getRegions("http://virtonomica.ru/" + realm + "/main/geo/regionlist/", countries);
+        Utils.writeToGson(baseDir + "regions.json", regions);
+        //города
         final List<City> cities = CityInitParser.getCities("http://virtonomica.ru/" + realm + "/main/globalreport/marketing/by_trade_at_cities/");
         //заполняем уровень богатства городов
         CityListParser.fillWealthIndex("http://virtonomica.ru/" + realm + "/main/geo/citylist/", cities);
         //получаем список доступных розничных товаров
         final List<Product> products = ProductInitParser.getProducts("http://virtonomica.ru/" + realm + "/main/common/main_page/game_info/trading/");
+        Utils.writeToGson(baseDir + "products.json", products);
+        //получаем список доступных розничных категорий товаров
+        final List<ProductCategory> product_categories = ProductInitParser.getProductCategories("http://virtonomica.ru/" + realm + "/main/common/main_page/game_info/trading/");
+        Utils.writeToGson(baseDir + "product_categories.json", product_categories);
         //собираем данные продаж товаров в городах
         final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities("http://virtonomica.ru/" + realm + "/main/globalreport/marketing/by_trade_at_cities/", cities, products);
         //сохраняем их в json
         for (final String key : stats.keySet()) {
             final List<TradeAtCity> list = stats.get(key);
-            final Gson gson = new Gson();
-            Utils.log(baseDir + "tradeAtCity_" + key + ".json");
-            Utils.writeFile(baseDir + "tradeAtCity_" + key + ".json", gson.toJson(list));
+            Utils.writeToGson(baseDir + "tradeAtCity_" + key + ".json", list);
         }
         //создаем html-страницы
         final String index = GenHtml.createIndexHtml(realm, cities, products);

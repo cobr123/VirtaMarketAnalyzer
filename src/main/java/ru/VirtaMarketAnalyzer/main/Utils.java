@@ -1,5 +1,7 @@
 package ru.VirtaMarketAnalyzer.main;
 
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -13,6 +15,12 @@ import java.util.Date;
 public final class Utils {
     public static String getDir() throws IOException {
         return System.getProperty("java.io.tmpdir") + File.separator + "VirtaMarketAnalyzer" + File.separator;
+    }
+
+    public static void writeToGson(final String path, final Object obj) throws IOException {
+        final Gson gson = new Gson();
+        Utils.log(path);
+        Utils.writeFile(path, gson.toJson(obj));
     }
 
     public static void writeFile(final String path, final String content)
@@ -57,7 +65,7 @@ public final class Utils {
     }
 
     public static void log(final Object... lineParts) {
-        //System.out.println(Arrays.toString(lineParts));
+        System.out.println(Arrays.toString(lineParts));
     }
 
     public static Date getZeroTimeDate(final Date fecha) {
@@ -72,7 +80,8 @@ public final class Utils {
 
         return calendar.getTime();
     }
-    public static boolean equalsWoTime(final Date date1,final Date date2) {
+
+    public static boolean equalsWoTime(final Date date1, final Date date2) {
         return getZeroTimeDate(date1).equals(getZeroTimeDate(date2));
     }
 }

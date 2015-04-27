@@ -64,10 +64,10 @@ public final class CityParser {
                     map.put(product.getId(), new ArrayList<>());
                 }
                 map.get(product.getId()).add(get(url, city, product));
-//                if (list.size() > 3) {
-//                    //todo: test only
-//                    return list;
-//                }
+                if (cnt > 3) {
+                    //todo: test only
+                    return map;
+                }
                 ++cnt;
             }
         }

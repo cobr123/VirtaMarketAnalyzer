@@ -5,6 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import ru.VirtaMarketAnalyzer.data.Product;
+import ru.VirtaMarketAnalyzer.data.ProductCategory;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
@@ -44,5 +45,9 @@ public final class ProductInitParser {
             list.add(new Product(imgUrl, id, caption));
         }
         return list;
+    }
+
+    public static List<ProductCategory> getProductCategories(final String url) {
+        return null;
     }
 }
