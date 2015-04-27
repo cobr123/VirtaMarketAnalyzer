@@ -13,7 +13,8 @@ import java.util.Date;
  */
 public final class Downloader {
     private static long lastAccess = 0;
-    private static final long timeoutInMillis = 2000;
+    //1000 milliseconds is one second.
+    private static final long timeoutInMillis = 1000;
 
     public static File get(final String url) throws IOException {
         final String clearedUrl = url.replace("http://", "").replace("/", File.separator);
@@ -25,14 +26,14 @@ public final class Downloader {
             Utils.log("Запрошен адрес: ", url);
             final long elapsed = System.currentTimeMillis() - lastAccess;
             if (elapsed < timeoutInMillis) {
-                lastAccess = System.currentTimeMillis();
                 Utils.log("Ожидаем ", timeoutInMillis - elapsed);
                 try {
-                    Thread.sleep(timeoutInMillis - elapsed);                 //1000 milliseconds is one second.
+                    Thread.sleep(timeoutInMillis - elapsed); 
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 }
             }
+            lastAccess = System.currentTimeMillis();
             final Document doc = Jsoup.connect(url).get();
             Utils.writeFile(fileToSave, doc.outerHtml());
         }
