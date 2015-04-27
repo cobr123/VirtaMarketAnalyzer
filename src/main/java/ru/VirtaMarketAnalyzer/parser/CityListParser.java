@@ -43,14 +43,16 @@ public final class CityListParser {
     public static void getWealthIndex(final String url, final Region region, final List<City> cities) throws IOException {
         final Document doc = Downloader.getDoc(url + region.getId());
         final Element table = doc.select("table[class=\"grid\"]").last();
-        //System.out.println(list.outerHtml());
+//        System.out.println(table.outerHtml());
         final Elements towns = table.select("table > tbody > tr");
         for (Element town : towns) {
-            final String[] parts = town.select("tr > td:nth-child(1) > a").eq(0).attr("href").split("/");
-            final String caption = town.select("tr > td:nth-child(1) > a").eq(0).text();
-            final String id = parts[parts.length - 1];
-            final String wealthIndex = town.select("tr > td:nth-child(6)").html();
-            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex)));
+            if(!town.select("tr > td:nth-child(1) > a").isEmpty()) {
+                final String[] parts = town.select("tr > td:nth-child(1) > a").eq(0).attr("href").split("/");
+                final String caption = town.select("tr > td:nth-child(1) > a").eq(0).text();
+                final String id = parts[parts.length - 1];
+                final String wealthIndex = town.select("tr > td:nth-child(6)").html();
+                cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex)));
+            }
         }
     }
 }

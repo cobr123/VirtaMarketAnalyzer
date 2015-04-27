@@ -40,6 +40,7 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "regions.json", regions);
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex("http://virtonomica.ru/" + realm + "/main/geo/citylist/", regions);
+        Utils.writeToGson(baseDir + "cities.json", cities);
         //получаем список доступных розничных товаров
         final List<Product> products = ProductInitParser.getProducts("http://virtonomica.ru/" + realm + "/main/common/main_page/game_info/trading/");
         Utils.writeToGson(baseDir + "products.json", products);

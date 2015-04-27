@@ -42,12 +42,14 @@ public final class ProductInitParser {
                 productCategory = row.select("tr > th").text();
 //                Utils.log(productCategory);
             } else if (!row.select("tr > td > a > img").isEmpty()) {
-                final Element img = row.select("tr > td > a > img").first();
-                final String caption = img.attr("title");
-                final String[] parts = img.parent().attr("href").split("/");
-                final String id = parts[parts.length - 1];
-                final String imgUrl = img.attr("src");
-                list.add(new Product(productCategory, imgUrl, id, caption));
+                final Elements imgs = row.select("tr > td > a > img");
+                for (final Element img : imgs) {
+                    final String caption = img.attr("title");
+                    final String[] parts = img.parent().attr("href").split("/");
+                    final String id = parts[parts.length - 1];
+                    final String imgUrl = img.attr("src");
+                    list.add(new Product(productCategory, imgUrl, id, caption));
+                }
             }
         }
         return list;
