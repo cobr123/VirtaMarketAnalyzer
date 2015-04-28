@@ -8,10 +8,9 @@ import ru.VirtaMarketAnalyzer.parser.ProductInitParser;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Created by cobr123 on 25.04.2015.
@@ -41,7 +40,7 @@ public final class Wizard {
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex("http://virtonomica.ru/" + realm + "/main/geo/citylist/", regions);
         Utils.writeToGson(baseDir + "cities.json", cities);
-        Utils.log("cities.size() = ",cities.size());
+        Utils.log("cities.size() = ", cities.size());
         //получаем список доступных розничных товаров
         final List<Product> products = ProductInitParser.getProducts("http://virtonomica.ru/" + realm + "/main/common/main_page/game_info/trading/");
         Utils.writeToGson(baseDir + "products.json", products);
@@ -56,5 +55,8 @@ public final class Wizard {
             final List<TradeAtCity> list = stats.get(key);
             Utils.writeToGson(baseDir + "tradeAtCity_" + key + ".json", list);
         }
+        //запоминаем дату обновления данных
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 }
