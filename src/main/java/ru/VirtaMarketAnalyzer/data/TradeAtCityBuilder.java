@@ -19,8 +19,6 @@ public final class TradeAtCityBuilder {
     private double localPercent;
     private double localPrice;
     private double localQuality;
-    private double localBrand;
-    private double shopPercent;
     private double shopPrice;
     private double shopQuality;
     private double shopBrand;
@@ -41,8 +39,6 @@ public final class TradeAtCityBuilder {
                 , localPercent
                 , localPrice
                 , localQuality
-                , localBrand
-                , shopPercent
                 , shopPrice
                 , shopQuality
                 , shopBrand
@@ -117,16 +113,6 @@ public final class TradeAtCityBuilder {
 
     public TradeAtCityBuilder setLocalQuality(final double localQuality) {
         this.localQuality = localQuality;
-        return this;
-    }
-
-    public TradeAtCityBuilder setLocalBrand(final double localBrand) {
-        this.localBrand = localBrand;
-        return this;
-    }
-
-    public TradeAtCityBuilder setShopPercent(final double shopPercent) {
-        this.shopPercent = shopPercent;
         return this;
     }
 

@@ -1,36 +1,53 @@
 package ru.VirtaMarketAnalyzer.data;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
  * Created by cobr123 on 25.04.2015.
  */
 public final class TradeAtCity {
+    @SerializedName("ci")
     final private String countryId;
+    @SerializedName("ri")
     final private String regionId;
-    final private String cityId;
-    final private String cityCaption;
+    @SerializedName("ti")
+    final private String townId;
+    @SerializedName("tc")
+    final private String townCaption;
+    @SerializedName("wi")
     final private double wealthIndex;
+    @SerializedName("pi")
     final private String productId;
+    @SerializedName("mi")
     final private String marketIdx;
+    @SerializedName("v")
     final private long volume;
+    @SerializedName("sc")
     final private long sellerCnt;
+    @SerializedName("cc")
     final private long companiesCnt;
+    @SerializedName("lpe")
     final private double localPercent;
+    @SerializedName("lpr")
     final private double localPrice;
+    @SerializedName("lq")
     final private double localQuality;
-    final private double localBrand;
-    final private double shopPercent;
+    @SerializedName("spr")
     final private double shopPrice;
+    @SerializedName("sq")
     final private double shopQuality;
+    @SerializedName("sb")
     final private double shopBrand;
+    @SerializedName("ms")
     final private List<MajorSellInCity> majorSellInCityList;
 
     public TradeAtCity(
             final String countryId
             , final String regionId
-            , final String cityId
-            , final String cityCaption
+            , final String townId
+            , final String townCaption
             , final String productId
             , final String marketIdx
             , final long volume
@@ -40,8 +57,6 @@ public final class TradeAtCity {
             , final double localPercent
             , final double localPrice
             , final double localQuality
-            , final double localBrand
-            , final double shopPercent
             , final double shopPrice
             , final double shopQuality
             , final double shopBrand
@@ -49,8 +64,8 @@ public final class TradeAtCity {
     ) {
         this.countryId = countryId;
         this.regionId = regionId;
-        this.cityId = cityId;
-        this.cityCaption = cityCaption;
+        this.townId = townId;
+        this.townCaption = townCaption;
         this.productId = productId;
         this.marketIdx = marketIdx;
         this.volume = volume;
@@ -60,16 +75,14 @@ public final class TradeAtCity {
         this.localPercent = localPercent;
         this.localPrice = localPrice;
         this.localQuality = localQuality;
-        this.localBrand = localBrand;
-        this.shopPercent = shopPercent;
         this.shopPrice = shopPrice;
         this.shopQuality = shopQuality;
         this.shopBrand = shopBrand;
         this.majorSellInCityList = majorSellInCityList;
     }
 
-    public String getCityCaption() {
-        return cityCaption;
+    public String getTownCaption() {
+        return townCaption;
     }
 
     public List<MajorSellInCity> getMajorSellInCityList() {
@@ -84,8 +97,8 @@ public final class TradeAtCity {
         return regionId;
     }
 
-    public String getCityId() {
-        return cityId;
+    public String getTownId() {
+        return townId;
     }
 
     public double getWealthIndex() {
@@ -122,14 +135,6 @@ public final class TradeAtCity {
 
     public double getLocalQuality() {
         return localQuality;
-    }
-
-    public double getLocalBrand() {
-        return localBrand;
-    }
-
-    public double getShopPercent() {
-        return shopPercent;
     }
 
     public double getShopPrice() {

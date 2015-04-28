@@ -19,9 +19,9 @@ import java.util.Set;
 public final class Wizard {
     public static void main(String[] args) throws IOException {
         final List<String> realms = new ArrayList<>();
+        realms.add("lien");
         realms.add("olga");
         realms.add("vera");
-        realms.add("lien");
         realms.add("anna");
         realms.add("mary");
         for (final String realm : realms) {
@@ -41,9 +41,11 @@ public final class Wizard {
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex("http://virtonomica.ru/" + realm + "/main/geo/citylist/", regions);
         Utils.writeToGson(baseDir + "cities.json", cities);
+        Utils.log("cities.size() = ",cities.size());
         //получаем список доступных розничных товаров
         final List<Product> products = ProductInitParser.getProducts("http://virtonomica.ru/" + realm + "/main/common/main_page/game_info/trading/");
         Utils.writeToGson(baseDir + "products.json", products);
+        Utils.log("products.size() = ", products.size());
         //получаем список доступных розничных категорий товаров
         final List<ProductCategory> product_categories = ProductInitParser.getProductCategories(products);
         Utils.writeToGson(baseDir + "product_categories.json", product_categories);

@@ -14,7 +14,7 @@ import java.util.Date;
 public final class Downloader {
     private static long lastAccess = 0;
     //1000 milliseconds is one second.
-    private static final long timeoutInMillis = 200;
+    private static final long timeoutInMillis = 100;
 
     public static File get(final String url) throws IOException {
         final String clearedUrl = url.replace("http://", "").replace("/", File.separator);

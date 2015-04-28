@@ -20,7 +20,8 @@ import java.util.Map;
  */
 public final class CityParser {
     public static void main(final String[] args) throws IOException {
-        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/370077/7060/7063/7076");
+        //final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
+        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/335165/335166/422021");
         final Element table = doc.select("table[class=\"grid\"]").first();
 //        System.out.println(table.outerHtml());
 //        System.out.println(table.select("table > tbody > tr > td").eq(2).text().replaceAll("[\\W]+", ""));
@@ -37,6 +38,17 @@ public final class CityParser {
 //        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(0).html());
 //        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(1).html());
 
+        final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
+
+        for (int i = 0; i < percs.size();++i) {
+            if ("Местные поставщики".equals(percs.eq(i).text())) {
+                System.out.println("Местные поставщики");
+                if (percs.eq(i + 2).text().contains("%")) {
+                    System.out.println(Utils.toDouble(percs.eq(i + 2).html()));
+                }
+                break;
+            }
+        }
 //        final Element list = doc.select("table[class=\"list\"]").last();
 //        System.out.println(list.outerHtml());
 //        final Elements bestInTown = list.select("table > tbody > tr");
@@ -53,21 +65,21 @@ public final class CityParser {
 //        }
     }
 
-    public static Map<String,List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products) throws IOException {
-        final Map<String,List<TradeAtCity>> map = new HashMap<>();
+    public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products) throws IOException {
+        final Map<String, List<TradeAtCity>> map = new HashMap<>();
         final long total = cities.size() * products.size();
         long cnt = 1;
         for (final City city : cities) {
             for (final Product product : products) {
                 Utils.log(cnt, total, cnt * 100 / total, "%");
-                if(!map.containsKey(product.getId())){
+                if (!map.containsKey(product.getId())) {
                     map.put(product.getId(), new ArrayList<>());
                 }
                 map.get(product.getId()).add(get(url, city, product));
-                if (cnt > 10) {
-                    //todo: test only
-                    return map;
-                }
+//                if (cnt > 10) {
+//                    //todo: test only
+//                    return map;
+//                }
                 ++cnt;
             }
         }
@@ -92,8 +104,15 @@ public final class CityParser {
         builder.setCityCaption(city.getCaption());
         builder.setWealthIndex(city.getWealthIndex());
 
-        builder.setLocalPercent(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td").eq(4).html()));
-        builder.setShopPercent(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr:nth-child(3) > td").eq(4).html()));
+        final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
+        for (int i = 0; i < percs.size();++i) {
+            if ("Местные поставщики".equals(percs.eq(i).text())) {
+                if (percs.eq(i + 2).text().contains("%")) {
+                    builder.setLocalPercent(Utils.toDouble(percs.eq(i + 2).html()));
+                }
+                break;
+            }
+        }
 
         builder.setLocalPrice(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(2) > td").eq(0).html()));
         builder.setShopPrice(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(2) > td").eq(1).html()));
@@ -101,7 +120,6 @@ public final class CityParser {
         builder.setLocalQuality(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(3) > td").eq(0).html()));
         builder.setShopQuality(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(3) > td").eq(1).html()));
 
-        builder.setLocalBrand(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(0).html()));
         builder.setShopBrand(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(1).html()));
 
         final List<MajorSellInCity> majorSellInCityList = new ArrayList<>();
