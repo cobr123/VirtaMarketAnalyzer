@@ -40,7 +40,7 @@ public final class CityParser {
 
         final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
 
-        for (int i = 0; i < percs.size();++i) {
+        for (int i = 0; i < percs.size(); ++i) {
             if ("Местные поставщики".equals(percs.eq(i).text())) {
                 System.out.println("Местные поставщики");
                 if (percs.eq(i + 2).text().contains("%")) {
@@ -69,6 +69,22 @@ public final class CityParser {
         final Map<String, List<TradeAtCity>> map = new HashMap<>();
         final long total = cities.size() * products.size();
         long cnt = 1;
+        final List<String> urls = new ArrayList<>(cities.size()*products.size());
+
+        for (final City city : cities) {
+            for (final Product product : products) {
+                urls.add(url + product.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId());
+            }
+        }
+        //греем кэш
+        urls.parallelStream().forEach(s -> {
+            try {
+                Downloader.get(s);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
         for (final City city : cities) {
             for (final Product product : products) {
                 Utils.log(cnt, total, cnt * 100 / total, "%");
@@ -105,7 +121,7 @@ public final class CityParser {
         builder.setWealthIndex(city.getWealthIndex());
 
         final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
-        for (int i = 0; i < percs.size();++i) {
+        for (int i = 0; i < percs.size(); ++i) {
             if ("Местные поставщики".equals(percs.eq(i).text())) {
                 if (percs.eq(i + 2).text().contains("%")) {
                     builder.setLocalPercent(Utils.toDouble(percs.eq(i + 2).html()));
