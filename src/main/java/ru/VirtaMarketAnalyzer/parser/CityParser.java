@@ -69,7 +69,7 @@ public final class CityParser {
         final Map<String, List<TradeAtCity>> map = new HashMap<>();
         final long total = cities.size() * products.size();
         long cnt = 1;
-        final List<String> urls = new ArrayList<>(cities.size()*products.size());
+        final List<String> urls = new ArrayList<>(cities.size() * products.size());
 
         for (final City city : cities) {
             for (final Product product : products) {
@@ -84,10 +84,14 @@ public final class CityParser {
                 e.printStackTrace();
             }
         });
-
+        //парсим данные
+        long prevPerc = 0;
         for (final City city : cities) {
             for (final Product product : products) {
-                Utils.log(cnt, total, cnt * 100 / total, "%");
+                final long curPerc = cnt * 100 / total;
+                if (prevPerc != curPerc) {
+                    Utils.log(cnt, total, curPerc, "%");
+                }
                 if (!map.containsKey(product.getId())) {
                     map.put(product.getId(), new ArrayList<>());
                 }
@@ -97,6 +101,7 @@ public final class CityParser {
 //                    return map;
 //                }
                 ++cnt;
+                prevPerc = curPerc;
             }
         }
         return map;
