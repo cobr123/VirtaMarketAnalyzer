@@ -1,11 +1,12 @@
 package ru.VirtaMarketAnalyzer.main;
 
 import com.google.gson.Gson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -13,13 +14,19 @@ import java.util.Date;
  * Created by cobr123 on 25.04.2015.
  */
 public final class Utils {
+    private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+
     public static String getDir() throws IOException {
-        return System.getProperty("java.io.tmpdir") + File.separator + "VirtaMarketAnalyzer" + File.separator;
+        String dir = System.getProperty("java.io.tmpdir");
+        if (dir.charAt(dir.length() - 1) != File.separatorChar) {
+            dir += File.separator;
+        }
+        return dir + "VirtaMarketAnalyzer" + File.separator;
     }
 
     public static void writeToGson(final String path, final Object obj) throws IOException {
         final Gson gson = new Gson();
-        Utils.log(path);
+        logger.info(path);
         Utils.writeFile(path, gson.toJson(obj));
     }
 
@@ -62,10 +69,6 @@ public final class Utils {
         } else {
             return Long.valueOf(clear);
         }
-    }
-
-    public static void log(final Object... lineParts) {
-        System.out.println(Arrays.toString(lineParts));
     }
 
     public static Date getZeroTimeDate(final Date fecha) {

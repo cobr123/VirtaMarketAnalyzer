@@ -1,5 +1,7 @@
 package ru.VirtaMarketAnalyzer.main;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.parser.CityInitParser;
 import ru.VirtaMarketAnalyzer.parser.CityListParser;
@@ -16,6 +18,8 @@ import java.util.*;
  * Created by cobr123 on 25.04.2015.
  */
 public final class Wizard {
+    private static final Logger logger = LoggerFactory.getLogger(Wizard.class);
+
     public static void main(String[] args) throws IOException {
         final List<String> realms = new ArrayList<>();
         realms.add("lien");
@@ -40,11 +44,11 @@ public final class Wizard {
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex("http://virtonomica.ru/" + realm + "/main/geo/citylist/", regions);
         Utils.writeToGson(baseDir + "cities.json", cities);
-        Utils.log("cities.size() = ", cities.size());
+        logger.info("cities.size() = {}", cities.size());
         //получаем список доступных розничных товаров
         final List<Product> products = ProductInitParser.getProducts("http://virtonomica.ru/" + realm + "/main/common/main_page/game_info/trading/");
         Utils.writeToGson(baseDir + "products.json", products);
-        Utils.log("products.size() = ", products.size());
+        logger.info("products.size() = {}", products.size());
         //получаем список доступных розничных категорий товаров
         final List<ProductCategory> product_categories = ProductInitParser.getProductCategories(products);
         Utils.writeToGson(baseDir + "product_categories.json", product_categories);

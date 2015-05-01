@@ -1,14 +1,14 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +19,8 @@ import java.util.Map;
  * Created by cobr123 on 24.04.2015.
  */
 public final class CityParser {
+    private static final Logger logger = LoggerFactory.getLogger(CityParser.class);
+
     public static void main(final String[] args) throws IOException {
         //final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
         final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/335165/335166/422021");
@@ -76,7 +78,7 @@ public final class CityParser {
                 urls.add(url + product.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId());
             }
         }
-        //греем кэш
+        logger.info("греем кэш");
         urls.parallelStream().forEach(s -> {
             try {
                 Downloader.get(s);
@@ -84,13 +86,13 @@ public final class CityParser {
                 e.printStackTrace();
             }
         });
-        //парсим данные
+        logger.info("парсим данные");
         long prevPerc = 0;
         for (final City city : cities) {
             for (final Product product : products) {
                 final long curPerc = cnt * 100 / total;
                 if (prevPerc != curPerc) {
-                    Utils.log(cnt, total, curPerc, "%");
+                    logger.info("{} из {}, {}%", cnt, total, curPerc);
                 }
                 if (!map.containsKey(product.getId())) {
                     map.put(product.getId(), new ArrayList<>());
