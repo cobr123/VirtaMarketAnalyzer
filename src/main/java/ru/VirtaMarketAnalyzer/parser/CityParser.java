@@ -68,9 +68,6 @@ public final class CityParser {
     }
 
     public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products) throws IOException {
-        final Map<String, List<TradeAtCity>> map = new HashMap<>();
-        final long total = cities.size() * products.size();
-        long cnt = 1;
         final List<String> urls = new ArrayList<>(cities.size() * products.size());
 
         for (final City city : cities) {
@@ -82,12 +79,15 @@ public final class CityParser {
         urls.parallelStream().forEach(s -> {
             try {
                 Downloader.get(s);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (final IOException e) {
+                logger.error("Ошибка:", e);
             }
         });
         logger.info("парсим данные");
+        final Map<String, List<TradeAtCity>> map = new HashMap<>();
         long prevPerc = 0;
+        long cnt = 1;
+        final long total = cities.size() * products.size();
         for (final City city : cities) {
             for (final Product product : products) {
                 final long curPerc = cnt * 100 / total;
@@ -149,7 +149,7 @@ public final class CityParser {
         final Element list = doc.select("table[class=\"list\"]").last();
         //System.out.println(list.outerHtml());
         final Elements bestInTown = list.select("table > tbody > tr");
-        for (Element best : bestInTown) {
+        for (final Element best : bestInTown) {
             if (!best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title").isEmpty()) {
                 final long shopSize = Utils.toLong(best.select("tr > td").eq(1).html());
                 final String cityDistrict = best.select("tr > td").eq(2).html();

@@ -71,11 +71,10 @@ public final class Utils {
         }
     }
 
-    public static Date getZeroTimeDate(final Date fecha) {
-        final Date res = fecha;
+    public static Date getZeroTimeDate(final Date date) {
         final Calendar calendar = Calendar.getInstance();
 
-        calendar.setTime(fecha);
+        calendar.setTime(date);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);

@@ -3,7 +3,6 @@ package ru.VirtaMarketAnalyzer.parser;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import ru.VirtaMarketAnalyzer.data.City;
 import ru.VirtaMarketAnalyzer.data.Country;
 import ru.VirtaMarketAnalyzer.data.Region;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
