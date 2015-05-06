@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.main;
 
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
@@ -7,6 +8,7 @@ import ru.VirtaMarketAnalyzer.parser.CityInitParser;
 import ru.VirtaMarketAnalyzer.parser.CityListParser;
 import ru.VirtaMarketAnalyzer.parser.CityParser;
 import ru.VirtaMarketAnalyzer.parser.ProductInitParser;
+import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +23,7 @@ public final class Wizard {
     private static final Logger logger = LoggerFactory.getLogger(Wizard.class);
     public static final String host = "http://virtonomica.ru/";
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, GitAPIException {
         final List<String> realms = new ArrayList<>();
         realms.add("lien");
         realms.add("olga");
@@ -32,6 +34,7 @@ public final class Wizard {
             collectToJson(realm);
         }
         //публикуем на сайте
+        GitHubPublisher.publish(realms);
     }
 
     public static void collectToJson(final String realm) throws IOException {
