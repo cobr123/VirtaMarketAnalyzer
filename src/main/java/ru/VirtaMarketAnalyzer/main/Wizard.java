@@ -4,10 +4,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
-import ru.VirtaMarketAnalyzer.parser.CityInitParser;
-import ru.VirtaMarketAnalyzer.parser.CityListParser;
-import ru.VirtaMarketAnalyzer.parser.CityParser;
-import ru.VirtaMarketAnalyzer.parser.ProductInitParser;
+import ru.VirtaMarketAnalyzer.parser.*;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 
 import java.io.File;
@@ -65,5 +62,23 @@ public final class Wizard {
         //запоминаем дату обновления данных
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        //собираем рецепты производства товаров и материалов
+        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
+        final List<ProductRecipe> recipes = ProductRecipeParser.getRecipes(host + realm + "/main/industry/unit_type/info/", manufactures);
+        Utils.writeToGson(baseDir + "manufactures.json", manufactures);
+        //иногда один продукт можно получить разными способами
+        final Map<String,List<ProductRecipe>> productRecipes = new HashMap<>();
+        for (final ProductRecipe recipe : recipes) {
+            for (final ManufactureResult result : recipe.getResultProducts()) {
+                if(!productRecipes.containsKey(result.getProductID())){
+                    productRecipes.put(result.getProductID(), new ArrayList<>());
+                }
+                productRecipes.get(result.getProductID()).add(recipe);
+            }
+        }
+        //сохраняем их в json
+        for (final Map.Entry<String, List<ProductRecipe>> entry : productRecipes.entrySet()) {
+            Utils.writeToGson(baseDir + "recipe_" + entry.getKey() + ".json", entry.getValue());
+        }
     }
 }

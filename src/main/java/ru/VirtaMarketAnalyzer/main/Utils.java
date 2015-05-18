@@ -1,6 +1,7 @@
 package ru.VirtaMarketAnalyzer.main;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +26,18 @@ public final class Utils {
     }
 
     public static void writeToGson(final String path, final Object obj) throws IOException {
-        final Gson gson = new Gson();
         logger.info(path);
-        Utils.writeFile(path, gson.toJson(obj));
+        Utils.writeFile(path, getGson(obj));
+    }
+
+    public static String getGson(final Object obj) throws IOException {
+        final Gson gson = new Gson();
+        return gson.toJson(obj);
+    }
+
+    public static String getPrettyGson(final Object obj) throws IOException {
+        final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        return gson.toJson(obj);
     }
 
     public static void writeFile(final String path, final String content)
@@ -50,7 +60,7 @@ public final class Utils {
     }
 
     public static String clearNumber(final String text) {
-        return text.replace("$", "").replace("%", "").replace("ед.", "").replace("менее", "").replace("около", "").replace("более", "").replaceAll("\\s+", "").trim();
+        return text.replace("$", "").replace("+", "").replace("%", "").replace("ед.", "").replace("менее", "").replace("около", "").replace("более", "").replaceAll("\\s+", "").trim();
     }
 
     public static double toDouble(final String text) {
@@ -58,7 +68,12 @@ public final class Utils {
         if (clear.isEmpty() || "-".equals(text)) {
             return 0.0;
         } else {
-            return Double.valueOf(clear);
+            if (clear.matches("\\d+/\\d+")) {
+                final String[] data = clear.split("/");
+                return Double.valueOf(data[0]) / Double.valueOf(data[1]);
+            } else {
+                return Double.valueOf(clear);
+            }
         }
     }
 
