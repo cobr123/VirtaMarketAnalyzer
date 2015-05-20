@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.scrapper;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
@@ -17,7 +18,18 @@ public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
     public static File get(final String url) throws IOException {
-        final String clearedUrl = url.replace("http://", "").replace("/", File.separator);
+        return get(url, "");
+    }
+
+    public static File get(final String url, final String referrer) throws IOException {
+        String clearedUrl = "";
+        if (referrer != null && !referrer.isEmpty()) {
+            final String[] parts = url.split("/");
+            final String page = File.separator + parts[parts.length - 2] + File.separator + parts[parts.length - 1];
+            clearedUrl = referrer.replace("http://", "").replace("/", File.separator) + page;
+        } else {
+            clearedUrl = url.replace("http://", "").replace("/", File.separator);
+        }
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
@@ -27,7 +39,12 @@ public final class Downloader {
 
             for (int tries = 1; tries <= 3; ++tries) {
                 try {
-                    final Document doc = Jsoup.connect(url).get();
+                    final Connection conn = Jsoup.connect(url);
+                    if (referrer != null && !referrer.isEmpty()) {
+                        logger.info("referrer: {}", referrer);
+                        conn.referrer(referrer);
+                    }
+                    final Document doc = conn.get();
                     Utils.writeFile(fileToSave, doc.outerHtml());
                     break;
                 } catch (final IOException e) {
@@ -53,7 +70,11 @@ public final class Downloader {
     }
 
     public static Document getDoc(final String url) throws IOException {
-        final File input = Downloader.get(url);
+        return getDoc(url, "");
+    }
+
+    public static Document getDoc(final String url, final String referrer) throws IOException {
+        final File input = Downloader.get(url, referrer);
         return Jsoup.parse(input, "UTF-8", "http://virtonomica.ru/");
     }
 

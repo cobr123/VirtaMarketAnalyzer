@@ -80,5 +80,11 @@ public final class Wizard {
         for (final Map.Entry<String, List<ProductRecipe>> entry : productRecipes.entrySet()) {
             Utils.writeToGson(baseDir + "recipe_" + entry.getKey() + ".json", entry.getValue());
         }
+        //получаем список всех доступных товаров и материалов
+        final List<Product> materials = ProductInitParser.getProducts(host + realm + "/main/common/main_page/game_info/products/");
+        Utils.writeToGson(baseDir + "materials.json", materials);
+        logger.info("materials.size() = {}", materials.size());
+        //собираем данные о доступных товарах на оптовом рынке
+        ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", materials);
     }
 }
