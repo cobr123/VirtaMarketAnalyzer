@@ -68,7 +68,7 @@ public final class Utils {
         if (clear.isEmpty() || "-".equals(text)) {
             return 0.0;
         } else {
-            if (clear.matches("\\d+/\\d+")) {
+            if (clear.matches("\\d+(\\.\\d+)?/\\d+(\\.\\d+)?")) {
                 final String[] data = clear.split("/");
                 return Double.valueOf(data[0]) / Double.valueOf(data[1]);
             } else {

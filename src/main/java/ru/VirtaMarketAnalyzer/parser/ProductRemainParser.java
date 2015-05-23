@@ -30,7 +30,7 @@ public final class ProductRemainParser {
         System.out.println(Utils.getPrettyGson(getRemains(url, products)));
     }
 
-    public static List<ProductRemain> getRemains(final String url, final List<Product> materials) throws IOException {
+    public static Map<String, List<ProductRemain>> getRemains(final String url, final List<Product> materials) throws IOException {
         final Map<String, ProductRemain> map = new HashMap<>();
 
         logger.info("греем кэш");
@@ -83,6 +83,9 @@ public final class ProductRemainParser {
                     }
                 }
                 final Element currPage = doc.select("table.paging > tbody > tr > td > div > a > span.selected").last();
+                if (currPage == null || currPage.parent() == null) {
+                    break;
+                }
                 final Element nextLink = currPage.parent().nextElementSibling();
                 if (nextLink != null && "a".equalsIgnoreCase(nextLink.nodeName())) {
                     nextPageUrl = nextLink.attr("href");
@@ -92,6 +95,13 @@ public final class ProductRemainParser {
                 }
             }
         }
-        return new ArrayList<>(map.values());
+        final Map<String, List<ProductRemain>> productRemains = new HashMap<>();
+        for (final Map.Entry<String, ProductRemain> entry : map.entrySet()) {
+            if (!productRemains.containsKey(entry.getValue().getProductID())) {
+                productRemains.put(entry.getValue().getProductID(), new ArrayList<>());
+            }
+            productRemains.get(entry.getValue().getProductID()).add(entry.getValue());
+        }
+        return productRemains;
     }
 }

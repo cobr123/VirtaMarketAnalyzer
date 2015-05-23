@@ -22,11 +22,11 @@ public final class Wizard {
 
     public static void main(String[] args) throws IOException, GitAPIException {
         final List<String> realms = new ArrayList<>();
-        realms.add("lien");
         realms.add("olga");
         realms.add("vera");
         realms.add("anna");
         realms.add("mary");
+        realms.add("lien");
         for (final String realm : realms) {
             collectToJson(realm);
         }
@@ -85,6 +85,10 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "materials.json", materials);
         logger.info("materials.size() = {}", materials.size());
         //собираем данные о доступных товарах на оптовом рынке
-        ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", materials);
+        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", materials);
+        //сохраняем их в json
+        for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
+            Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
+        }
     }
 }

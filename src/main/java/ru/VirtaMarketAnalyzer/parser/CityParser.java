@@ -75,7 +75,7 @@ public final class CityParser {
                 urls.add(url + product.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId());
             }
         }
-        logger.info("греем кэш");
+        logger.info("греем кэш: {}", cities.size() * products.size());
         urls.parallelStream().forEach(s -> {
             try {
                 Downloader.get(s);
