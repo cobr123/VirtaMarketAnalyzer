@@ -3,6 +3,8 @@ package ru.VirtaMarketAnalyzer.parser;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Manufacture;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
@@ -15,10 +17,12 @@ import java.util.List;
  * Created by cobr123 on 18.05.2015.
  */
 final public class ManufactureListParser {
+    private static final Logger logger = LoggerFactory.getLogger(ManufactureListParser.class);
+
     public static void main(final String[] args) throws IOException {
         final String url = "http://virtonomica.ru/olga/main/common/main_page/game_info/industry/";
 
-        System.out.println(Utils.getPrettyGson(getManufactures(url)));
+        logger.info(Utils.getPrettyGson(getManufactures(url)));
     }
 
     public static List<Manufacture> getManufactures(final String url) throws IOException {

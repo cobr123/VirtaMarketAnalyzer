@@ -1,9 +1,10 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import com.sun.org.apache.xerces.internal.dom.ElementNSImpl;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Manufacture;
 import ru.VirtaMarketAnalyzer.data.ManufactureIngredient;
 import ru.VirtaMarketAnalyzer.data.ManufactureResult;
@@ -19,6 +20,8 @@ import java.util.List;
  * Created by cobr123 on 18.05.2015.
  */
 final public class ProductRecipeParser {
+    private static final Logger logger = LoggerFactory.getLogger(ProductRecipeParser.class);
+
     public static void main(final String[] args) throws IOException {
 //        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/15751");
 //        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/422209");
@@ -28,7 +31,7 @@ final public class ProductRecipeParser {
         final List<Manufacture> manufactures = new ArrayList<>();
         manufactures.add(new Manufacture("2425","manufactureCategory","caption"));
 
-        System.out.println(Utils.getPrettyGson(getRecipes(url, manufactures)));
+        logger.info(Utils.getPrettyGson(getRecipes(url, manufactures)));
     }
 
     public static List<ProductRecipe> getRecipes(final String url, final List<Manufacture> manufactures) throws IOException {
@@ -59,7 +62,7 @@ final public class ProductRecipeParser {
                         final String qty = ing.parent().parent().parent().nextElementSibling().child(0).text();
                         inputProducts.add(new ManufactureIngredient(productID, Utils.toDouble(qty), Utils.toDouble(minQuality)));
                     }
-                    //количество товаров производимых 1 человеком
+                    //РєРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕРІР°СЂРѕРІ РїСЂРѕРёР·РІРѕРґРёРјС‹С… 1 С‡РµР»РѕРІРµРєРѕРј
                     final String minWorkerQty = lastTableRow.select("> td:nth-child(1)").text().replaceAll("\\W+", "");
                     final String minProdQty = lastTableRow.select("> td").eq(idx + 3).select("> nobr").text();
                     final Double prodBaseQty = Utils.toDouble(minProdQty) / Utils.toDouble(minWorkerQty);

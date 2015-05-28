@@ -3,6 +3,8 @@ package ru.VirtaMarketAnalyzer.parser;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Country;
 import ru.VirtaMarketAnalyzer.data.Region;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
@@ -15,6 +17,8 @@ import java.util.List;
  * Created by cobr123 on 24.04.2015.
  */
 public final class CityInitParser {
+    private static final Logger logger = LoggerFactory.getLogger(CityInitParser.class);
+
     public static void main(final String[] args) throws IOException {
         final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/");
 
@@ -22,8 +26,8 @@ public final class CityInitParser {
         //System.out.println(list.outerHtml());
         for (Element opt : options) {
             if (opt.attr("value").matches("/\\d+/\\d+/\\d+")) {
-                System.out.println(opt.text());
-                System.out.println(opt.attr("value"));
+                logger.info(opt.text());
+                logger.info(opt.attr("value"));
             }
         }
     }
