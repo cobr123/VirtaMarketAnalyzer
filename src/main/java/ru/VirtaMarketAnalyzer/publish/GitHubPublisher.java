@@ -7,6 +7,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ final public class GitHubPublisher {
         logger.info("git commit");
         git.commit().setMessage("data update").call();
         logger.info("git push");
-        git.push().call();
+        git.push().setCredentialsProvider(getCredentialsProvider()).call();
         git.close();
         FileUtils.deleteDirectory(localPathFile);
     }
@@ -44,6 +45,25 @@ final public class GitHubPublisher {
             final File destDir = new File(localPath + File.separator + "by_trade_at_cities" + File.separator + realm + File.separator);
             logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
             FileUtils.copyDirectory(srcDir, destDir);
+        }
+    }
+
+    private static CredentialsProvider getCredentialsProvider() {
+        final String token = System.getenv("vma.github.token");
+        final String name = System.getenv("vma.github.username");
+        if ((name == null || name.isEmpty()) && (token == null || token.isEmpty())) {
+            throw new IllegalArgumentException("Необходимо задать логин к репозиторию (vma.github.username) или токен (vma.github.token)");
+        }
+        final String password = System.getenv("vma.github.password");
+        if (name != null && !name.isEmpty() && (password == null || password.isEmpty())) {
+            throw new IllegalArgumentException("Не задан пароль к репозиторию (vma.github.password)");
+        }
+        if (token != null && !token.isEmpty()) {
+            logger.info("auth by token");
+            return new UsernamePasswordCredentialsProvider(token, "");
+        } else {
+            logger.info("auth by username and password");
+            return new UsernamePasswordCredentialsProvider(name, password);
         }
     }
 
@@ -60,22 +80,19 @@ final public class GitHubPublisher {
         final CloneCommand cloneCommand = Git.cloneRepository();
         cloneCommand.setURI(remotePath);
         cloneCommand.setDirectory(localPathFile);
-        final String name = System.getenv("vma.github.username");
-        if (name == null || name.isEmpty()) {
-            throw new IllegalArgumentException("Не задан логин к репозиторию (vma.github.username)");
-        }
-        final String password = System.getenv("vma.github.password");
-        if (password == null || password.isEmpty()) {
-            throw new IllegalArgumentException("Не задан пароль к репозиторию (vma.github.password)");
-        }
-        cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(name, password));
+        cloneCommand.setCredentialsProvider(getCredentialsProvider());
         return cloneCommand.call();
     }
 
     public static void main(String[] args) throws IOException, GitAPIException {
-        final List<String> realms = new ArrayList<>();
-        realms.add("anna");
-        //публикуем на сайте
-        GitHubPublisher.publish(realms);
+        final String localPath = Utils.getDir() + "remote_repository" + File.separator;
+        final File localPathFile = new File(localPath);
+        logger.info("localPath: " + localPath);
+        final Git git = getRepo(localPathFile);
+        logger.info("git commit");
+        git.commit().setMessage("test").call();
+        logger.info("git push");
+        git.push().setCredentialsProvider(getCredentialsProvider()).call();
+        git.close();
     }
 }
