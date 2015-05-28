@@ -43,15 +43,19 @@ final public class GitHubPublisher {
     private static void copyToLocalRepo(final String localPath, final List<String> realms) throws IOException {
         for (final String realm : realms) {
             final File srcDir = new File(Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator);
-            final File destDir = new File(localPath + Wizard.by_trade_at_cities + File.separator + realm + File.separator);
-            logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
-            FileUtils.copyDirectory(srcDir, destDir);
+            if (srcDir.exists()) {
+                final File destDir = new File(localPath + Wizard.by_trade_at_cities + File.separator + realm + File.separator);
+                logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
+                FileUtils.copyDirectory(srcDir, destDir);
+            }
         }
         for (final String realm : realms) {
             final File srcDir = new File(Utils.getDir() + Wizard.industry + File.separator + realm + File.separator);
-            final File destDir = new File(localPath + Wizard.industry + File.separator + realm + File.separator);
-            logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
-            FileUtils.copyDirectory(srcDir, destDir);
+            if (srcDir.exists()) {
+                final File destDir = new File(localPath + Wizard.industry + File.separator + realm + File.separator);
+                logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
+                FileUtils.copyDirectory(srcDir, destDir);
+            }
         }
     }
 

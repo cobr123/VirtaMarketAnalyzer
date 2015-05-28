@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.main;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,16 @@ public final class Wizard {
 
     public static void collectToJsonTradeAtCities(final String realm) throws IOException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
+
+        final Calendar today = Calendar.getInstance();
+        final File baseDirFile = new File(baseDir);
+        if (today.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
+            logger.info("розницу парсим по только субботам");
+            if (baseDirFile.exists()) {
+                FileUtils.deleteDirectory(baseDirFile);
+            }
+            return;
+        }
         //страны
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
         Utils.writeToGson(baseDir + "countries.json", countries);
@@ -67,6 +78,7 @@ public final class Wizard {
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
+
     public static void collectToJsonIndustries(final String realm) throws IOException {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
         //собираем рецепты производства товаров и материалов
@@ -74,10 +86,10 @@ public final class Wizard {
         final List<ProductRecipe> recipes = ProductRecipeParser.getRecipes(host + realm + "/main/industry/unit_type/info/", manufactures);
         Utils.writeToGson(baseDir + "manufactures.json", manufactures);
         //иногда один продукт можно получить разными способами
-        final Map<String,List<ProductRecipe>> productRecipes = new HashMap<>();
+        final Map<String, List<ProductRecipe>> productRecipes = new HashMap<>();
         for (final ProductRecipe recipe : recipes) {
             for (final ManufactureResult result : recipe.getResultProducts()) {
-                if(!productRecipes.containsKey(result.getProductID())){
+                if (!productRecipes.containsKey(result.getProductID())) {
                     productRecipes.put(result.getProductID(), new ArrayList<>());
                 }
                 productRecipes.get(result.getProductID()).add(recipe);
