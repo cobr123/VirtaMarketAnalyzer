@@ -47,6 +47,7 @@ public final class Wizard {
         if (today.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
             logger.info("розницу парсим по только субботам");
             if (baseDirFile.exists()) {
+                logger.info("удаляем {}", baseDirFile.getAbsolutePath());
                 FileUtils.deleteDirectory(baseDirFile);
             }
             return;

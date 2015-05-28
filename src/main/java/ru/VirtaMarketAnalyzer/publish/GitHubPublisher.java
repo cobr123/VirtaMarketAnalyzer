@@ -45,6 +45,10 @@ final public class GitHubPublisher {
             final File srcDir = new File(Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator);
             if (srcDir.exists()) {
                 final File destDir = new File(localPath + Wizard.by_trade_at_cities + File.separator + realm + File.separator);
+                if (destDir.exists()) {
+                    logger.info("удаляем {}", destDir.getAbsolutePath());
+                    FileUtils.deleteDirectory(destDir);
+                }
                 logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
                 FileUtils.copyDirectory(srcDir, destDir);
             }
@@ -53,6 +57,10 @@ final public class GitHubPublisher {
             final File srcDir = new File(Utils.getDir() + Wizard.industry + File.separator + realm + File.separator);
             if (srcDir.exists()) {
                 final File destDir = new File(localPath + Wizard.industry + File.separator + realm + File.separator);
+                if (destDir.exists()) {
+                    logger.info("удаляем {}", destDir.getAbsolutePath());
+                    FileUtils.deleteDirectory(destDir);
+                }
                 logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
                 FileUtils.copyDirectory(srcDir, destDir);
             }
