@@ -19,6 +19,9 @@ import java.util.*;
 public final class Wizard {
     private static final Logger logger = LoggerFactory.getLogger(Wizard.class);
     public static final String host = "http://virtonomica.ru/";
+    public static final String industry = "industry";
+    public static final String by_trade_at_cities = "by_trade_at_cities";
+
 
     public static void main(String[] args) throws IOException, GitAPIException {
         final List<String> realms = new ArrayList<>();
@@ -28,14 +31,15 @@ public final class Wizard {
         realms.add("mary");
         realms.add("lien");
         for (final String realm : realms) {
-            collectToJson(realm);
+            collectToJsonTradeAtCities(realm);
+            collectToJsonIndustries(realm);
         }
         //публикуем на сайте
         GitHubPublisher.publish(realms);
     }
 
-    public static void collectToJson(final String realm) throws IOException {
-        final String baseDir = Utils.getDir() + realm + File.separator;
+    public static void collectToJsonTradeAtCities(final String realm) throws IOException {
+        final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         //страны
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
         Utils.writeToGson(baseDir + "countries.json", countries);
@@ -62,6 +66,9 @@ public final class Wizard {
         //запоминаем дату обновления данных
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+    }
+    public static void collectToJsonIndustries(final String realm) throws IOException {
+        final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
         //собираем рецепты производства товаров и материалов
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
         final List<ProductRecipe> recipes = ProductRecipeParser.getRecipes(host + realm + "/main/industry/unit_type/info/", manufactures);
@@ -90,5 +97,8 @@ public final class Wizard {
         for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
             Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
         }
+        //запоминаем дату обновления данных
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 }
