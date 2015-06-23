@@ -10,12 +10,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by cobr123 on 25.04.2015.
  */
 public final class Utils {
     private static final Logger logger = LoggerFactory.getLogger(Utils.class);
+    private static final Pattern fraction_pattern = Pattern.compile("^\\d+(\\.\\d+)?/\\d+(\\.\\d+)?$");
 
     public static String getDir() throws IOException {
         String dir = System.getProperty("java.io.tmpdir");
@@ -60,7 +63,7 @@ public final class Utils {
     }
 
     public static String clearNumber(final String text) {
-        return text.replace("$", "").replace("+", "").replace("%", "").replace("ед.", "").replace("менее", "").replace("около", "").replace("более", "").replaceAll("\\s+", "").trim();
+        return text.replace("$", "").replace("+", "").replace("%", "").replaceAll("\\p{InCyrillic}+\\.?", "").replaceAll("\\s+", "").trim();
     }
 
     public static double toDouble(final String text) {
@@ -68,7 +71,8 @@ public final class Utils {
         if (clear.isEmpty() || "-".equals(text)) {
             return 0.0;
         } else {
-            if (clear.matches("\\d+(\\.\\d+)?/\\d+(\\.\\d+)?")) {
+            final Matcher matcher = fraction_pattern.matcher(clear);
+            if (matcher.find()) {
                 final String[] data = clear.split("/");
                 return Double.valueOf(data[0]) / Double.valueOf(data[1]);
             } else {
