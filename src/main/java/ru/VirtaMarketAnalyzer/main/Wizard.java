@@ -1,6 +1,7 @@
 package ru.VirtaMarketAnalyzer.main;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.BasicConfigurator;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ public final class Wizard {
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
+        BasicConfigurator.configure();
+
         final List<String> realms = new ArrayList<>();
         realms.add("olga");
         realms.add("vera");
@@ -45,7 +48,7 @@ public final class Wizard {
         final Calendar today = Calendar.getInstance();
         final File baseDirFile = new File(baseDir);
         if (today.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY) {
-            logger.info("розницу парсим по только субботам");
+            logger.info("розницу парсим только по субботам");
             if (baseDirFile.exists()) {
                 logger.info("удаляем {}", baseDirFile.getAbsolutePath());
                 FileUtils.deleteDirectory(baseDirFile);
