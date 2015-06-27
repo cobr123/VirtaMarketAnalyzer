@@ -4,9 +4,6 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.InvalidRemoteException;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
@@ -16,11 +13,10 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by r.tabulov on 06.05.2015.
+ * Created by cobr123 on 06.05.2015.
  */
 final public class GitHubPublisher {
     private static final Logger logger = LoggerFactory.getLogger(GitHubPublisher.class);

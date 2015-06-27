@@ -46,7 +46,7 @@ public final class ProductRemainParser {
                     }
                 });
 
-        logger.info("парсим");
+        logger.info("парсим остатки: " + materials.size());
         for (final Product material : materials) {
             String nextPageUrl = url + material.getId();
             String ref = "";

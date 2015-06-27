@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 24.04.2015.
@@ -68,44 +69,17 @@ public final class CityParser {
     }
 
     public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products) throws IOException {
-        final List<String> urls = new ArrayList<>(cities.size() * products.size());
+        final List<CityProduct> cityProducts = new ArrayList<>(cities.size() * products.size());
 
         for (final City city : cities) {
             for (final Product product : products) {
-                urls.add(url + product.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId());
+                cityProducts.add(new CityProduct(city, product, url));
             }
         }
-        logger.info("греем кэш: {}", cities.size() * products.size());
-        urls.parallelStream().forEach(s -> {
-            try {
-                Downloader.get(s);
-            } catch (final IOException e) {
-                logger.error("Ошибка:", e);
-            }
-        });
-        logger.info("парсим данные");
-        final Map<String, List<TradeAtCity>> map = new HashMap<>();
-        long prevPerc = 0;
-        long cnt = 1;
-        final long total = cities.size() * products.size();
-        for (final City city : cities) {
-            for (final Product product : products) {
-                final long curPerc = cnt * 100 / total;
-                if (prevPerc != curPerc) {
-                    logger.info("{} из {}, {}%", cnt, total, curPerc);
-                }
-                if (!map.containsKey(product.getId())) {
-                    map.put(product.getId(), new ArrayList<>());
-                }
-                map.get(product.getId()).add(get(url, city, product));
-//                if (cnt > 10) {
-//                    //todo: test only
-//                    return map;
-//                }
-                ++cnt;
-                prevPerc = curPerc;
-            }
-        }
+        logger.info("парсим данные: {}", cityProducts.size());
+
+        final Map<String, List<TradeAtCity>> map = cityProducts.parallelStream().map(cp -> cp.getTradeAtCity()).collect(Collectors.groupingBy(TradeAtCity::getProductId));
+
         return map;
     }
 
