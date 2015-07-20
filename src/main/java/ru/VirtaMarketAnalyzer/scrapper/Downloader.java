@@ -57,10 +57,6 @@ public final class Downloader {
         return file;
     }
 
-//    public static void waitSecond() {
-//        waitSecond(1);
-//    }
-
     public static void waitSecond(final long seconds) {
         try {
             Thread.sleep(seconds * 1000);
