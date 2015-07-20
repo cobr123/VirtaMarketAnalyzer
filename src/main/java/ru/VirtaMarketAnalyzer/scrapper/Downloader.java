@@ -35,13 +35,13 @@ public final class Downloader {
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
             logger.trace("Взят из кэша: {}", file.getAbsolutePath());
         } else {
-            logger.info("Запрошен адрес: {}", url);
+            logger.trace("Запрошен адрес: {}", url);
 
             for (int tries = 1; tries <= 3; ++tries) {
                 try {
                     final Connection conn = Jsoup.connect(url);
                     if (referrer != null && !referrer.isEmpty()) {
-                        logger.info("referrer: {}", referrer);
+                        logger.trace("referrer: {}", referrer);
                         conn.referrer(referrer);
                     }
                     final Document doc = conn.get();

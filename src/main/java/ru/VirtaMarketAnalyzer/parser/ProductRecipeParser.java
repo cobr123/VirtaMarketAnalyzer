@@ -29,7 +29,7 @@ final public class ProductRecipeParser {
 //        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/2417");
         final String url = "http://virtonomica.ru/olga/main/industry/unit_type/info/";
         final List<Manufacture> manufactures = new ArrayList<>();
-        manufactures.add(new Manufacture("2425","manufactureCategory","caption"));
+        manufactures.add(new Manufacture("2425", "manufactureCategory", "caption"));
 
         logger.info(Utils.getPrettyGson(getRecipes(url, manufactures)));
     }
