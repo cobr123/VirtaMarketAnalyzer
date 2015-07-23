@@ -47,11 +47,11 @@ public final class Wizard {
 
         final Calendar today = Calendar.getInstance();
         final File baseDirFile = new File(baseDir);
-        if (today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY && "vera".equalsIgnoreCase(realm)) {
-        } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY && "olga".equalsIgnoreCase(realm)) {
+        if (today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY && "olga".equalsIgnoreCase(realm)) {
         } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY && "anna".equalsIgnoreCase(realm)) {
         } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY && "mary".equalsIgnoreCase(realm)) {
         } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY && "lien".equalsIgnoreCase(realm)) {
+        } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY && "vera".equalsIgnoreCase(realm)) {
         } else {
             if (baseDirFile.exists()) {
                 logger.info("удаляем {}", baseDirFile.getAbsolutePath());
