@@ -29,11 +29,11 @@ public final class Wizard {
         BasicConfigurator.configure();
 
         final List<String> realms = new ArrayList<>();
-//        realms.add("olga");
+        realms.add("olga");
         realms.add("vera");
-//        realms.add("anna");
-//        realms.add("mary");
-//        realms.add("lien");
+        realms.add("anna");
+        realms.add("mary");
+        realms.add("lien");
         for (final String realm : realms) {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
