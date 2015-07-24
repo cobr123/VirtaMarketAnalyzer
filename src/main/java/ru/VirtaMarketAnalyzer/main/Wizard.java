@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.main;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +28,7 @@ public final class Wizard {
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
-        BasicConfigurator.configure();
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 
         final List<String> realms = new ArrayList<>();
         realms.add("olga");
