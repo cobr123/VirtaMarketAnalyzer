@@ -11,7 +11,7 @@ public final class MajorSellInCity {
     @SerializedName("d")
     private final String townDistrict;
     @SerializedName("v")
-    private final long sellVolume;
+    private final double sellVolume;
     @SerializedName("p")
     private final double price;
     @SerializedName("q")
@@ -19,7 +19,7 @@ public final class MajorSellInCity {
     @SerializedName("b")
     private final double brand;
 
-    public MajorSellInCity(final long shopSize, final String townDistrict, final long sellVolume, final double price, final double quality, final double brand) {
+    public MajorSellInCity(final long shopSize, final String townDistrict, final double sellVolume, final double price, final double quality, final double brand) {
         this.shopSize = shopSize;
         this.townDistrict = townDistrict;
         this.sellVolume = sellVolume;
@@ -37,7 +37,7 @@ public final class MajorSellInCity {
         return townDistrict;
     }
 
-    public long getSellVolume() {
+    public double getSellVolume() {
         return sellVolume;
     }
 

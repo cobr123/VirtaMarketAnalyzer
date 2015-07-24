@@ -21,8 +21,8 @@ public final class Downloader {
         return get(url, "");
     }
 
-    public static File get(final String url, final String referrer) throws IOException {
-        String clearedUrl = "";
+    public static String getCrearedUrl(final String url, final String referrer) {
+        String clearedUrl;
         if (referrer != null && !referrer.isEmpty()) {
             final String[] parts = url.split("/");
             final String page = File.separator + parts[parts.length - 2] + File.separator + parts[parts.length - 1];
@@ -30,6 +30,24 @@ public final class Downloader {
         } else {
             clearedUrl = url.replace("http://", "").replace("/", File.separator);
         }
+        return clearedUrl;
+    }
+
+    public static void invalidateCache(final String url) throws IOException {
+        invalidateCache(url, "");
+    }
+
+    public static void invalidateCache(final String url, final String referrer) throws IOException {
+        final String clearedUrl = getCrearedUrl(url, referrer);
+        final String fileToSave = Utils.getDir() + clearedUrl + ".html";
+        final File file = new File(fileToSave);
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    public static File get(final String url, final String referrer) throws IOException {
+        final String clearedUrl = getCrearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
@@ -49,7 +67,7 @@ public final class Downloader {
                     break;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{}: {}", tries, url);
-                    logger.error("Ошибка:", e);
+                    logger.error("Ошибка: ", e);
                     waitSecond(3);
                 }
             }

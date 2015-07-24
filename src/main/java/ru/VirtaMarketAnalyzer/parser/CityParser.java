@@ -24,7 +24,7 @@ public final class CityParser {
 
     public static void main(final String[] args) throws IOException {
         //final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
-        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/335165/335166/422021");
+        final Document doc = Downloader.getDoc("http://virtonomica.ru/vera/main/globalreport/marketing/by_trade_at_cities/422897/3054/3055/3056");
         final Element table = doc.select("table[class=\"grid\"]").first();
 //        System.out.println(table.outerHtml());
 //        System.out.println(table.select("table > tbody > tr > td").eq(2).text().replaceAll("[\\W]+", ""));
@@ -84,8 +84,14 @@ public final class CityParser {
     }
 
     public static TradeAtCity get(final String url, final City city, final Product product) throws IOException {
-        final Document doc = Downloader.getDoc(url + product.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId());
-        final Element table = doc.select("table[class=\"grid\"]").first();
+        final String fullUrl = url + product.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId();
+        final Document doc = Downloader.getDoc(fullUrl);
+        final Element table = doc.select("table.grid").first();
+
+        if (table == null) {
+            Downloader.invalidateCache(fullUrl);
+            throw new IOException("На странице '" + fullUrl + "' не найдена таблица с классом grid");
+        }
 
         final TradeAtCityBuilder builder = new TradeAtCityBuilder();
 
@@ -127,7 +133,7 @@ public final class CityParser {
             if (!best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title").isEmpty()) {
                 final long shopSize = Utils.toLong(best.select("tr > td").eq(1).html());
                 final String cityDistrict = best.select("tr > td").eq(2).html();
-                final long sellVolume = Utils.toLong(best.select("tr > td").eq(3).html());
+                final double sellVolume = Utils.toDouble(best.select("tr > td").eq(3).html());
                 final double price = Utils.toDouble(best.select("tr > td").eq(4).html());
                 final double quality = Utils.toDouble(best.select("tr > td").eq(5).html());
                 final double brand = Utils.toDouble(best.select("tr > td").eq(6).html());

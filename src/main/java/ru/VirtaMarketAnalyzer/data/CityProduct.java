@@ -3,6 +3,7 @@ package ru.VirtaMarketAnalyzer.data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.parser.CityParser;
+import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
 
@@ -34,10 +35,14 @@ final public class CityProduct {
     }
 
     public TradeAtCity getTradeAtCity() {
-        try {
-            return CityParser.get(getUrl(), getCity(), getProduct());
-        } catch (final IOException e) {
-            logger.info(e.getLocalizedMessage(), e);
+        for (int tries = 1; tries <= 3; ++tries) {
+            try {
+                return CityParser.get(getUrl(), getCity(), getProduct());
+            } catch (final IOException e) {
+                logger.error("Ошибка при запросе, попытка #{}: {}", tries, url);
+                logger.error("Ошибка: ", e);
+                Downloader.waitSecond(3);
+            }
         }
         return null;
     }
