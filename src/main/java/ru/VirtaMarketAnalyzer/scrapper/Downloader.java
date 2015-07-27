@@ -55,7 +55,8 @@ public final class Downloader {
         } else {
             logger.trace("Запрошен адрес: {}", url);
 
-            for (int tries = 1; tries <= 3; ++tries) {
+            final int maxTriesCnt = 3;
+            for (int tries = 1; tries <= maxTriesCnt; ++tries) {
                 try {
                     final Connection conn = Jsoup.connect(url);
                     if (referrer != null && !referrer.isEmpty()) {
@@ -68,7 +69,11 @@ public final class Downloader {
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{}: {}", tries, url);
                     logger.error("Ошибка: ", e);
-                    waitSecond(3);
+                    if(maxTriesCnt == tries){
+                        throw new IOException(e);
+                    }else {
+                        waitSecond(3);
+                    }
                 }
             }
         }

@@ -35,13 +35,16 @@ final public class CityProduct {
     }
 
     public TradeAtCity getTradeAtCity() {
-        for (int tries = 1; tries <= 3; ++tries) {
+        final int maxTriesCnt = 3;
+        for (int tries = 1; tries <= maxTriesCnt; ++tries) {
             try {
                 return CityParser.get(getUrl(), getCity(), getProduct());
             } catch (final IOException e) {
                 logger.error("Ошибка при запросе, попытка #{}: {}", tries, url);
                 logger.error("Ошибка: ", e);
-                Downloader.waitSecond(3);
+                if (tries < maxTriesCnt) {
+                    Downloader.waitSecond(3);
+                }
             }
         }
         return null;
