@@ -24,7 +24,7 @@ public final class CityParser {
 
     public static void main(final String[] args) throws IOException {
         //final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
-        final Document doc = Downloader.getDoc("http://virtonomica.ru/vera/main/globalreport/marketing/by_trade_at_cities/422897/3054/3055/3056");
+        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422549/3054/3055/3056");
         final Element table = doc.select("table[class=\"grid\"]").first();
 //        System.out.println(table.outerHtml());
 //        System.out.println(table.select("table > tbody > tr > td").eq(2).text().replaceAll("[\\W]+", ""));
@@ -78,9 +78,7 @@ public final class CityParser {
         }
         logger.info("парсим данные: {}", cityProducts.size());
 
-        final Map<String, List<TradeAtCity>> map = cityProducts.parallelStream().map(cp -> cp.getTradeAtCity()).collect(Collectors.groupingBy(TradeAtCity::getProductId));
-
-        return map;
+        return cityProducts.parallelStream().map(CityProduct::getTradeAtCity).collect(Collectors.groupingBy(TradeAtCity::getProductId));
     }
 
     public static TradeAtCity get(final String url, final City city, final Product product) throws IOException {
