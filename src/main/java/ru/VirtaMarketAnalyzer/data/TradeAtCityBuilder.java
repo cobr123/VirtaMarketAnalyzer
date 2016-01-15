@@ -11,6 +11,8 @@ public final class TradeAtCityBuilder {
     private String cityId;
     private String cityCaption;
     private double wealthIndex;
+    private double educationIndex;
+    private double averageSalary;
     private String productId;
     private String marketIdx;
     private long volume;
@@ -34,6 +36,8 @@ public final class TradeAtCityBuilder {
                 , marketIdx
                 , volume
                 , wealthIndex
+                , educationIndex
+                , averageSalary
                 , sellerCnt
                 , companiesCnt
                 , localPercent
@@ -73,6 +77,16 @@ public final class TradeAtCityBuilder {
 
     public TradeAtCityBuilder setWealthIndex(final double wealthIndex) {
         this.wealthIndex = wealthIndex;
+        return this;
+    }
+
+    public TradeAtCityBuilder setEducationIndex(final double educationIndex) {
+        this.educationIndex = educationIndex;
+        return this;
+    }
+
+    public TradeAtCityBuilder setAverageSalary(final double averageSalary) {
+        this.averageSalary = averageSalary;
         return this;
     }
 

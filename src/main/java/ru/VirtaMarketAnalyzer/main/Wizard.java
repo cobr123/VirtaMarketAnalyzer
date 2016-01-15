@@ -8,6 +8,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
+import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 import ru.VirtaMarketAnalyzer.parser.*;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 
@@ -87,6 +88,8 @@ public final class Wizard {
         //запоминаем дату обновления данных
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        //ищем формулу для объема продаж в рознице
+        RetailSalePrediction.createPrediction(realm, stats);
     }
 
     public static void collectToJsonIndustries(final String realm) throws IOException {

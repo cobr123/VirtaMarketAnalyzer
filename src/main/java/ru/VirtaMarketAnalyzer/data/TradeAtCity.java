@@ -18,6 +18,10 @@ public final class TradeAtCity {
     final private String townCaption;
     @SerializedName("wi")
     final private double wealthIndex;
+    @SerializedName("ei")
+    final private double educationIndex;
+    @SerializedName("as")
+    final private double averageSalary;
     @SerializedName("pi")
     final private String productId;
     @SerializedName("mi")
@@ -52,6 +56,8 @@ public final class TradeAtCity {
             , final String marketIdx
             , final long volume
             , final double wealthIndex
+            , final double educationIndex
+            , final double averageSalary
             , final long sellerCnt
             , final long companiesCnt
             , final double localPercent
@@ -70,6 +76,8 @@ public final class TradeAtCity {
         this.marketIdx = marketIdx;
         this.volume = volume;
         this.wealthIndex = wealthIndex;
+        this.educationIndex = educationIndex;
+        this.averageSalary = averageSalary;
         this.sellerCnt = sellerCnt;
         this.companiesCnt = companiesCnt;
         this.localPercent = localPercent;
@@ -103,6 +111,14 @@ public final class TradeAtCity {
 
     public double getWealthIndex() {
         return wealthIndex;
+    }
+
+    public double getEducationIndex() {
+        return educationIndex;
+    }
+
+    public double getAverageSalary() {
+        return averageSalary;
     }
 
     public String getProductId() {

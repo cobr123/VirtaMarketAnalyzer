@@ -50,8 +50,10 @@ public final class CityListParser {
                 final String[] parts = town.select("tr > td:nth-child(1) > a").eq(0).attr("href").split("/");
                 final String caption = town.select("tr > td:nth-child(1) > a").eq(0).text();
                 final String id = parts[parts.length - 1];
+                final String averageSalary = town.select("tr > td:nth-child(3)").text();
+                final String educationIndex = town.select("tr > td:nth-child(5)").text();
                 final String wealthIndex = town.select("tr > td:nth-child(6)").html();
-                cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex)));
+                cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary)));
             }
         }
     }

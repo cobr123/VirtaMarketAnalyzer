@@ -6,11 +6,11 @@ import weka.classifiers.functions.LinearRegression;
 import weka.core.*;
 
 /**
- * Created by r.tabulov on 15.01.2016.
+ * Created by cobr123 on 15.01.2016.
  */
 public class Test {
-    static FastVector attrs;
-    static Instances isTrainingSet;
+    private static FastVector attrs;
+    private static Instances isTrainingSet;
 
     public static void main(String[] args) throws Exception {
         // Declare numeric attributes
