@@ -105,6 +105,7 @@ public final class CityParser {
         builder.setCityCaption(city.getCaption());
         builder.setWealthIndex(city.getWealthIndex());
         builder.setEducationIndex(city.getEducationIndex());
+        builder.setAverageSalary(city.getAverageSalary());
 
         final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
         for (int i = 0; i < percs.size(); ++i) {
