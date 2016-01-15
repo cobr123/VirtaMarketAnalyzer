@@ -49,11 +49,11 @@ public final class Wizard {
 
         final Calendar today = Calendar.getInstance();
         final File baseDirFile = new File(baseDir);
-        if (today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY && "olga".equalsIgnoreCase(realm)) {
-        } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY && "anna".equalsIgnoreCase(realm)) {
-        } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY && "mary".equalsIgnoreCase(realm)) {
-        } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY && "lien".equalsIgnoreCase(realm)) {
-        } else if (today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY && "vera".equalsIgnoreCase(realm)) {
+        if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
+        } else if ("anna".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
+        } else if ("mary".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY) {
+        } else if ("lien".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY) {
+        } else if ("vera".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)) {
         } else {
             if (baseDirFile.exists()) {
                 logger.info("удаляем {}", baseDirFile.getAbsolutePath());
