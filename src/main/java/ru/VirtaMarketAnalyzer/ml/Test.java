@@ -38,6 +38,15 @@ public class Test {
 
         // Print the result à la Weka explorer:
         System.out.println(eTest.toSummaryString());
+
+        // Specify that the instance belong to the training set
+        // in order to inherit from the set description
+        Instance iUse = createInstance(3198, 9669, 5, 0, 1, 0);
+        iUse.setDataset(isTrainingSet);
+
+        // Get the likelihood of each classes
+        double[] fDistribution = cModel.distributionForInstance(iUse);
+        System.out.println(fDistribution[0]);
     }
 
     static void createTrainingSet() {
