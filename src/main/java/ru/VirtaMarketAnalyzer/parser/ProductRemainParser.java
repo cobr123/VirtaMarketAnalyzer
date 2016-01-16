@@ -26,7 +26,7 @@ public final class ProductRemainParser {
     public static void main(final String[] args) throws IOException {
         final String url = "http://virtonomica.ru/olga/main/globalreport/marketing/by_products/";
         final List<Product> products = new ArrayList<>();
-        products.add(new Product("", "", "1466", ""));
+        products.add(new Product("", "", "1482", ""));
         System.out.println(Utils.getPrettyGson(getRemains(url, products)));
     }
 
@@ -82,15 +82,9 @@ public final class ProductRemainParser {
                         }
                     }
                 }
-                final Element currPage = doc.select("table.paging > tbody > tr > td > div > a > span.selected").last();
-                if (currPage == null || currPage.parent() == null) {
-                    break;
-                }
-                final Element nextLink = currPage.parent().nextElementSibling();
-                if (nextLink != null && "a".equalsIgnoreCase(nextLink.nodeName())) {
-                    nextPageUrl = nextLink.attr("href");
-                    ref = url + material.getId();
-                } else {
+                nextPageUrl = Utils.getNextPageHref(doc);
+                ref = url + material.getId();
+                if (nextPageUrl.isEmpty()) {
                     break;
                 }
             }

@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.main;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,5 +110,20 @@ public final class Utils {
 
     public static int daysBetween(final Date date1, final Date date2) {
         return (int) ((getZeroTimeDate(date1).getTime() - getZeroTimeDate(date2).getTime()) / (1000 * 60 * 60 * 24));
+    }
+
+    public static String getNextPageHref(final Document doc) {
+        final Element currPage = doc.select("ul[class=\"pager_list pull-right\"] > li.selected").last();
+        if (currPage == null || currPage.parent() == null) {
+            logger.error("currPage is null", new Exception());
+            return "";
+        }
+        final Element nextLink = currPage.nextElementSibling();
+        if (nextLink != null && "li".equalsIgnoreCase(nextLink.nodeName())) {
+            return nextLink.select("> a").attr("href");
+        } else {
+            logger.trace("nextLink is null");
+        }
+        return "";
     }
 }
