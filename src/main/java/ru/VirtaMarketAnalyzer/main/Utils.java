@@ -105,4 +105,8 @@ public final class Utils {
     public static boolean equalsWoTime(final Date date1, final Date date2) {
         return getZeroTimeDate(date1).equals(getZeroTimeDate(date2));
     }
+
+    public static int daysBetween(final Date date1, final Date date2) {
+        return (int) ((getZeroTimeDate(date1).getTime() - getZeroTimeDate(date2).getTime()) / (1000 * 60 * 60 * 24));
+    }
 }
