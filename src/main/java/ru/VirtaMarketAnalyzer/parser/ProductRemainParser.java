@@ -56,8 +56,7 @@ public final class ProductRemainParser {
 
                 for (final Element row : rows) {
                     if (!row.select("> td:nth-child(1)").isEmpty()) {
-                        final String[] parts = row.select("> td:nth-child(1) > table > tbody > tr > td:nth-child(2) > a").attr("href").split("/");
-                        final String unitID = parts[parts.length - 1];
+                        final String unitID = Utils.getLastFromUrl(row.select("> td:nth-child(1) > table > tbody > tr > td:nth-child(2) > a").attr("href"));
                         final double maxOrder = Utils.toDouble(row.select("> td:nth-child(2) > span").text().replace("Max:", ""));
                         final ProductRemain.MaxOrderType maxOrderType = (maxOrder > 0) ? ProductRemain.MaxOrderType.L : ProductRemain.MaxOrderType.U;
                         row.select("> td:nth-child(2)").first().children().remove();

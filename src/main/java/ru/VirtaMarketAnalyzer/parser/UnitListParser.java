@@ -1,5 +1,8 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -20,6 +23,7 @@ public final class UnitListParser {
     private static final Logger logger = LoggerFactory.getLogger(UnitListParser.class);
 
     public static void main(String[] args) throws IOException {
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final List<Shop> list = getShopList("http://virtonomica.ru/olga/main/company/view/", "2085506");
         System.out.println("list.size() = " + list.size());
     }

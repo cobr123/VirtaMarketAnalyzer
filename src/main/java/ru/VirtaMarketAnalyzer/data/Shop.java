@@ -8,20 +8,18 @@ import java.util.List;
  * Created by cobr123 on 16.01.16.
  */
 public final class Shop {
-    @SerializedName("ui")
-    final private String unitId;
     @SerializedName("ci")
     final private String countryId;
     @SerializedName("ri")
     final private String regionId;
     @SerializedName("ti")
     final private String townId;
-    @SerializedName("s")
+    @SerializedName("ss")
     private final int shopSize;
-    @SerializedName("d")
+    @SerializedName("td")
     private final String townDistrict;
     @SerializedName("dc")
-    private final int departmentCount;
+    private final double departmentCount;
     @SerializedName("n")
     private final double notoriety;
     @SerializedName("vc")
@@ -31,8 +29,7 @@ public final class Shop {
     @SerializedName("sp")
     final private List<ShopProduct> shopProducts;
 
-    public Shop(String unitId, String countryId, String regionId, String townId, int shopSize, String townDistrict, int departmentCount, double notoriety, int visitorsCount, String serviceLevel, List<ShopProduct> shopProducts) {
-        this.unitId = unitId;
+    public Shop(final String countryId, final String regionId, final String townId, final int shopSize, final String townDistrict, final double departmentCount, final double notoriety, final int visitorsCount, final String serviceLevel, final List<ShopProduct> shopProducts) {
         this.countryId = countryId;
         this.regionId = regionId;
         this.townId = townId;
@@ -43,10 +40,6 @@ public final class Shop {
         this.visitorsCount = visitorsCount;
         this.serviceLevel = serviceLevel;
         this.shopProducts = shopProducts;
-    }
-
-    public String getUnitId() {
-        return unitId;
     }
 
     public String getCountryId() {
@@ -69,7 +62,7 @@ public final class Shop {
         return townDistrict;
     }
 
-    public int getDepartmentCount() {
+    public double getDepartmentCount() {
         return departmentCount;
     }
 

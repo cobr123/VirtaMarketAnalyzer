@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Country;
 import ru.VirtaMarketAnalyzer.data.Region;
+import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -40,9 +41,9 @@ public final class CityInitParser {
             final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr > td:nth-child(1) > a");
             //System.out.println(list.outerHtml());
             for (final Element row : rows) {
-                final String[] data = row.attr("href").split("/");
+                final String id = Utils.getLastFromUrl(row.attr("href"));
                 final String caption = row.text();
-                list.add(new Region(country.getId(), data[data.length - 1], caption));
+                list.add(new Region(country.getId(), id, caption));
             }
         }
         return list;
@@ -55,9 +56,9 @@ public final class CityInitParser {
         final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr > td:nth-child(1) > a");
         //System.out.println(list.outerHtml());
         for (final Element row : rows) {
-            final String[] data = row.attr("href").split("/");
+            final String id = Utils.getLastFromUrl(row.attr("href"));
             final String caption = row.text();
-            list.add(new Country(data[data.length - 1], caption));
+            list.add(new Country(id, caption));
         }
         return list;
     }

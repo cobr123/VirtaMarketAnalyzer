@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName;
 public final class ShopProduct {
     @SerializedName("pi")
     final private String productId;
-    @SerializedName("v")
+    @SerializedName("sv")
     private final double sellVolume;
     @SerializedName("p")
     private final double price;
@@ -19,7 +19,7 @@ public final class ShopProduct {
     @SerializedName("ms")
     private final double marketShare;
 
-    public ShopProduct(String productId, double sellVolume, double price, double quality, double brand, double marketShare) {
+    public ShopProduct(final String productId, final double sellVolume, final double price, final double quality, final double brand, final double marketShare) {
         this.productId = productId;
         this.sellVolume = sellVolume;
         this.price = price;

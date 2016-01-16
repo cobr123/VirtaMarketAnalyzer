@@ -39,8 +39,7 @@ public final class ProductInitParser {
                 final Elements imgs = row.select("tr > td > a > img");
                 for (final Element img : imgs) {
                     final String caption = img.attr("title");
-                    final String[] parts = img.parent().attr("href").split("/");
-                    final String id = parts[parts.length - 1];
+                    final String id = Utils.getLastFromUrl(img.parent().attr("href"));
                     final String imgUrl = img.attr("src");
                     list.add(new Product(productCategory, imgUrl, id, caption));
                 }

@@ -69,26 +69,50 @@ public final class Utils {
     }
 
     public static double toDouble(final String text) {
-        final String clear = clearNumber(text);
-        if (clear.isEmpty() || "-".equals(text)) {
-            return 0.0;
-        } else {
-            final Matcher matcher = fraction_pattern.matcher(clear);
-            if (matcher.find()) {
-                final String[] data = clear.split("/");
-                return Double.valueOf(data[0]) / Double.valueOf(data[1]);
+        try {
+            final String clear = clearNumber(text);
+            if (clear.isEmpty() || "-".equals(text)) {
+                return 0.0;
             } else {
-                return Double.valueOf(clear);
+                final Matcher matcher = fraction_pattern.matcher(clear);
+                if (matcher.find()) {
+                    final String[] data = clear.split("/");
+                    return Double.valueOf(data[0]) / Double.valueOf(data[1]);
+                } else {
+                    return Double.valueOf(clear);
+                }
             }
+        } catch (final Exception e) {
+            logger.error("Не удалось преобразовать строку \"" + text + "\" в double");
+            throw e;
         }
     }
 
     public static long toLong(final String text) {
-        final String clear = clearNumber(text);
-        if (clear.isEmpty()) {
-            return 0;
-        } else {
-            return Long.valueOf(clear);
+        try {
+            final String clear = clearNumber(text);
+            if (clear.isEmpty()) {
+                return 0;
+            } else {
+                return Long.valueOf(clear);
+            }
+        } catch (final Exception e) {
+            logger.error("Не удалось преобразовать строку \"" + text + "\" в long");
+            throw e;
+        }
+    }
+
+    public static int toInt(final String text) {
+        try {
+            final String clear = clearNumber(text);
+            if (clear.isEmpty()) {
+                return 0;
+            } else {
+                return Integer.valueOf(clear);
+            }
+        } catch (final Exception e) {
+            logger.error("Не удалось преобразовать строку \"" + text + "\" в int");
+            throw e;
         }
     }
 
@@ -127,4 +151,21 @@ public final class Utils {
         }
         return "";
     }
+
+    public static String getLastFromUrl(final String url) {
+        final String[] data = url.split("/");
+        return data[data.length - 1];
+    }
+
+    public static String findTownByCaption(final String countryId, final String regionId, final String townCaption) {
+        //todo
+        return townCaption;
+    }
+
+
+    public static String findProductByImg(final String imgSrc) {
+        //todo
+        return imgSrc;
+    }
+
 }
