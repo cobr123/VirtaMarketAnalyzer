@@ -88,6 +88,9 @@ public final class Wizard {
         //запоминаем дату обновления данных
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        //собираем данные из магазинов
+        final List<Shop> shops = TopRetailParser.getShopList(host, realm);
+        Utils.writeToGson(baseDir + "shops.json", shops);
         //ищем формулу для объема продаж в рознице
         //RetailSalePrediction.createPrediction(realm, stats);
     }
