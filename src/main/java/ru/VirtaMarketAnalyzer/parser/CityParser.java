@@ -150,7 +150,7 @@ public final class CityParser {
                 );
             }
         }
-        builder.setMajorSellInCityList(majorSellInCityList);
+//        builder.setMajorSellInCityList(majorSellInCityList);
 
         return builder.build();
     }

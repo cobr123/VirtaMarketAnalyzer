@@ -89,7 +89,7 @@ public final class Wizard {
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         //ищем формулу для объема продаж в рознице
-        RetailSalePrediction.createPrediction(realm, stats);
+        //RetailSalePrediction.createPrediction(realm, stats);
     }
 
     public static void collectToJsonIndustries(final String realm) throws IOException {
