@@ -118,11 +118,12 @@ public final class Utils {
             logger.error("currPage is null", new Exception());
             return "";
         }
-        final Element nextLink = currPage.nextElementSibling();
-        if (nextLink != null && "li".equalsIgnoreCase(nextLink.nodeName())) {
-            return nextLink.select("> a").attr("href");
+        final Element nextPageLink = currPage.nextElementSibling();
+        if (nextPageLink != null && "li".equalsIgnoreCase(nextPageLink.nodeName())) {
+            logger.trace("nextPageLink = " + nextPageLink);
+            return nextPageLink.select("> a").attr("href");
         } else {
-            logger.trace("nextLink is null");
+            logger.trace("nextPageLink is null");
         }
         return "";
     }
