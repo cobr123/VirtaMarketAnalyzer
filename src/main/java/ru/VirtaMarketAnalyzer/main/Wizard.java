@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.ml.PrepareAnalitics;
+import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 import ru.VirtaMarketAnalyzer.parser.*;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 
@@ -91,12 +92,12 @@ public final class Wizard {
         //собираем данные из магазинов
         final List<Shop> shops = TopRetailParser.getShopList(host, realm, cities, products);
         //группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой
-        final Map<String, List<RetailAnalytics>> retailAnalitincs = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats);
-        for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalitincs.entrySet()) {
+        final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats);
+        for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             Utils.writeToGson(baseDir + "retail_analytics_" + entry.getKey() + ".json", entry.getValue());
         }
         //ищем формулу для объема продаж в рознице
-        //RetailSalePrediction.createPrediction(realm, stats);
+        RetailSalePrediction.createPrediction(realm, retailAnalytics);
     }
 
     public static void collectToJsonIndustries(final String realm) throws IOException {

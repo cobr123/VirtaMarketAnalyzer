@@ -5,9 +5,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.City;
-import ru.VirtaMarketAnalyzer.data.MajorSellInCity;
-import ru.VirtaMarketAnalyzer.data.TradeAtCity;
+import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import weka.classifiers.Classifier;
@@ -21,7 +19,6 @@ import weka.core.converters.ArffSaver;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +29,16 @@ public final class RetailSalePrediction {
     private static final Logger logger = LoggerFactory.getLogger(RetailSalePrediction.class);
 
     private enum ATTR {
-        WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY, MARKET_INDEX, MARKET_VOLUME, LOCAL_PERCENT, LOCAL_PRICE, LOCAL_QUALITY, SHOP_PERCENT, SHOP_PRICE, SHOP_QUALITY, MAJOR_PRICE, MAJOR_SHOP_SIZE, MAJOR_TOWN_DISTRICT, MAJOR_BRAND, MAJOR_QUALITY, MAJOR_SELL_VOLUME
+        WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY, MARKET_INDEX, MARKET_VOLUME,
+        LOCAL_PERCENT, LOCAL_PRICE, LOCAL_QUALITY, PRICE, SHOP_SIZE,
+        TOWN_DISTRICT, DEPARTMENT_COUNT, BRAND, QUALITY, SELL_VOLUME,
+        NOTORIETY, VISITORS_COUNT, SERVICE_LEVEL, SELLER_COUNT
     }
 
-    public static void createPrediction(final String realm, final Map<String, List<TradeAtCity>> stats) {
-        System.out.println("stats.size() = " + stats.size());
-        for (final Map.Entry<String, List<TradeAtCity>> entry : stats.entrySet()) {
+    public static void createPrediction(final String realm, final Map<String, List<RetailAnalytics>> retailAnalytics) throws IOException {
+        final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
+        System.out.println("stats.size() = " + retailAnalytics.size());
+        for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             logger.info("entry.getValue().size() = " + entry.getValue().size());
             logger.info(entry.getKey());
             try {
@@ -45,7 +46,7 @@ public final class RetailSalePrediction {
                 //
                 final ArffSaver saver = new ArffSaver();
                 saver.setInstances(trainingSet);
-                saver.setFile(new File("d:\\weka\\" + realm + "\\" + entry.getKey() + ".arff"));
+                saver.setFile(new File(baseDir + "weka" + entry.getKey() + ".arff"));
                 saver.writeBatch();
                 // Create a LinearRegression classifier
                 final Classifier cModel = (Classifier) new LinearRegression();
@@ -74,7 +75,7 @@ public final class RetailSalePrediction {
         }
     }
 
-    private static Instances createTrainingSet(final List<TradeAtCity> tradeAtCities) {
+    private static Instances createTrainingSet(final List<RetailAnalytics> retailAnalytics) {
         final FastVector attrs = new FastVector(ATTR.values().length);
         for (final ATTR attr : ATTR.values()) {
             if (attr.ordinal() == ATTR.MARKET_INDEX.ordinal()) {
@@ -89,7 +90,7 @@ public final class RetailSalePrediction {
                 marketIndex.addElement("");
 
                 attrs.addElement(new Attribute(attr.name(), marketIndex));
-            } else if (attr.ordinal() == ATTR.MAJOR_TOWN_DISTRICT.ordinal()) {
+            } else if (attr.ordinal() == ATTR.TOWN_DISTRICT.ordinal()) {
                 final FastVector districts = new FastVector(5);
                 districts.addElement("Фешенебельный район");
                 districts.addElement("Центр города");
@@ -98,7 +99,15 @@ public final class RetailSalePrediction {
                 districts.addElement("Пригород");
 
                 attrs.addElement(new Attribute(attr.name(), districts));
-            } else if (attr.ordinal() == ATTR.MAJOR_SHOP_SIZE.ordinal()) {
+            } else if (attr.ordinal() == ATTR.SERVICE_LEVEL.ordinal()) {
+                final FastVector serviceLevel = new FastVector(5);
+                serviceLevel.addElement("Элитный");
+                serviceLevel.addElement("Высокий");
+                serviceLevel.addElement("Средний");
+                serviceLevel.addElement("Низкий");
+
+                attrs.addElement(new Attribute(attr.name(), serviceLevel));
+            } else if (attr.ordinal() == ATTR.SHOP_SIZE.ordinal()) {
                 final FastVector sizes = new FastVector(5);
                 sizes.addElement("100");
                 sizes.addElement("500");
@@ -111,40 +120,40 @@ public final class RetailSalePrediction {
                 attrs.addElement(new Attribute(attr.name()));
             }
         }
-        final Instances trainingSet = new Instances("RetailSalePrediction", attrs, tradeAtCities.size());
-        // Set class index (ATTR.MAJOR_SELL_VOLUME.ordinal())
-        trainingSet.setClassIndex(ATTR.MAJOR_SELL_VOLUME.ordinal());
+        final Instances trainingSet = new Instances("RetailSalePrediction", attrs, retailAnalytics.size());
+        // Set class index (ATTR.SELL_VOLUME.ordinal())
+        trainingSet.setClassIndex(ATTR.SELL_VOLUME.ordinal());
 
-        for (final TradeAtCity tradeAtCity : tradeAtCities) {
-            for (final MajorSellInCity majorSellInCity : tradeAtCity.getMajorSellInCityList()) {
-                trainingSet.add(createInstance(attrs, tradeAtCity, majorSellInCity));
-            }
+        for (final RetailAnalytics ra : retailAnalytics) {
+            trainingSet.add(createInstance(attrs, ra));
         }
         return trainingSet;
     }
 
-    private static Instance createInstance(final FastVector attrs, final TradeAtCity tradeAtCity, final MajorSellInCity majorSellInCity) {
+    private static Instance createInstance(final FastVector attrs, final RetailAnalytics retailAnalytics) {
         final Instance instance = new Instance(ATTR.values().length);
-        instance.setValue((Attribute) attrs.elementAt(ATTR.WEALTH_INDEX.ordinal()), tradeAtCity.getWealthIndex());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.EDUCATION_INDEX.ordinal()), tradeAtCity.getEducationIndex());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.AVERAGE_SALARY.ordinal()), tradeAtCity.getAverageSalary());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MARKET_INDEX.ordinal()), tradeAtCity.getMarketIdx());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MARKET_VOLUME.ordinal()), tradeAtCity.getVolume());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.WEALTH_INDEX.ordinal()), retailAnalytics.getWealthIndex());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.EDUCATION_INDEX.ordinal()), retailAnalytics.getEducationIndex());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.AVERAGE_SALARY.ordinal()), retailAnalytics.getAverageSalary());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.MARKET_INDEX.ordinal()), retailAnalytics.getMarketIdx());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.MARKET_VOLUME.ordinal()), retailAnalytics.getMarketVolume());
 
-        instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_PERCENT.ordinal()), tradeAtCity.getLocalPercent());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_PRICE.ordinal()), tradeAtCity.getLocalPrice());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_QUALITY.ordinal()), tradeAtCity.getLocalQuality());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_PERCENT.ordinal()), retailAnalytics.getLocalPercent());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_PRICE.ordinal()), retailAnalytics.getLocalPrice());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_QUALITY.ordinal()), retailAnalytics.getLocalQuality());
 
-        instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_PERCENT.ordinal()), tradeAtCity.getShopBrand());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_PRICE.ordinal()), tradeAtCity.getShopPrice());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_QUALITY.ordinal()), tradeAtCity.getShopQuality());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_SIZE.ordinal()), retailAnalytics.getShopSize() + "");
+        instance.setValue((Attribute) attrs.elementAt(ATTR.TOWN_DISTRICT.ordinal()), retailAnalytics.getTownDistrict());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.DEPARTMENT_COUNT.ordinal()), retailAnalytics.getDepartmentCount());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.NOTORIETY.ordinal()), retailAnalytics.getNotoriety());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.VISITORS_COUNT.ordinal()), retailAnalytics.getVisitorsCount());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.SERVICE_LEVEL.ordinal()), retailAnalytics.getServiceLevel());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.SELLER_COUNT.ordinal()), retailAnalytics.getSellerCnt());
 
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MAJOR_SHOP_SIZE.ordinal()), majorSellInCity.getShopSize() + "");
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MAJOR_TOWN_DISTRICT.ordinal()), majorSellInCity.getTownDistrict());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MAJOR_BRAND.ordinal()), majorSellInCity.getBrand());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MAJOR_PRICE.ordinal()), majorSellInCity.getPrice());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MAJOR_QUALITY.ordinal()), majorSellInCity.getQuality());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.MAJOR_SELL_VOLUME.ordinal()), majorSellInCity.getSellVolume());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.BRAND.ordinal()), retailAnalytics.getBrand());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.PRICE.ordinal()), retailAnalytics.getPrice());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.QUALITY.ordinal()), retailAnalytics.getQuality());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.SELL_VOLUME.ordinal()), retailAnalytics.getSellVolume());
         return instance;
     }
 
