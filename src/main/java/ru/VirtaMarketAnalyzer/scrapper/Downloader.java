@@ -67,11 +67,11 @@ public final class Downloader {
                     Utils.writeFile(fileToSave, doc.outerHtml());
                     break;
                 } catch (final IOException e) {
-                    logger.error("Ошибка при запросе, попытка #{}: {}", tries, url);
+                    logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
                     logger.error("Ошибка: ", e);
-                    if(maxTriesCnt == tries){
+                    if (maxTriesCnt == tries) {
                         throw new IOException(e);
-                    }else {
+                    } else {
                         waitSecond(3);
                     }
                 }

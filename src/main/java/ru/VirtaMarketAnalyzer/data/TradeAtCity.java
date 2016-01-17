@@ -89,6 +89,10 @@ public final class TradeAtCity {
         this.majorSellInCityList = majorSellInCityList;
     }
 
+    public String getCountryRegionTownIds() {
+        return countryId + "|" + regionId + "|" + townId;
+    }
+
     public String getTownCaption() {
         return townCaption;
     }

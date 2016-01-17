@@ -47,6 +47,9 @@ public final class ShopParser {
         logger.trace("rows.size() = " + rows.size());
         for (final Element row : rows) {
             try {
+                if ("не изв.".equalsIgnoreCase(row.select("> td:nth-child(3)").first().text())) {
+                    continue;
+                }
                 final String productId = Utils.findProductByImg(row.select("> td:nth-child(1) > img").first().attr("src"));
                 final double sellVolume = Utils.toDouble(row.select("> td:nth-child(2)").first().text());
                 final double quality = Utils.toDouble(row.select("> td:nth-child(3)").first().text());

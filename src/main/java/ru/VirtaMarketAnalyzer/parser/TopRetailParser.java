@@ -24,20 +24,21 @@ public final class TopRetailParser {
 
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final List<Shop> list = getShopList("http://virtonomica.ru/","olga");
+        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga");
         System.out.println("list.size() = " + list.size());
     }
 
     public static List<Shop> getShopList(final String baseUrl, final String realm) throws IOException {
         final List<Shop> shops = new ArrayList<>();
 
-        final String newRef = baseUrl + realm +  "/main/company/toplist/retail";
+        final String newRef = baseUrl + realm + "/main/company/toplist/retail";
         String nextPageUrl = newRef;
         String ref = "";
-        for (; ; ) {
+        for (int page = 1; page <= 5; ++page) {
             final Document doc = Downloader.getDoc(nextPageUrl, ref);
             final Elements companyLinks = doc.select("table > tbody > tr > td:nth-child(2) > span > a");
-            logger.trace("companyLinks.size() = " + companyLinks.size());
+            logger.info("companyLinks.size() = {}", companyLinks.size());
+            final int shopsSizeBefore = shops.size();
             for (final Element link : companyLinks) {
                 final String companyId = Utils.getLastFromUrl(link.attr("href"));
                 final List<Shop> tmp = UnitListParser.getShopList(baseUrl, realm, companyId);
@@ -49,6 +50,9 @@ public final class TopRetailParser {
             if (nextPageUrl.isEmpty()) {
                 break;
             }
+            logger.info("nextPageUrl: {}", nextPageUrl);
+            logger.info("shops.size(): {}", shops.size());
+            logger.info("shops.size() diff: {}", shops.size() - shopsSizeBefore);
         }
 
         return shops;

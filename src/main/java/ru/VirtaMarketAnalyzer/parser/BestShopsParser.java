@@ -17,36 +17,30 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by cobr123 on 16.01.16.
+ * Created by cobr123 on 17.01.16.
  */
-public final class UnitListParser {
-    private static final Logger logger = LoggerFactory.getLogger(UnitListParser.class);
+public final class BestShopsParser {
+    private static final Logger logger = LoggerFactory.getLogger(BestShopsParser.class);
 
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", "2085506");
+        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga");
         System.out.println("list.size() = " + list.size());
     }
 
-    public static List<Shop> getShopList(final String baseUrl, final String realm, final String companyId) throws IOException {
+    public static List<Shop> getShopList(final String baseUrl, final String realm) throws IOException {
         final List<Shop> shops = new ArrayList<>();
-        final String newRef = baseUrl + realm + "/main/company/view/" + companyId + "/unit_list";
+
+        final String newRef = baseUrl + realm + "/main/globalreport/marketing/best_shops";
         String nextPageUrl = newRef;
         String ref = "";
-        for (; ; ) {
+        for (int page = 1; page <= 5; ++page) {
             final Document doc = Downloader.getDoc(nextPageUrl, ref);
-            final Elements shopLinks = doc.select("table > tbody > tr > td[class=\"info i-shop\"] > a");
-
-            logger.trace("shopLinks.size() = " + shopLinks.size());
+            final Elements shopLinks = doc.select("table.list > tbody > tr > td:nth-child(3) > div:nth-child(1) > a:nth-child(2)");
+            logger.trace("shopLinks.size() = {}", shopLinks.size());
             for (final Element link : shopLinks) {
-                try {
-                    final Shop shop = ShopParser.parse(link.attr("href"));
-                    if (shop.getShopProducts().size() > 0) {
-                        shops.add(shop);
-                    }
-                } catch (final Exception e) {
-                    logger.error(e.getLocalizedMessage(), e);
-                }
+                final Shop shop = ShopParser.parse(link.attr("href"));
+                shops.add(shop);
             }
 
             nextPageUrl = Utils.getNextPageHref(doc);

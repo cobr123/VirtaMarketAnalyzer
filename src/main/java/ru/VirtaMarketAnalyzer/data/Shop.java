@@ -42,6 +42,10 @@ public final class Shop {
         this.shopProducts = shopProducts;
     }
 
+    public String getCountryRegionTownIds() {
+        return countryId + "|" + regionId + "|" + townId;
+    }
+
     public String getCountryId() {
         return countryId;
     }

@@ -8,7 +8,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
-import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
+import ru.VirtaMarketAnalyzer.ml.PrepareAnalitics;
 import ru.VirtaMarketAnalyzer.parser.*;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 
@@ -90,7 +90,11 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         //собираем данные из магазинов
         final List<Shop> shops = TopRetailParser.getShopList(host, realm);
-        Utils.writeToGson(baseDir + "shops.json", shops);
+        //группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой
+        final Map<String, List<RetailAnalytics>> retailAnalitincs = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats);
+        for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalitincs.entrySet()) {
+            Utils.writeToGson(baseDir + "retail_analytics_" + entry.getKey() + ".json", entry.getValue());
+        }
         //ищем формулу для объема продаж в рознице
         //RetailSalePrediction.createPrediction(realm, stats);
     }
