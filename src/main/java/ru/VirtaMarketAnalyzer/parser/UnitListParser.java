@@ -8,6 +8,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.data.City;
+import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.Shop;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
@@ -24,11 +26,11 @@ public final class UnitListParser {
 
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", "2085506");
+        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", "2085506", new ArrayList<>(), new ArrayList<>());
         System.out.println("list.size() = " + list.size());
     }
 
-    public static List<Shop> getShopList(final String baseUrl, final String realm, final String companyId) throws IOException {
+    public static List<Shop> getShopList(final String baseUrl, final String realm, final String companyId, final List<City> cities, final List<Product> products) throws IOException {
         final List<Shop> shops = new ArrayList<>();
         final String newRef = baseUrl + realm + "/main/company/view/" + companyId + "/unit_list";
         String nextPageUrl = newRef;
@@ -40,7 +42,7 @@ public final class UnitListParser {
             logger.trace("shopLinks.size() = " + shopLinks.size());
             for (final Element link : shopLinks) {
                 try {
-                    final Shop shop = ShopParser.parse(link.attr("href"));
+                    final Shop shop = ShopParser.parse(link.attr("href"), cities, products);
                     if (shop.getShopProducts().size() > 0) {
                         shops.add(shop);
                     }

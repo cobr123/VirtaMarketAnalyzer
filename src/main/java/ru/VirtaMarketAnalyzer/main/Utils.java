@@ -156,16 +156,4 @@ public final class Utils {
         final String[] data = url.split("/");
         return data[data.length - 1];
     }
-
-    public static String findTownByCaption(final String countryId, final String regionId, final String townCaption) {
-        //todo
-        return townCaption;
-    }
-
-
-    public static String findProductByImg(final String imgSrc) {
-        //todo
-        return imgSrc;
-    }
-
 }

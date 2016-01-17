@@ -89,7 +89,7 @@ public final class Wizard {
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         //собираем данные из магазинов
-        final List<Shop> shops = TopRetailParser.getShopList(host, realm);
+        final List<Shop> shops = TopRetailParser.getShopList(host, realm, cities, products);
         //группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой
         final Map<String, List<RetailAnalytics>> retailAnalitincs = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats);
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalitincs.entrySet()) {
