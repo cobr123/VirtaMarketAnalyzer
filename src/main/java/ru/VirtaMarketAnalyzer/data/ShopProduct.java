@@ -9,7 +9,7 @@ public final class ShopProduct {
     @SerializedName("pi")
     final private String productId;
     @SerializedName("sv")
-    private final double sellVolume;
+    private final String sellVolume;
     @SerializedName("p")
     private final double price;
     @SerializedName("q")
@@ -19,7 +19,7 @@ public final class ShopProduct {
     @SerializedName("ms")
     private final double marketShare;
 
-    public ShopProduct(final String productId, final double sellVolume, final double price, final double quality, final double brand, final double marketShare) {
+    public ShopProduct(final String productId, final String sellVolume, final double price, final double quality, final double brand, final double marketShare) {
         this.productId = productId;
         this.sellVolume = sellVolume;
         this.price = price;
@@ -32,7 +32,7 @@ public final class ShopProduct {
         return productId;
     }
 
-    public double getSellVolume() {
+    public String getSellVolume() {
         return sellVolume;
     }
 

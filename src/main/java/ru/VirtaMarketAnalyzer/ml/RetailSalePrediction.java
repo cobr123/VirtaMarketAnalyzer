@@ -11,6 +11,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
@@ -28,11 +29,22 @@ import java.util.Map;
 public final class RetailSalePrediction {
     private static final Logger logger = LoggerFactory.getLogger(RetailSalePrediction.class);
 
+    private static final String[] numbers = new String[]{
+            "100", "200", "300", "500",
+            "1 000", "2 000", "3 000", "5 000",
+            "10 000", "20 000", "30 000", "50 000",
+            "100 000", "200 000", "300 000", "500 000",
+            "1 000 000", "2 000 000", "3 000 000", "5 000 000"
+    };
+    private static final String[] words = new String[]{"около", "более"};
+
     private enum ATTR {
         WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY, MARKET_INDEX, MARKET_VOLUME,
         LOCAL_PERCENT, LOCAL_PRICE, LOCAL_QUALITY, PRICE, SHOP_SIZE,
-        TOWN_DISTRICT, DEPARTMENT_COUNT, BRAND, QUALITY, SELL_VOLUME,
-        NOTORIETY, VISITORS_COUNT, SERVICE_LEVEL, SELLER_COUNT
+        TOWN_DISTRICT, DEPARTMENT_COUNT, BRAND, QUALITY,
+        NOTORIETY, VISITORS_COUNT, SERVICE_LEVEL, SELLER_COUNT,
+        //последний для автоподстановки при открытии в weka
+        SELL_VOLUME
     }
 
     public static void createPrediction(final String realm, final Map<String, List<RetailAnalytics>> retailAnalytics) throws IOException {
@@ -53,14 +65,14 @@ public final class RetailSalePrediction {
                 saver.setFile(new File(baseDir + "weka" + File.separator + entry.getKey() + ".arff"));
                 saver.writeBatch();
                 // Create a LinearRegression classifier
-                final Classifier cModel = (Classifier) new LinearRegression();
-                cModel.buildClassifier(trainingSet);
+                final J48 tree = new J48();
+                tree.buildClassifier(trainingSet);
                 // Print the result à la Weka explorer:
 //                logger.info((cModel.toString());
 
                 // Test the model
                 final Evaluation eTest = new Evaluation(trainingSet);
-                eTest.evaluateModel(cModel, trainingSet);
+                eTest.evaluateModel(tree, trainingSet);
 
                 // Print the result à la Weka explorer:
                 logger.info(eTest.toSummaryString());
@@ -122,6 +134,17 @@ public final class RetailSalePrediction {
                 sizes.addElement("100000");
 
                 attrs.addElement(new Attribute(attr.name(), sizes));
+            } else if (attr.ordinal() == ATTR.SELL_VOLUME.ordinal() || attr.ordinal() == ATTR.VISITORS_COUNT.ordinal()) {
+                final FastVector values = new FastVector(numbers.length * words.length + 2);
+                values.addElement("менее 50");
+                values.addElement("около 50");
+                for (final String number : numbers) {
+                    for (final String word : words) {
+                        values.addElement(word + " " + number);
+                    }
+                }
+
+                attrs.addElement(new Attribute(attr.name(), values));
             } else {
                 attrs.addElement(new Attribute(attr.name()));
             }
@@ -161,7 +184,12 @@ public final class RetailSalePrediction {
         }
         instance.setValue((Attribute) attrs.elementAt(ATTR.DEPARTMENT_COUNT.ordinal()), retailAnalytics.getDepartmentCount());
         instance.setValue((Attribute) attrs.elementAt(ATTR.NOTORIETY.ordinal()), retailAnalytics.getNotoriety());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.VISITORS_COUNT.ordinal()), retailAnalytics.getVisitorsCount());
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.VISITORS_COUNT.ordinal()), retailAnalytics.getVisitorsCount());
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getVisitorsCount() = '{}'", retailAnalytics.getVisitorsCount());
+            throw e;
+        }
         try {
             instance.setValue((Attribute) attrs.elementAt(ATTR.SERVICE_LEVEL.ordinal()), retailAnalytics.getServiceLevel());
         } catch (final Exception e) {
@@ -173,7 +201,12 @@ public final class RetailSalePrediction {
         instance.setValue((Attribute) attrs.elementAt(ATTR.BRAND.ordinal()), retailAnalytics.getBrand());
         instance.setValue((Attribute) attrs.elementAt(ATTR.PRICE.ordinal()), retailAnalytics.getPrice());
         instance.setValue((Attribute) attrs.elementAt(ATTR.QUALITY.ordinal()), retailAnalytics.getQuality());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.SELL_VOLUME.ordinal()), retailAnalytics.getSellVolume());
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.SELL_VOLUME.ordinal()), retailAnalytics.getSellVolume());
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getSellVolume() = '{}'", retailAnalytics.getSellVolume());
+            throw e;
+        }
         return instance;
     }
 

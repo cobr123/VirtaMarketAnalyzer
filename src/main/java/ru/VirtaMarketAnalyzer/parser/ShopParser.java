@@ -83,7 +83,7 @@ public final class ShopParser {
         final String townDistrict = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text();
         final double departmentCount = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text());
         final double notoriety = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(5) > td:nth-child(2)").text());
-        final int visitorsCount = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(6) > td:nth-child(2)").text());
+        final String visitorsCount = doc.select("table.infoblock > tbody > tr:nth-child(6) > td:nth-child(2)").text().trim();
         final String serviceLevel = doc.select("table.infoblock > tbody > tr:nth-child(7) > td:nth-child(2)").text();
 
         final List<ShopProduct> shopProducts = new ArrayList<>();
@@ -97,7 +97,7 @@ public final class ShopParser {
                     continue;
                 }
                 final String productId = productsByImgSrc.get(row.select("> td:nth-child(1) > img").first().attr("src")).get(0).getId();
-                final double sellVolume = Utils.toDouble(row.select("> td:nth-child(2)").first().text());
+                final String sellVolume = row.select("> td:nth-child(2)").first().text().trim();
                 final double quality = Utils.toDouble(row.select("> td:nth-child(3)").first().text());
                 final double brand = Utils.toDouble(row.select("> td:nth-child(4)").first().text());
                 final double price = Utils.toDouble(row.select("> td:nth-child(5)").first().text());

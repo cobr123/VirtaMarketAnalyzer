@@ -23,13 +23,16 @@ public final class Shop {
     @SerializedName("n")
     private final double notoriety;
     @SerializedName("vc")
-    private final int visitorsCount;
+    private final String visitorsCount;
     @SerializedName("sl")
     final private String serviceLevel;
     @SerializedName("sp")
     final private List<ShopProduct> shopProducts;
 
-    public Shop(final String countryId, final String regionId, final String townId, final int shopSize, final String townDistrict, final double departmentCount, final double notoriety, final int visitorsCount, final String serviceLevel, final List<ShopProduct> shopProducts) {
+    public Shop(final String countryId, final String regionId, final String townId,
+                final int shopSize, final String townDistrict, final double departmentCount,
+                final double notoriety, final String visitorsCount, final String serviceLevel,
+                final List<ShopProduct> shopProducts) {
         this.countryId = countryId;
         this.regionId = regionId;
         this.townId = townId;
@@ -74,7 +77,7 @@ public final class Shop {
         return notoriety;
     }
 
-    public int getVisitorsCount() {
+    public String getVisitorsCount() {
         return visitorsCount;
     }
 

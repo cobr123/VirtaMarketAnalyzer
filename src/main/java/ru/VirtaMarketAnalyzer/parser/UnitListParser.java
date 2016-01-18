@@ -5,6 +5,7 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Collector;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 16.01.16.
@@ -40,16 +42,23 @@ public final class UnitListParser {
             final Elements shopLinks = doc.select("table > tbody > tr > td[class=\"info i-shop\"] > a");
 
             logger.trace("shopLinks.size() = " + shopLinks.size());
-            for (final Element link : shopLinks) {
-                try {
-                    final Shop shop = ShopParser.parse(link.attr("href"), cities, products);
-                    if (shop.getShopProducts().size() > 0 && !"Не известен".equals(shop.getTownDistrict()) && !"Не известен".equals(shop.getServiceLevel())) {
-                        shops.add(shop);
-                    }
-                } catch (final Exception e) {
-                    logger.error(e.getLocalizedMessage(), e);
-                }
-            }
+            final List<Shop> tmpShops = shopLinks.parallelStream()
+                    .map(sl -> {
+                        Shop shop = null;
+                        try {
+                            shop = ShopParser.parse(sl.attr("href"), cities, products);
+                        } catch (final Exception e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                        }
+                        return shop;
+                    })
+                    .filter(s -> s != null)
+                    .filter(s -> s.getShopProducts().size() > 0)
+                    .filter(s -> !"Не известен".equals(s.getTownDistrict()))
+                    .filter(s -> !"Не известен".equals(s.getServiceLevel()))
+                    .collect(Collectors.toList());
+
+            shops.addAll(tmpShops);
 
             nextPageUrl = Utils.getNextPageHref(doc);
             ref = newRef;

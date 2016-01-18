@@ -15,11 +15,11 @@ public final class RetailAnalytics {
     @SerializedName("n")
     private final double notoriety;
     @SerializedName("vc")
-    private final int visitorsCount;
+    private final String visitorsCount;
     @SerializedName("sl")
     final private String serviceLevel;
     @SerializedName("sv")
-    private final double sellVolume;
+    private final String sellVolume;
     @SerializedName("p")
     private final double price;
     @SerializedName("q")
@@ -45,7 +45,12 @@ public final class RetailAnalytics {
     @SerializedName("lq")
     final private double localQuality;
 
-    public RetailAnalytics(int shopSize, String townDistrict, double departmentCount, double notoriety, int visitorsCount, String serviceLevel, double sellVolume, double price, double quality, double brand, double wealthIndex, double educationIndex, double averageSalary, String marketIdx, long marketVolume, long sellerCnt, double localPercent, double localPrice, double localQuality) {
+    public RetailAnalytics(int shopSize, String townDistrict, double departmentCount,
+                           double notoriety, String visitorsCount, String serviceLevel,
+                           String sellVolume, double price, double quality, double brand,
+                           double wealthIndex, double educationIndex, double averageSalary,
+                           String marketIdx, long marketVolume, long sellerCnt, double localPercent,
+                           double localPrice, double localQuality) {
         this.shopSize = shopSize;
         this.townDistrict = townDistrict.replace("City centre","Центр города")
                 .replace("Centro de la ciudad","Центр города")
@@ -85,7 +90,7 @@ public final class RetailAnalytics {
         return notoriety;
     }
 
-    public int getVisitorsCount() {
+    public String getVisitorsCount() {
         return visitorsCount;
     }
 
@@ -93,7 +98,7 @@ public final class RetailAnalytics {
         return serviceLevel;
     }
 
-    public double getSellVolume() {
+    public String getSellVolume() {
         return sellVolume;
     }
 
