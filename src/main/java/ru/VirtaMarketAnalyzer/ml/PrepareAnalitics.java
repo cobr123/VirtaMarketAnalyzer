@@ -7,10 +7,7 @@ import ru.VirtaMarketAnalyzer.data.Shop;
 import ru.VirtaMarketAnalyzer.data.ShopProduct;
 import ru.VirtaMarketAnalyzer.data.TradeAtCity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -39,37 +36,48 @@ public final class PrepareAnalitics {
         final List<RetailAnalytics> retailAnalitincs = new ArrayList<>();
 
         for (final Map.Entry<String, List<TradeAtCity>> entry : statsBy.entrySet()) {
-            for (final TradeAtCity tradeAtCity : entry.getValue()) {
-                for (final Shop shop : shopBy.get(entry.getKey())) {
-                    try {
-                        final ShopProduct shopProduct = shop.getShopProducts().stream().filter(sp -> sp.getProductId().equals(productId)).findFirst().get();
-                        retailAnalitincs.add(
-                                new RetailAnalytics(
-                                        shop.getShopSize(),
-                                        shop.getTownDistrict(),
-                                        shop.getDepartmentCount(),
-                                        shop.getNotoriety(),
-                                        shop.getVisitorsCount(),
-                                        shop.getServiceLevel(),
-                                        shopProduct.getSellVolume(),
-                                        shopProduct.getPrice(),
-                                        shopProduct.getQuality(),
-                                        shopProduct.getBrand(),
-                                        tradeAtCity.getWealthIndex(),
-                                        tradeAtCity.getEducationIndex(),
-                                        tradeAtCity.getAverageSalary(),
-                                        tradeAtCity.getMarketIdx(),
-                                        tradeAtCity.getVolume(),
-                                        tradeAtCity.getSellerCnt(),
-                                        tradeAtCity.getLocalPercent(),
-                                        tradeAtCity.getLocalPrice(),
-                                        tradeAtCity.getLocalQuality()
-                                )
-                        );
-                    } catch (final Exception e) {
-                        logger.error(e.getLocalizedMessage(), e);
+            try {
+                for (final TradeAtCity tradeAtCity : entry.getValue()) {
+                    if (!shopBy.containsKey(entry.getKey())) {
+                        continue;
+                    }
+                    for (final Shop shop : shopBy.get(entry.getKey())) {
+                        try {
+                            final Optional<ShopProduct> shopProductOpt = shop.getShopProducts().stream().filter(sp -> sp.getProductId().equals(productId)).findFirst();
+                            if (!shopProductOpt.isPresent()) {
+                                continue;
+                            }
+                            final ShopProduct shopProduct = shopProductOpt.get();
+                            retailAnalitincs.add(
+                                    new RetailAnalytics(
+                                            shop.getShopSize(),
+                                            shop.getTownDistrict(),
+                                            shop.getDepartmentCount(),
+                                            shop.getNotoriety(),
+                                            shop.getVisitorsCount(),
+                                            shop.getServiceLevel(),
+                                            shopProduct.getSellVolume(),
+                                            shopProduct.getPrice(),
+                                            shopProduct.getQuality(),
+                                            shopProduct.getBrand(),
+                                            tradeAtCity.getWealthIndex(),
+                                            tradeAtCity.getEducationIndex(),
+                                            tradeAtCity.getAverageSalary(),
+                                            tradeAtCity.getMarketIdx(),
+                                            tradeAtCity.getVolume(),
+                                            tradeAtCity.getSellerCnt(),
+                                            tradeAtCity.getLocalPercent(),
+                                            tradeAtCity.getLocalPrice(),
+                                            tradeAtCity.getLocalQuality()
+                                    )
+                            );
+                        } catch (final Exception e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                        }
                     }
                 }
+            } catch (final Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
             }
         }
         return retailAnalitincs;

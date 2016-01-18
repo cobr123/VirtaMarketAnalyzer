@@ -39,14 +39,18 @@ public final class RetailSalePrediction {
         final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
         System.out.println("stats.size() = " + retailAnalytics.size());
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
-            logger.info("entry.getValue().size() = " + entry.getValue().size());
             logger.info(entry.getKey());
+            logger.info("entry.getValue().size() = " + entry.getValue().size());
+            if (entry.getValue().isEmpty()) {
+                continue;
+            }
+
             try {
                 final Instances trainingSet = createTrainingSet(entry.getValue());
                 //
                 final ArffSaver saver = new ArffSaver();
                 saver.setInstances(trainingSet);
-                saver.setFile(new File(baseDir + "weka" + entry.getKey() + ".arff"));
+                saver.setFile(new File(baseDir + "weka" + File.separator + entry.getKey() + ".arff"));
                 saver.writeBatch();
                 // Create a LinearRegression classifier
                 final Classifier cModel = (Classifier) new LinearRegression();
@@ -95,16 +99,18 @@ public final class RetailSalePrediction {
                 districts.addElement("Фешенебельный район");
                 districts.addElement("Центр города");
                 districts.addElement("Спальный район");
-                districts.addElement("Окраина");
                 districts.addElement("Пригород");
+                districts.addElement("Окраина");
 
                 attrs.addElement(new Attribute(attr.name(), districts));
             } else if (attr.ordinal() == ATTR.SERVICE_LEVEL.ordinal()) {
-                final FastVector serviceLevel = new FastVector(5);
+                final FastVector serviceLevel = new FastVector(6);
                 serviceLevel.addElement("Элитный");
+                serviceLevel.addElement("Очень высокий");
                 serviceLevel.addElement("Высокий");
-                serviceLevel.addElement("Средний");
+                serviceLevel.addElement("Нормальный");
                 serviceLevel.addElement("Низкий");
+                serviceLevel.addElement("Очень низкий");
 
                 attrs.addElement(new Attribute(attr.name(), serviceLevel));
             } else if (attr.ordinal() == ATTR.SHOP_SIZE.ordinal()) {
@@ -125,7 +131,11 @@ public final class RetailSalePrediction {
         trainingSet.setClassIndex(ATTR.SELL_VOLUME.ordinal());
 
         for (final RetailAnalytics ra : retailAnalytics) {
-            trainingSet.add(createInstance(attrs, ra));
+            try {
+                trainingSet.add(createInstance(attrs, ra));
+            } catch (final Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
         }
         return trainingSet;
     }
@@ -143,11 +153,21 @@ public final class RetailSalePrediction {
         instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_QUALITY.ordinal()), retailAnalytics.getLocalQuality());
 
         instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_SIZE.ordinal()), retailAnalytics.getShopSize() + "");
-        instance.setValue((Attribute) attrs.elementAt(ATTR.TOWN_DISTRICT.ordinal()), retailAnalytics.getTownDistrict());
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.TOWN_DISTRICT.ordinal()), retailAnalytics.getTownDistrict());
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getTownDistrict() = '{}'", retailAnalytics.getTownDistrict());
+            throw e;
+        }
         instance.setValue((Attribute) attrs.elementAt(ATTR.DEPARTMENT_COUNT.ordinal()), retailAnalytics.getDepartmentCount());
         instance.setValue((Attribute) attrs.elementAt(ATTR.NOTORIETY.ordinal()), retailAnalytics.getNotoriety());
         instance.setValue((Attribute) attrs.elementAt(ATTR.VISITORS_COUNT.ordinal()), retailAnalytics.getVisitorsCount());
-        instance.setValue((Attribute) attrs.elementAt(ATTR.SERVICE_LEVEL.ordinal()), retailAnalytics.getServiceLevel());
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.SERVICE_LEVEL.ordinal()), retailAnalytics.getServiceLevel());
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getServiceLevel() = '{}'", retailAnalytics.getServiceLevel());
+            throw e;
+        }
         instance.setValue((Attribute) attrs.elementAt(ATTR.SELLER_COUNT.ordinal()), retailAnalytics.getSellerCnt());
 
         instance.setValue((Attribute) attrs.elementAt(ATTR.BRAND.ordinal()), retailAnalytics.getBrand());

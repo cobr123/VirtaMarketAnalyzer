@@ -30,7 +30,8 @@ public final class ShopParser {
 
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final String url = "http://virtonomica.ru/olga/main/unit/view/5788675";
+//        final String url = "http://virtonomica.ru/olga/main/unit/view/5788675";
+        final String url = "http://virtonomica.ru/mary/main/unit/view/3463932";
         final List<City> cities = new ArrayList<>();
         cities.add(new City("7060", "7062", "7073", "Астана", 0.0, 0.0, 0.0));
         final List<Product> products = new ArrayList<>();
@@ -46,11 +47,38 @@ public final class ShopParser {
         final String regionId = Utils.getLastFromUrl(doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(2)").attr("href"));
         doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").first().children().remove();
         final String dyrtyCaption = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").text();
-        final String townId = cities.stream()
-                .filter(c -> c.getCountryId().equals(countryId))
-                .filter(c -> c.getRegionId().equals(regionId))
-                .filter(c -> c.getCaption().equals(dyrtyCaption.substring(0, dyrtyCaption.length() - 5)))
-                .findFirst().get().getId();
+        final String dyrtyCaptionReplaced = dyrtyCaption.replaceFirst("\\([^\\)]*\\)$", "").trim()
+                .replace("San Diego","Сан-Диего")
+                .replace("Indianapolis","Индианаполис")
+                .replace("San Luis Potosí","Сан-Луис-Потоси")
+                .replace("San Luis Potosi","Сан-Луис-Потоси")
+                .replace("León","Леон")
+                .replace("Filadelfia","Филадельфия")
+                .replace("Tartu","Тарту")
+                .replace("Belfast","Белфаст")
+                .replace("Lisburn","Лисберн")
+                .replace("Leeds","Лидс")
+                .replace("Coventry","Ковентри")
+                .replace("Bamako","Бамако")
+                .replace("Rhodes","Родос");
+        String townId = "";
+        try {
+            townId = cities.stream()
+                    .filter(c -> c.getCountryId().equals(countryId))
+//                    .filter(c -> c.getRegionId().equals(regionId))
+                    .filter(c -> c.getCaption().equals(dyrtyCaptionReplaced))
+                    .findFirst().get().getId();
+        } catch (final Exception e) {
+            logger.info(url);
+            cities.stream()
+                    .filter(c -> c.getCountryId().equals(countryId))
+//                    .filter(c -> c.getRegionId().equals(regionId))
+                    .forEach(c -> logger.info("'{}'", c.getCaption()));
+            logger.info("'countryId = {}'", countryId);
+            logger.info("'regionId = {}'", regionId);
+            logger.info("'dyrtyCaption = {}'", dyrtyCaptionReplaced);
+            throw e;
+        }
         final int shopSize = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
         final String townDistrict = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text();
         final double departmentCount = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text());
@@ -60,10 +88,12 @@ public final class ShopParser {
 
         final List<ShopProduct> shopProducts = new ArrayList<>();
         final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr[class]");
-        logger.info("rows.size() = " + rows.size());
         for (final Element row : rows) {
             try {
                 if ("не изв.".equalsIgnoreCase(row.select("> td:nth-child(3)").first().text())) {
+                    continue;
+                }
+                if (row.select("> td:nth-child(1) > img").first().attr("src").contains("/brand/")) {
                     continue;
                 }
                 final String productId = productsByImgSrc.get(row.select("> td:nth-child(1) > img").first().attr("src")).get(0).getId();
@@ -76,7 +106,8 @@ public final class ShopParser {
                 final ShopProduct shopProduct = new ShopProduct(productId, sellVolume, price, quality, brand, marketShare);
                 shopProducts.add(shopProduct);
             } catch (final Exception e) {
-//                logger.error(row.outerHtml());
+                logger.info("rows.size() = " + rows.size());
+                logger.error(row.outerHtml());
                 logger.error(e.getLocalizedMessage(), e);
             }
         }

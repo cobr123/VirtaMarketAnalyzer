@@ -151,7 +151,6 @@ public final class CityParser {
             }
         }
 //        builder.setMajorSellInCityList(majorSellInCityList);
-
         return builder.build();
     }
 }

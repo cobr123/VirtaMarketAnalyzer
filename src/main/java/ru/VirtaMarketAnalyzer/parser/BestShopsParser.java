@@ -42,7 +42,9 @@ public final class BestShopsParser {
             logger.trace("shopLinks.size() = {}", shopLinks.size());
             for (final Element link : shopLinks) {
                 final Shop shop = ShopParser.parse(link.attr("href"), cities, products);
-                shops.add(shop);
+                if(shop.getShopProducts().size() > 0 && !"Не известен".equals(shop.getTownDistrict()) && !"Не известен".equals(shop.getServiceLevel())) {
+                    shops.add(shop);
+                }
             }
 
             nextPageUrl = Utils.getNextPageHref(doc);

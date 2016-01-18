@@ -43,7 +43,7 @@ public final class UnitListParser {
             for (final Element link : shopLinks) {
                 try {
                     final Shop shop = ShopParser.parse(link.attr("href"), cities, products);
-                    if (shop.getShopProducts().size() > 0) {
+                    if (shop.getShopProducts().size() > 0 && !"Не известен".equals(shop.getTownDistrict()) && !"Не известен".equals(shop.getServiceLevel())) {
                         shops.add(shop);
                     }
                 } catch (final Exception e) {

@@ -139,7 +139,7 @@ public final class Utils {
     public static String getNextPageHref(final Document doc) {
         final Element currPage = doc.select("ul[class=\"pager_list pull-right\"] > li.selected").last();
         if (currPage == null || currPage.parent() == null) {
-            logger.error("currPage is null", new Exception());
+            logger.trace("currPage is null");
             return "";
         }
         final Element nextPageLink = currPage.nextElementSibling();

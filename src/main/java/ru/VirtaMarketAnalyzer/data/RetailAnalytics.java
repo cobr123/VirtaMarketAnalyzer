@@ -47,7 +47,9 @@ public final class RetailAnalytics {
 
     public RetailAnalytics(int shopSize, String townDistrict, double departmentCount, double notoriety, int visitorsCount, String serviceLevel, double sellVolume, double price, double quality, double brand, double wealthIndex, double educationIndex, double averageSalary, String marketIdx, long marketVolume, long sellerCnt, double localPercent, double localPrice, double localQuality) {
         this.shopSize = shopSize;
-        this.townDistrict = townDistrict;
+        this.townDistrict = townDistrict.replace("City centre","Центр города")
+                .replace("Centro de la ciudad","Центр города")
+                .replace("Trendy neighborhood","Фешенебельный район");
         this.departmentCount = departmentCount;
         this.notoriety = notoriety;
         this.visitorsCount = visitorsCount;
