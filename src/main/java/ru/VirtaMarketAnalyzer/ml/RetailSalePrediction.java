@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.ml;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -8,9 +9,8 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
-import weka.classifiers.Classifier;
+import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -67,6 +67,11 @@ public final class RetailSalePrediction {
                 // Create a LinearRegression classifier
                 final J48 tree = new J48();
                 tree.buildClassifier(trainingSet);
+//                try {
+//                    FileUtils.writeStringToFile(new File(baseDir + "weka" + File.separator + "js" + File.separator + entry.getKey() + ".js"), ClassifierToJs.toSource(tree), "UTF-8");
+//                } catch (final Exception e) {
+//                    logger.error(e.getLocalizedMessage(), e);
+//                }
                 // Print the result à la Weka explorer:
 //                logger.info((cModel.toString());
 
