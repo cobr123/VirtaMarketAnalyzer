@@ -1,14 +1,20 @@
 package ru.VirtaMarketAnalyzer.ml.js;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.j48.C45Split;
 import weka.classifiers.trees.j48.ClassifierSplitModel;
 import weka.classifiers.trees.j48.ClassifierTree;
 import weka.core.Instances;
 
+import java.io.*;
 import java.lang.reflect.Field;
 
 /**
@@ -18,17 +24,46 @@ public final class ClassifierToJs {
     private static final Logger logger = LoggerFactory.getLogger(ClassifierToJs.class);
     private static long printID = 0;
 
-    public static String toSource(final J48 tree) throws Exception {
+    public static void main(String[] args) throws Exception {
+        final String realm = "olga";
+        final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
+        File dir = new File(baseDir + "weka" + File.separator + "java" + File.separator);
+        for (final File file : dir.listFiles()) {
+            final J48 tree = (J48) loadModel(file.getAbsolutePath());
+            final String path = file.getAbsolutePath().replace(".model", ".js").replace(File.separator + "java" + File.separator, File.separator + "js" + File.separator);
+            FileUtils.writeStringToFile(new File(path), ClassifierToJs.toSource(tree, "PredictProd" + FilenameUtils.removeExtension(file.getName())), "UTF-8");
+        }
+    }
+
+    public static Classifier loadModel(final String path) throws Exception {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
+            return (Classifier) ois.readObject();
+        }
+    }
+
+    public static void saveModel(final Classifier c, final String path) throws Exception {
+        Utils.mkdirs(path);
+        try (ObjectOutputStream oos = new ObjectOutputStream(
+                new FileOutputStream(path))) {
+            oos.writeObject(c);
+            oos.flush();
+        }
+    }
+
+    public static String toSource(final J48 tree, final String jsClassName) throws Exception {
         printID = 0;
         /** The decision tree */
         final ClassifierTree m_root = (ClassifierTree) getPrivateFieldValue(tree.getClass(), tree, "m_root");
 
-        final StringBuffer[] source = toSourceClassifierTree(m_root);
+        final StringBuffer[] source = toSourceClassifierTree(m_root, jsClassName);
         return
-                "class className {\n\n"
-                        + "  public static double classify(Object[] i)\n"
-                        + "    throws Exception {\n\n"
-                        + "    double p = Double.NaN;\n"
+                "class " + jsClassName + " {\n"
+                        + "  static predictBy(i) {\n"
+                        + "    p = " + jsClassName + ".N1(i);\n"
+                        + "    return i[p];\n"
+                        + "  }\n"
+                        + "  static classify(i) {\n"
+                        + "    p = NaN;\n"
                         + source[0]  // Assignment code
                         + "    return p;\n"
                         + "  }\n"
@@ -47,7 +82,7 @@ public final class ClassifierToJs {
      * assignment code, and the second containing source for support code.
      * @throws Exception if something goes wrong
      */
-    public static StringBuffer[] toSourceClassifierTree(final ClassifierTree m_root) throws Exception {
+    public static StringBuffer[] toSourceClassifierTree(final ClassifierTree m_root, final String jsClassName) throws Exception {
         final StringBuffer[] result = new StringBuffer[2];
         /** True if node is leaf. */
         final boolean m_isLeaf = isLeaf(m_root);
@@ -70,10 +105,10 @@ public final class ClassifierToJs {
             //nextID
             printID++;
 
-            text.append("  static double N")
-                    .append(Integer.toHexString(m_localModel.hashCode()) + printID)
-                    .append("(Object []i) {\n")
-                    .append("    double p = Double.NaN;\n");
+            text.append("  static N")
+                    .append(/*Integer.toHexString(m_localModel.hashCode()) +*/ printID)
+                    .append("(i) {\n")
+                    .append("    p = NaN;\n");
 
             text.append("    if (")
                     .append(sourceExpression(m_localModel, -1, m_train))
@@ -89,7 +124,7 @@ public final class ClassifierToJs {
                     text.append("      p = "
                             + m_localModel.distribution().maxClass(i) + ";\n");
                 } else {
-                    final StringBuffer[] sub = toSourceClassifierTree(m_sons[i]);
+                    final StringBuffer[] sub = toSourceClassifierTree(m_sons[i], jsClassName);
                     text.append(sub[0]);
                     atEnd.append(sub[1]);
                 }
@@ -101,8 +136,8 @@ public final class ClassifierToJs {
 
             text.append("    return p;\n  }\n");
 
-            result[0] = new StringBuffer("    p = N");
-            result[0].append(Integer.toHexString(m_localModel.hashCode()) + printID)
+            result[0] = new StringBuffer("    p = " + jsClassName + ".N");
+            result[0].append(/*Integer.toHexString(m_localModel.hashCode()) + */printID)
                     .append("(i);\n");
             result[1] = text.append(atEnd);
         }
@@ -129,16 +164,16 @@ public final class ClassifierToJs {
         } else if (data.attribute(m_attIndex).isNominal()) {
             final StringBuilder expr = new StringBuilder("i[");
             expr.append(m_attIndex).append("]");
-            expr.append(".equals(\"").append(data.attribute(m_attIndex)
-                    .value(index)).append("\")");
+            expr.append(" === \"").append(data.attribute(m_attIndex)
+                    .value(index)).append("\"");
             return expr.toString();
         } else {
-            final StringBuilder expr = new StringBuilder("((Double) i[");
+            final StringBuilder expr = new StringBuilder("(i[");
             expr.append(m_attIndex).append("])");
             if (index == 0) {
-                expr.append(".doubleValue() <= ").append(m_splitPoint);
+                expr.append(" <= ").append(m_splitPoint);
             } else {
-                expr.append(".doubleValue() > ").append(m_splitPoint);
+                expr.append(" > ").append(m_splitPoint);
             }
             return expr.toString();
         }

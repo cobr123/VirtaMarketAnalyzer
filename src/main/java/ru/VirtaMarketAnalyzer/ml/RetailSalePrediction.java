@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.ml;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -8,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
+import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
@@ -16,8 +19,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.Map;
 
@@ -65,8 +67,10 @@ public final class RetailSalePrediction {
                 // Create a LinearRegression classifier
                 final J48 tree = new J48();
                 tree.buildClassifier(trainingSet);
+//                ClassifierToJs.saveModel(tree, baseDir + "weka" + File.separator + "java" + File.separator + entry.getKey() + ".model");
+
 //                try {
-//                    FileUtils.writeStringToFile(new File(baseDir + "weka" + File.separator + "js" + File.separator + entry.getKey() + ".js"), ClassifierToJs.toSource(tree), "UTF-8");
+//                FileUtils.writeStringToFile(new File(baseDir + "weka" + File.separator + "js" + File.separator + entry.getKey() + ".js"), ClassifierToJs.toSource(tree, "PredictProd" + entry.getKey()), "UTF-8");
 //                } catch (final Exception e) {
 //                    logger.error(e.getLocalizedMessage(), e);
 //                }

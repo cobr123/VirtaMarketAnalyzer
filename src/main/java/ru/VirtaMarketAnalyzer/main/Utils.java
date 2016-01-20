@@ -44,9 +44,7 @@ public final class Utils {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(obj);
     }
-
-    public static void writeFile(final String path, final String content)
-            throws IOException {
+    public static File mkdirs(final String path){
         final File file = new File(path);
         if (!file.exists()) {
             final File dir = new File(file.getParent());
@@ -54,6 +52,12 @@ public final class Utils {
                 dir.mkdirs();
             }
         }
+        return file;
+    }
+
+    public static void writeFile(final String path, final String content)
+            throws IOException {
+        final File file = Utils.mkdirs(path);
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
                 new FileOutputStream(file), "UTF-8"))) {
             writer.write(content);
