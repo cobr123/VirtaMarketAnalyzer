@@ -45,16 +45,14 @@ public final class CityListParser {
         final Element table = doc.select("table[class=\"grid\"]").last();
 //        System.out.println(table.outerHtml());
         final Elements towns = table.select("table > tbody > tr");
-        for (Element town : towns) {
-            if (!town.select("tr > td:nth-child(1) > a").isEmpty()) {
-                final String[] parts = town.select("tr > td:nth-child(1) > a").eq(0).attr("href").split("/");
-                final String caption = town.select("tr > td:nth-child(1) > a").eq(0).text();
-                final String id = parts[parts.length - 1];
-                final String averageSalary = town.select("tr > td:nth-child(3)").text();
-                final String educationIndex = town.select("tr > td:nth-child(5)").text();
-                final String wealthIndex = town.select("tr > td:nth-child(6)").html();
-                cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary)));
-            }
-        }
+        towns.stream().filter(town -> !town.select("tr > td:nth-child(1) > a").isEmpty()).forEach(town -> {
+            final String[] parts = town.select("tr > td:nth-child(1) > a").eq(0).attr("href").split("/");
+            final String caption = town.select("tr > td:nth-child(1) > a").eq(0).text();
+            final String id = parts[parts.length - 1];
+            final String averageSalary = town.select("tr > td:nth-child(3)").text();
+            final String educationIndex = town.select("tr > td:nth-child(5)").text();
+            final String wealthIndex = town.select("tr > td:nth-child(6)").html();
+            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary)));
+        });
     }
 }

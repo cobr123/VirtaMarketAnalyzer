@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 24.04.2015.
@@ -51,9 +52,7 @@ public final class ProductInitParser {
     public static List<ProductCategory> getProductCategories(final List<Product> products) {
         final Set<String> set = new HashSet<>();
         final List<ProductCategory> list = new ArrayList<>();
-        for (final Product product : products) {
-            set.add(product.getProductCategory());
-        }
+        set.addAll(products.stream().map(Product::getProductCategory).collect(Collectors.toList()));
         set.forEach(s -> list.add(new ProductCategory(s)));
         return list;
     }

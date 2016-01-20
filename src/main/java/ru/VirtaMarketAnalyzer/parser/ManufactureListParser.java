@@ -31,15 +31,13 @@ final public class ManufactureListParser {
 
         final Elements rows = doc.select("table[class=\"list\"] > tbody > tr > td > a");
         //System.out.println(list.outerHtml());
-        for (final Element row : rows) {
-            if (!row.text().isEmpty()) {
-                final String[] data = row.attr("href").split("/");
-                final String id = data[data.length - 1];
-                final String caption = row.text();
-                final String manufactureCategory = "";
-                list.add(new Manufacture(id, manufactureCategory, caption));
-            }
-        }
+        rows.stream().filter(row -> !row.text().isEmpty()).forEach(row -> {
+            final String[] data = row.attr("href").split("/");
+            final String id = data[data.length - 1];
+            final String caption = row.text();
+            final String manufactureCategory = "";
+            list.add(new Manufacture(id, manufactureCategory, caption));
+        });
         return list;
     }
 }

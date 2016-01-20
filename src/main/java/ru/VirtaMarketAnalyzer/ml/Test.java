@@ -27,7 +27,7 @@ public class Test {
         createTrainingSet();
 
         // Create a LinearRegression classifier
-        Classifier cModel = (Classifier) new LinearRegression();
+        Classifier cModel = new LinearRegression();
         cModel.buildClassifier(isTrainingSet);
         // Print the result à la Weka explorer:
         System.out.println(cModel.toString());

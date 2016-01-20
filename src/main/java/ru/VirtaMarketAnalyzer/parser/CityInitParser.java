@@ -25,12 +25,10 @@ public final class CityInitParser {
 
         final Elements options = doc.select("option");
         //System.out.println(list.outerHtml());
-        for (Element opt : options) {
-            if (opt.attr("value").matches("/\\d+/\\d+/\\d+")) {
-                logger.info(opt.text());
-                logger.info(opt.attr("value"));
-            }
-        }
+        options.stream().filter(opt -> opt.attr("value").matches("/\\d+/\\d+/\\d+")).forEach(opt -> {
+            logger.info(opt.text());
+            logger.info(opt.attr("value"));
+        });
     }
 
     public static List<Region> getRegions(final String url, final List<Country> countries) throws IOException {

@@ -10,7 +10,6 @@ import weka.classifiers.trees.j48.ClassifierTree;
 import weka.core.Instances;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 /**
  * Created by cobr123 on 19.01.2016.
@@ -128,13 +127,13 @@ public final class ClassifierToJs {
         if (index < 0) {
             return "i[" + m_attIndex + "] == null";
         } else if (data.attribute(m_attIndex).isNominal()) {
-            final StringBuffer expr = new StringBuffer("i[");
+            final StringBuilder expr = new StringBuilder("i[");
             expr.append(m_attIndex).append("]");
             expr.append(".equals(\"").append(data.attribute(m_attIndex)
                     .value(index)).append("\")");
             return expr.toString();
         } else {
-            final StringBuffer expr = new StringBuffer("((Double) i[");
+            final StringBuilder expr = new StringBuilder("((Double) i[");
             expr.append(m_attIndex).append("])");
             if (index == 0) {
                 expr.append(".doubleValue() <= ").append(m_splitPoint);

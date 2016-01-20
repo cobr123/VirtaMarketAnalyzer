@@ -1,6 +1,5 @@
 package ru.VirtaMarketAnalyzer.ml;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -9,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
-import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;

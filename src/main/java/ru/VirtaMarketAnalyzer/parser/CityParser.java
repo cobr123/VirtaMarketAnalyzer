@@ -11,7 +11,6 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -72,9 +71,7 @@ public final class CityParser {
         final List<CityProduct> cityProducts = new ArrayList<>(cities.size() * products.size());
 
         for (final City city : cities) {
-            for (final Product product : products) {
-                cityProducts.add(new CityProduct(city, product, url));
-            }
+            cityProducts.addAll(products.stream().map(product -> new CityProduct(city, product, url)).collect(Collectors.toList()));
         }
         logger.info("парсим данные: {}", cityProducts.size());
 
@@ -125,8 +122,8 @@ public final class CityParser {
 
         builder.setShopBrand(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(1).html()));
 
-        final List<MajorSellInCity> majorSellInCityList = new ArrayList<>();
-        final Element list = doc.select("table[class=\"list\"]").last();
+//        final List<MajorSellInCity> majorSellInCityList = new ArrayList<>();
+        /*final Element list = doc.select("table[class=\"list\"]").last();
         //System.out.println(list.outerHtml());
         final Elements bestInTown = list.select("table > tbody > tr");
         for (final Element best : bestInTown) {
@@ -150,7 +147,7 @@ public final class CityParser {
                 );
             }
         }
-//        builder.setMajorSellInCityList(majorSellInCityList);
+        builder.setMajorSellInCityList(majorSellInCityList);*/
         return builder.build();
     }
 }

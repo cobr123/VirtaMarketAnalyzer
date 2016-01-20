@@ -5,7 +5,6 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Collector;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +60,7 @@ public final class ShopParser {
                 .replace("Coventry","Ковентри")
                 .replace("Bamako","Бамако")
                 .replace("Rhodes","Родос");
-        String townId = "";
+        String townId;
         try {
             townId = cities.stream()
                     .filter(c -> c.getCountryId().equals(countryId))
