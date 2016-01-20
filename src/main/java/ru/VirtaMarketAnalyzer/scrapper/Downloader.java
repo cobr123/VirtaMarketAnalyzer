@@ -55,7 +55,7 @@ public final class Downloader {
         } else {
             logger.trace("Запрошен адрес: {}", url);
 
-            final int maxTriesCnt = 3;
+            final int maxTriesCnt = 99;
             for (int tries = 1; tries <= maxTriesCnt; ++tries) {
                 try {
                     final Connection conn = Jsoup.connect(url);
@@ -72,7 +72,7 @@ public final class Downloader {
                     if (maxTriesCnt == tries) {
                         throw new IOException(e);
                     } else {
-                        waitSecond(3);
+                        waitSecond(3 * tries);
                     }
                 }
             }
