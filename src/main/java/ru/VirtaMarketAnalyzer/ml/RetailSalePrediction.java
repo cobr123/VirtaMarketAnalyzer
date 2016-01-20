@@ -38,13 +38,34 @@ public final class RetailSalePrediction {
     };
     private static final String[] words = new String[]{"около", "более"};
 
-    private enum ATTR {
-        WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY, MARKET_INDEX, MARKET_VOLUME,
-        LOCAL_PERCENT, LOCAL_PRICE, LOCAL_QUALITY, PRICE, SHOP_SIZE,
-        TOWN_DISTRICT, DEPARTMENT_COUNT, BRAND, QUALITY,
-        NOTORIETY, VISITORS_COUNT, SERVICE_LEVEL, SELLER_COUNT,
+    public enum ATTR {
+        WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY,
+        MARKET_INDEX, MARKET_VOLUME, LOCAL_PERCENT,
+        LOCAL_PRICE, LOCAL_QUALITY, PRICE,
+        SHOP_SIZE, TOWN_DISTRICT, DEPARTMENT_COUNT,
+        BRAND, QUALITY, NOTORIETY, VISITORS_COUNT,
+        SERVICE_LEVEL, SELLER_COUNT,
         //последний для автоподстановки при открытии в weka
-        SELL_VOLUME
+        SELL_VOLUME;
+
+        public String getFunctionName() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("get");
+            boolean capitalize = true;
+            for (int i = 0; i < this.name().length(); ++i) {
+                if (this.name().charAt(i) == '_') {
+                    capitalize = true;
+                    continue;
+                }
+                if (capitalize) {
+                    capitalize = false;
+                    sb.append((this.name().charAt(i) + "").toUpperCase());
+                } else {
+                    sb.append((this.name().charAt(i) + "").toLowerCase());
+                }
+            }
+            return sb.toString();
+        }
     }
 
     public static void createPrediction(final String realm, final Map<String, List<RetailAnalytics>> retailAnalytics) throws IOException {

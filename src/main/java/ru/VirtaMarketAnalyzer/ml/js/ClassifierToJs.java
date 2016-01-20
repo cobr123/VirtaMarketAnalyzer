@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
+import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
@@ -31,7 +32,7 @@ public final class ClassifierToJs {
         for (final File file : dir.listFiles()) {
             final J48 tree = (J48) loadModel(file.getAbsolutePath());
             final String path = file.getAbsolutePath().replace(".model", ".js").replace(File.separator + "java" + File.separator, File.separator + "js" + File.separator);
-            FileUtils.writeStringToFile(new File(path), ClassifierToJs.toSource(tree, "PredictProd" + FilenameUtils.removeExtension(file.getName())), "UTF-8");
+            FileUtils.writeStringToFile(new File(path), ClassifierToJs.toSource(tree, "predictByProd" + FilenameUtils.removeExtension(file.getName())), "UTF-8");
         }
     }
 
@@ -50,25 +51,39 @@ public final class ClassifierToJs {
         }
     }
 
-    public static String toSource(final J48 tree, final String jsClassName) throws Exception {
+    public static String toSource(final J48 tree, final String prefix) throws Exception {
         printID = 0;
         /** The decision tree */
         final ClassifierTree m_root = (ClassifierTree) getPrivateFieldValue(tree.getClass(), tree, "m_root");
 
-        final StringBuffer[] source = toSourceClassifierTree(m_root, jsClassName);
-        return
-                "class " + jsClassName + " {\n"
-                        + "  static predictBy(i) {\n"
-                        + "    p = " + jsClassName + ".N1(i);\n"
-                        + "    return i[p];\n"
-                        + "  }\n"
-                        + "  static classify(i) {\n"
-                        + "    p = NaN;\n"
-                        + source[0]  // Assignment code
-                        + "    return p;\n"
-                        + "  }\n"
-                        + source[1]  // Support code
-                        + "}\n";
+        final StringBuffer[] source = toSourceClassifierTree(m_root, prefix);
+        final StringBuilder sb = new StringBuilder();
+        sb.append("  function getParamForPredition(){\n");
+        sb.append("    param = [" + (RetailSalePrediction.ATTR.values().length - 1) + "];\n");
+        for (RetailSalePrediction.ATTR attr : RetailSalePrediction.ATTR.values()) {
+            //для последнего делаем вычисления, поэтому его в параметрах не должно быть
+            if (attr.ordinal() != RetailSalePrediction.ATTR.values().length - 1) {
+                sb.append("    param[");
+                sb.append(attr.ordinal());
+                sb.append("] = ");
+                sb.append(attr.getFunctionName());
+                sb.append("();\n");
+            }
+        }
+        sb.append("    return param;\n");
+        sb.append("  }\n");
+        return sb.toString()
+                + "  function " + prefix + "(i) {\n"
+                + "    p = " + prefix + "N1(i);\n"
+                + "    return i[p];\n"
+                + "  }\n"
+                + "  function " + prefix + "classify(i) {\n"
+                + "    p = NaN;\n"
+                + source[0]  // Assignment code
+                + "    return p;\n"
+                + "  }\n"
+                + source[1]  // Support code
+                ;
     }
 
     /**
@@ -82,7 +97,7 @@ public final class ClassifierToJs {
      * assignment code, and the second containing source for support code.
      * @throws Exception if something goes wrong
      */
-    public static StringBuffer[] toSourceClassifierTree(final ClassifierTree m_root, final String jsClassName) throws Exception {
+    public static StringBuffer[] toSourceClassifierTree(final ClassifierTree m_root, final String prefix) throws Exception {
         final StringBuffer[] result = new StringBuffer[2];
         /** True if node is leaf. */
         final boolean m_isLeaf = isLeaf(m_root);
@@ -105,7 +120,7 @@ public final class ClassifierToJs {
             //nextID
             printID++;
 
-            text.append("  static N")
+            text.append("  function " + prefix + "N")
                     .append(/*Integer.toHexString(m_localModel.hashCode()) +*/ printID)
                     .append("(i) {\n")
                     .append("    p = NaN;\n");
@@ -124,7 +139,7 @@ public final class ClassifierToJs {
                     text.append("      p = "
                             + m_localModel.distribution().maxClass(i) + ";\n");
                 } else {
-                    final StringBuffer[] sub = toSourceClassifierTree(m_sons[i], jsClassName);
+                    final StringBuffer[] sub = toSourceClassifierTree(m_sons[i], prefix);
                     text.append(sub[0]);
                     atEnd.append(sub[1]);
                 }
@@ -136,7 +151,7 @@ public final class ClassifierToJs {
 
             text.append("    return p;\n  }\n");
 
-            result[0] = new StringBuffer("    p = " + jsClassName + ".N");
+            result[0] = new StringBuffer("    p = " + prefix + "N");
             result[0].append(/*Integer.toHexString(m_localModel.hashCode()) + */printID)
                     .append("(i);\n");
             result[1] = text.append(atEnd);
