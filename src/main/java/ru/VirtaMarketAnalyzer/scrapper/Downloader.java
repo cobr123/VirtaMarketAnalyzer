@@ -50,7 +50,7 @@ public final class Downloader {
         final String clearedUrl = getCrearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
-        if (file.exists() && Utils.daysBetween(new Date(file.lastModified()), new Date()) < 3) {
+        if (file.exists() && Math.abs(Utils.daysBetween(new Date(file.lastModified()), new Date())) < 3) {
             logger.trace("Взят из кэша: {}", file.getAbsolutePath());
         } else {
             logger.trace("Запрошен адрес: {}", url);
