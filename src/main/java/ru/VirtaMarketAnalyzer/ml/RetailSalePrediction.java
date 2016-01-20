@@ -29,14 +29,14 @@ import java.util.Map;
 public final class RetailSalePrediction {
     private static final Logger logger = LoggerFactory.getLogger(RetailSalePrediction.class);
 
-    private static final String[] numbers = new String[]{
+    public static final String[] numbers = new String[]{
             "100", "200", "300", "500",
             "1 000", "2 000", "3 000", "5 000",
             "10 000", "20 000", "30 000", "50 000",
             "100 000", "200 000", "300 000", "500 000",
             "1 000 000", "2 000 000", "3 000 000", "5 000 000"
     };
-    private static final String[] words = new String[]{"около", "более"};
+    public static final String[] words = new String[]{"около", "более"};
 
     public enum ATTR {
         WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY,

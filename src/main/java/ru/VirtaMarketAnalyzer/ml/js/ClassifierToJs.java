@@ -72,10 +72,25 @@ public final class ClassifierToJs {
         }
         sb.append("    return param;\n");
         sb.append("  }\n");
+
+        sb.append("  function getValueByPredictionIdx(idx){\n");
+        sb.append("    values = [];\n");
+        sb.append("    values[0] = 'менее 50';\n");
+        sb.append("    values[1] = 'около 50';\n");
+        int idx = 2;
+        for (final String number : RetailSalePrediction.numbers) {
+            for (final String word : RetailSalePrediction.words) {
+                sb.append("    values[" + idx + "] = '" + word + " " + number + "';\n");
+                ++idx;
+            }
+        }
+        sb.append("    return values[idx];\n");
+        sb.append("  }\n");
+
         return sb.toString()
                 + "  function " + prefix + "(i) {\n"
                 + "    p = " + prefix + "N1(i);\n"
-                + "    return i[p];\n"
+                + "    return getValueByPredictionIdx(p);\n"
                 + "  }\n"
                 + "  function " + prefix + "classify(i) {\n"
                 + "    p = NaN;\n"
