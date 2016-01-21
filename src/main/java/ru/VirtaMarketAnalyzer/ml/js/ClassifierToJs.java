@@ -3,6 +3,7 @@ package ru.VirtaMarketAnalyzer.ml.js;
 import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.slf4j.Logger;
@@ -107,7 +108,7 @@ public final class ClassifierToJs {
 
         final StringBuilder[] source = toSourceClassifierTree(m_root, prefix);
         final StringBuilder sb = new StringBuilder();
-        sb.append("  function getParamForPredition(){\n");
+        sb.append("  function getParamFor" + WordUtils.capitalize(prefix) + "(){\n");
         sb.append("    param = [").append(RetailSalePrediction.ATTR.values().length - 1).append("];\n");
         for (RetailSalePrediction.ATTR attr : RetailSalePrediction.ATTR.values()) {
             //для последнего делаем вычисления, поэтому его в параметрах не должно быть
