@@ -114,29 +114,58 @@ public final class RetailSalePrediction {
                 saver.setInstances(trainingSet);
                 saver.setFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff"));
                 saver.writeBatch();
-                // Create a LinearRegression classifier
-                final J48 tree = new J48();
-                tree.buildClassifier(trainingSet);
-//                ClassifierToJs.saveModel(tree, baseDir + "weka" + File.separator + "java" + File.separator + entry.getKey() + ".model");
 
-                try {
-                    final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_script.js");
-                    FileUtils.writeStringToFile(file, ClassifierToJs.toSource(tree, "predictCommon"), "UTF-8");
-                } catch (final Exception e) {
-                    logger.error(e.getLocalizedMessage(), e);
-                }
-                // Print the result à la Weka explorer:
-//                logger.info((cModel.toString());
-
-                // Test the model
-                final Evaluation eTest = new Evaluation(trainingSet);
-                eTest.evaluateModel(tree, trainingSet);
-
-                // Print the result à la Weka explorer:
-                logger.info(eTest.toSummaryString());
+                trainJ48BySet(trainingSet);
+                trainJ48CrossValidation(trainingSet);
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
+        }
+    }
+
+    public static void trainJ48BySet(final Instances trainingSet) throws Exception{
+        // Create a classifier
+        final J48 tree = new J48();
+        tree.buildClassifier(trainingSet);
+
+        // Test the model
+        final Evaluation eval = new Evaluation(trainingSet);
+        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+
+        try {
+            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
+            FileUtils.writeStringToFile(file, ClassifierToJs.toSource(tree, "predictCommonBySet"), "UTF-8");
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+    public static void trainJ48CrossValidation(final Instances trainingSet) throws Exception {
+        // Create a classifier
+        final J48 tree = new J48();
+        tree.setUnpruned(true);        // using an unpruned J48
+
+        //evaluate j48 with cross validation
+        final Evaluation eval = new Evaluation(trainingSet);
+
+        //first supply the classifier
+        //then the training data
+        //number of folds
+        //random seed
+        eval.crossValidateModel(tree, trainingSet, 10, new Random(new Date().getTime()));
+        logger.info(eval.toSummaryString());
+
+
+        tree.buildClassifier(trainingSet);
+//                logger.info(tree.graph());
+
+        try {
+            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_cv_script.js");
+            FileUtils.writeStringToFile(file, ClassifierToJs.toSource(tree, "predictCommonByCV"), "UTF-8");
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
         }
     }
 
@@ -157,7 +186,7 @@ public final class RetailSalePrediction {
                 saver.setInstances(trainingSet);
                 saver.setFile(new File(baseDir + WEKA + File.separator + entry.getKey() + ".arff"));
                 saver.writeBatch();
-                // Create a LinearRegression classifier
+                // Create a classifier
                 final J48 tree = new J48();
                 tree.buildClassifier(trainingSet);
 //                ClassifierToJs.saveModel(tree, baseDir + "weka" + File.separator + "java" + File.separator + entry.getKey() + ".model");
@@ -279,6 +308,12 @@ public final class RetailSalePrediction {
         instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_PRICE.ordinal()), retailAnalytics.getLocalPrice());
         instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_QUALITY.ordinal()), retailAnalytics.getLocalQuality());
 
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_ID.ordinal()), retailAnalytics.getProductId());
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getProductId() = '{}'", retailAnalytics.getProductId());
+            throw e;
+        }
         instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_SIZE.ordinal()), retailAnalytics.getShopSize() + "");
         try {
             instance.setValue((Attribute) attrs.elementAt(ATTR.TOWN_DISTRICT.ordinal()), retailAnalytics.getTownDistrict());
