@@ -37,24 +37,28 @@ public final class TopRetailParser {
         String nextPageUrl = newRef;
         String ref = "";
         for (int page = 1; page <= 10; ++page) {
-            final Document doc = Downloader.getDoc(nextPageUrl, ref);
-            final Elements companyLinks = doc.select("table > tbody > tr > td:nth-child(2) > span > a");
-            logger.info("companyLinks.size() = {}", companyLinks.size());
-            final int shopsSizeBefore = shops.size();
-            for (final Element link : companyLinks) {
-                final String companyId = Utils.getLastFromUrl(link.attr("href"));
-                final List<Shop> tmp = UnitListParser.getShopList(baseUrl, realm, companyId, cities, products);
-                shops.addAll(tmp);
-            }
+            try {
+                final Document doc = Downloader.getDoc(nextPageUrl, ref);
+                final Elements companyLinks = doc.select("table > tbody > tr > td:nth-child(2) > span > a");
+                logger.info("companyLinks.size() = {}", companyLinks.size());
+                final int shopsSizeBefore = shops.size();
+                for (final Element link : companyLinks) {
+                    final String companyId = Utils.getLastFromUrl(link.attr("href"));
+                    final List<Shop> tmp = UnitListParser.getShopList(baseUrl, realm, companyId, cities, products);
+                    shops.addAll(tmp);
+                }
 
-            nextPageUrl = Utils.getNextPageHref(doc);
-            ref = newRef;
-            if (nextPageUrl.isEmpty()) {
-                break;
+                nextPageUrl = Utils.getNextPageHref(doc);
+                ref = newRef;
+                if (nextPageUrl.isEmpty()) {
+                    break;
+                }
+                logger.info("shops.size(): {}", shops.size());
+                logger.info("shops.size() diff: {}", shops.size() - shopsSizeBefore);
+                logger.info("nextPageUrl: {}", nextPageUrl);
+            } catch (final Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
             }
-            logger.info("nextPageUrl: {}", nextPageUrl);
-            logger.info("shops.size(): {}", shops.size());
-            logger.info("shops.size() diff: {}", shops.size() - shopsSizeBefore);
         }
 
         return shops;
