@@ -1,7 +1,11 @@
 package ru.VirtaMarketAnalyzer.ml.js;
 
+import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
+import jdk.internal.util.xml.impl.ReaderUTF8;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.mozilla.javascript.ErrorReporter;
+import org.mozilla.javascript.EvaluatorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
@@ -49,6 +53,52 @@ public final class ClassifierToJs {
             oos.writeObject(c);
             oos.flush();
         }
+    }
+
+    public static String compress(final String script) throws Exception {
+        final Reader in = new StringReader(script);
+        final JavaScriptCompressor compressor = new JavaScriptCompressor(in, new ErrorReporter() {
+            public void warning(String message, String sourceName,
+                                int line, String lineSource, int lineOffset) {
+                logger.warn("\n[WARNING]");
+                if (line < 0) {
+                    logger.warn("  " + message);
+                } else {
+                    logger.warn("  " + line + ':' + lineOffset + ':' + message);
+                }
+            }
+
+            public void error(String message, String sourceName,
+                              int line, String lineSource, int lineOffset) {
+                logger.error("[ERROR]");
+                if (line < 0) {
+                    logger.error("  " + message);
+                } else {
+                    logger.error("  " + line + ':' + lineOffset + ':' + message);
+                }
+            }
+
+            public EvaluatorException runtimeError(String message, String sourceName,
+                                                   int line, String lineSource, int lineOffset) {
+                error(message, sourceName, line, lineSource, lineOffset);
+                return new EvaluatorException(message);
+            }
+        });
+
+        // Close the input stream first, and then open the output stream,
+        // in case the output file should override the input file.
+        in.close();
+
+        final StringWriter out = new StringWriter();
+
+        final int linebreak = 0;
+        final boolean munge = true;
+        final boolean verbose = true;
+        final boolean disableOptimizations = false;
+        final boolean preserveAllSemiColons = false;
+
+        compressor.compress(out, linebreak, munge, verbose, preserveAllSemiColons, disableOptimizations);
+        return out.toString();
     }
 
     public static String toSource(final J48 tree, final String prefix) throws Exception {

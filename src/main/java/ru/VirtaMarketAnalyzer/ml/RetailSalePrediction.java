@@ -123,7 +123,7 @@ public final class RetailSalePrediction {
         }
     }
 
-    public static void trainJ48BySet(final Instances trainingSet) throws Exception{
+    public static void trainJ48BySet(final Instances trainingSet) throws Exception {
         // Create a classifier
         final J48 tree = new J48();
         tree.buildClassifier(trainingSet);
@@ -137,11 +137,12 @@ public final class RetailSalePrediction {
 
         try {
             final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
-            FileUtils.writeStringToFile(file, ClassifierToJs.toSource(tree, "predictCommonBySet"), "UTF-8");
+            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
         } catch (final Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
     }
+
     public static void trainJ48CrossValidation(final Instances trainingSet) throws Exception {
         // Create a classifier
         final J48 tree = new J48();
@@ -163,7 +164,7 @@ public final class RetailSalePrediction {
 
         try {
             final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_cv_script.js");
-            FileUtils.writeStringToFile(file, ClassifierToJs.toSource(tree, "predictCommonByCV"), "UTF-8");
+            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonByCV")), "UTF-8");
         } catch (final Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
