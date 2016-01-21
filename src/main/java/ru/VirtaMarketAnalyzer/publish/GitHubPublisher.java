@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
+import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -38,11 +39,24 @@ final public class GitHubPublisher {
     private static final Logger logger = LoggerFactory.getLogger(GitHubPublisher.class);
     public static final String localPath = Utils.getDir() + "remote_repository" + File.separator;
 
-    public static void publish(final List<String> realms) throws IOException, GitAPIException {
+    public static void publishRetail(final List<String> realms) throws IOException, GitAPIException {
         final Git git = getRepo();
         copyToLocalRepo(realms);
-        logger.info("git add .");
-        git.add().addFilepattern(".").call();
+        final String pattern = "./" + Wizard.by_trade_at_cities + "/.";
+        logger.info("git add " + pattern);
+        git.add().addFilepattern(pattern).call();
+        logger.info("git commit");
+        git.commit().setMessage("data update").call();
+        logger.info("git push");
+        git.push().setCredentialsProvider(getCredentialsProvider()).call();
+        git.close();
+    }
+
+    public static void publishPredictions() throws IOException, GitAPIException {
+        final Git git = getRepo();
+        final String pattern = "./" + RetailSalePrediction.predict_retail_sales + "/.";
+        logger.info("git add " + pattern);
+        git.add().addFilepattern(pattern).call();
         logger.info("git commit");
         git.commit().setMessage("data update").call();
         logger.info("git push");

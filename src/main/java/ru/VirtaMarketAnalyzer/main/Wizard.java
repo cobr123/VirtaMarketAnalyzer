@@ -43,11 +43,11 @@ public final class Wizard {
             collectToJsonIndustries(realm);
         }
         //публикуем на сайте
-        GitHubPublisher.publish(realms);
+        GitHubPublisher.publishRetail(realms);
         //собираем данные со всех реалмов и продуктов
         RetailSalePrediction.createCommonPrediction();
         //публикуем на сайте
-        GitHubPublisher.publish(realms);
+        GitHubPublisher.publishPredictions();
     }
 
     public static void collectToJsonTradeAtCities(final String realm) throws IOException {

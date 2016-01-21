@@ -1,7 +1,6 @@
 package ru.VirtaMarketAnalyzer.ml.js;
 
 import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
-import jdk.internal.util.xml.impl.ReaderUTF8;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.mozilla.javascript.ErrorReporter;
