@@ -56,10 +56,10 @@ public final class ClassifierToJs {
         /** The decision tree */
         final ClassifierTree m_root = (ClassifierTree) getPrivateFieldValue(tree.getClass(), tree, "m_root");
 
-        final StringBuffer[] source = toSourceClassifierTree(m_root, prefix);
+        final StringBuilder[] source = toSourceClassifierTree(m_root, prefix);
         final StringBuilder sb = new StringBuilder();
         sb.append("  function getParamForPredition(){\n");
-        sb.append("    param = [" + (RetailSalePrediction.ATTR.values().length - 1) + "];\n");
+        sb.append("    param = [").append(RetailSalePrediction.ATTR.values().length - 1).append("];\n");
         for (RetailSalePrediction.ATTR attr : RetailSalePrediction.ATTR.values()) {
             //для последнего делаем вычисления, поэтому его в параметрах не должно быть
             if (attr.ordinal() != RetailSalePrediction.ATTR.values().length - 1) {
@@ -80,7 +80,7 @@ public final class ClassifierToJs {
         int idx = 2;
         for (final String number : RetailSalePrediction.numbers) {
             for (final String word : RetailSalePrediction.words) {
-                sb.append("    values[" + idx + "] = '" + word + " " + number + "';\n");
+                sb.append("    values[").append(idx).append("] = '").append(word).append(" ").append(number).append("';\n");
                 ++idx;
             }
         }
@@ -112,8 +112,8 @@ public final class ClassifierToJs {
      * assignment code, and the second containing source for support code.
      * @throws Exception if something goes wrong
      */
-    public static StringBuffer[] toSourceClassifierTree(final ClassifierTree m_root, final String prefix) throws Exception {
-        final StringBuffer[] result = new StringBuffer[2];
+    public static StringBuilder[] toSourceClassifierTree(final ClassifierTree m_root, final String prefix) throws Exception {
+        final StringBuilder[] result = new StringBuilder[2];
         /** True if node is leaf. */
         final boolean m_isLeaf = isLeaf(m_root);
         /** Local model at node. */
@@ -125,17 +125,17 @@ public final class ClassifierToJs {
         final Instances m_train = (Instances) getPrivateFieldValue(m_root.getClass(), m_root, "m_train");
 
         if (m_isLeaf) {
-            result[0] = new StringBuffer("    p = "
+            result[0] = new StringBuilder("    p = "
                     + m_localModel.distribution().maxClass(0) + ";\n");
-            result[1] = new StringBuffer("");
+            result[1] = new StringBuilder("");
         } else {
-            final StringBuffer text = new StringBuffer();
-            final StringBuffer atEnd = new StringBuffer();
+            final StringBuilder text = new StringBuilder();
+            final StringBuilder atEnd = new StringBuilder();
 
             //nextID
             printID++;
 
-            text.append("  function " + prefix + "N")
+            text.append("  function ").append(prefix).append("N")
                     .append(/*Integer.toHexString(m_localModel.hashCode()) +*/ printID)
                     .append("(i) {\n")
                     .append("    p = NaN;\n");
@@ -148,13 +148,11 @@ public final class ClassifierToJs {
                     .append(";\n");
             text.append("    } ");
             for (int i = 0; i < m_sons.length; i++) {
-                text.append("else if (" + sourceExpression(m_localModel, i, m_train)
-                        + ") {\n");
+                text.append("else if (").append(sourceExpression(m_localModel, i, m_train)).append(") {\n");
                 if (isLeaf(m_sons[i])) {
-                    text.append("      p = "
-                            + m_localModel.distribution().maxClass(i) + ";\n");
+                    text.append("      p = ").append(m_localModel.distribution().maxClass(i)).append(";\n");
                 } else {
-                    final StringBuffer[] sub = toSourceClassifierTree(m_sons[i], prefix);
+                    final StringBuilder[] sub = toSourceClassifierTree(m_sons[i], prefix);
                     text.append(sub[0]);
                     atEnd.append(sub[1]);
                 }
@@ -166,7 +164,7 @@ public final class ClassifierToJs {
 
             text.append("    return p;\n  }\n");
 
-            result[0] = new StringBuffer("    p = " + prefix + "N");
+            result[0] = new StringBuilder("    p = " + prefix + "N");
             result[0].append(/*Integer.toHexString(m_localModel.hashCode()) + */printID)
                     .append("(i);\n");
             result[1] = text.append(atEnd);
@@ -192,11 +190,7 @@ public final class ClassifierToJs {
         if (index < 0) {
             return "i[" + m_attIndex + "] == null";
         } else if (data.attribute(m_attIndex).isNominal()) {
-            final StringBuilder expr = new StringBuilder("i[");
-            expr.append(m_attIndex).append("]");
-            expr.append(" === \"").append(data.attribute(m_attIndex)
-                    .value(index)).append("\"");
-            return expr.toString();
+            return "i[" + m_attIndex + "]" + " === \"" + data.attribute(m_attIndex).value(index) + "\"";
         } else {
             final StringBuilder expr = new StringBuilder("(i[");
             expr.append(m_attIndex).append("])");

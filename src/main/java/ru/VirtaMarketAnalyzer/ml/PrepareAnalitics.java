@@ -2,10 +2,7 @@ package ru.VirtaMarketAnalyzer.ml;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
-import ru.VirtaMarketAnalyzer.data.Shop;
-import ru.VirtaMarketAnalyzer.data.ShopProduct;
-import ru.VirtaMarketAnalyzer.data.TradeAtCity;
+import ru.VirtaMarketAnalyzer.data.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,6 +47,7 @@ public final class PrepareAnalitics {
                             final ShopProduct shopProduct = shopProductOpt.get();
                             retailAnalitincs.add(
                                     new RetailAnalytics(
+                                            productId,
                                             shop.getShopSize(),
                                             shop.getTownDistrict(),
                                             shop.getDepartmentCount(),

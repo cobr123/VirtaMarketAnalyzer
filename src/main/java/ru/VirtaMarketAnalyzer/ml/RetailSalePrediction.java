@@ -1,15 +1,21 @@
 package ru.VirtaMarketAnalyzer.ml;
 
+import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
+import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.J48;
@@ -20,8 +26,8 @@ import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
 import java.io.*;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 15.01.2016.
@@ -29,14 +35,21 @@ import java.util.Map;
 public final class RetailSalePrediction {
     private static final Logger logger = LoggerFactory.getLogger(RetailSalePrediction.class);
 
+    public static final String predict_retail_sales = "predict_retail_sales";
+
     public static final String[] numbers = new String[]{
             "100", "200", "300", "500",
             "1 000", "2 000", "3 000", "5 000",
             "10 000", "20 000", "30 000", "50 000",
             "100 000", "200 000", "300 000", "500 000",
-            "1 000 000", "2 000 000", "3 000 000", "5 000 000"
+            "1 000 000", "2 000 000", "3 000 000", "5 000 000",
+            "10 000 000", "20 000 000", "30 000 000", "50 000 000",
+            "100 000 000", "200 000 000", "300 000 000", "500 000 000",
+            "1 000 000 000", "2 000 000 000", "3 000 000 000", "5 000 000 000"
     };
     public static final String[] words = new String[]{"около", "более"};
+    public static final String RETAIL_ANALYTICS_ = "retail_analytics_";
+    public static final String WEKA = "weka";
 
     public enum ATTR {
         WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY,
@@ -44,7 +57,7 @@ public final class RetailSalePrediction {
         LOCAL_PRICE, LOCAL_QUALITY, PRICE,
         SHOP_SIZE, TOWN_DISTRICT, DEPARTMENT_COUNT,
         BRAND, QUALITY, NOTORIETY, VISITORS_COUNT,
-        SERVICE_LEVEL, SELLER_COUNT,
+        SERVICE_LEVEL, SELLER_COUNT, PRODUCT_ID,
         //последний для автоподстановки при открытии в weka
         SELL_VOLUME;
 
@@ -68,10 +81,69 @@ public final class RetailSalePrediction {
         }
     }
 
-    public static void createPrediction(final String realm, final Map<String, List<RetailAnalytics>> retailAnalytics) throws IOException {
+    public static void createCommonPrediction() throws IOException, GitAPIException {
+        final Set<RetailAnalytics> set = new HashSet<>();
+        final File dir = new File(Utils.getDir() + Wizard.by_trade_at_cities + File.separator);
+        final Git git = GitHubPublisher.getRepo();
+        for (final File realmDir : dir.listFiles()) {
+            for (final File file : realmDir.listFiles()) {
+                if (file.getName().startsWith(RETAIL_ANALYTICS_)) {
+                    final List<String> list = GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realmDir.getName() + "/" + file.getName());
+                    final String productId = Utils.getLastBySep(FilenameUtils.removeExtension(file.getName()), "_");
+                    for (final String str : list) {
+                        try {
+                            final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(str, RetailAnalytics[].class);
+                            for (final RetailAnalytics ra : arr) {
+                                set.add(RetailAnalytics.fillProductId(productId, ra));
+                            }
+                        } catch (final Exception e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!set.isEmpty()) {
+            logger.info("set.size() = " + set.size());
+            final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
+            try {
+                final Instances trainingSet = createTrainingSet(set, productIds);
+                //
+                final ArffSaver saver = new ArffSaver();
+                saver.setInstances(trainingSet);
+                saver.setFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff"));
+                saver.writeBatch();
+                // Create a LinearRegression classifier
+                final J48 tree = new J48();
+                tree.buildClassifier(trainingSet);
+//                ClassifierToJs.saveModel(tree, baseDir + "weka" + File.separator + "java" + File.separator + entry.getKey() + ".model");
+
+                try {
+                    final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_script.js");
+                    FileUtils.writeStringToFile(file, ClassifierToJs.toSource(tree, "predictCommon"), "UTF-8");
+                } catch (final Exception e) {
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+                // Print the result à la Weka explorer:
+//                logger.info((cModel.toString());
+
+                // Test the model
+                final Evaluation eTest = new Evaluation(trainingSet);
+                eTest.evaluateModel(tree, trainingSet);
+
+                // Print the result à la Weka explorer:
+                logger.info(eTest.toSummaryString());
+            } catch (final Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+        }
+    }
+
+    public static void createPrediction(final String realm, final Map<String, Set<RetailAnalytics>> retailAnalytics, final Set<String> productIds) throws IOException {
         final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
-        System.out.println("stats.size() = " + retailAnalytics.size());
-        for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
+        logger.info("stats.size() = " + retailAnalytics.size());
+        for (final Map.Entry<String, Set<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             logger.info(entry.getKey());
             logger.info("entry.getValue().size() = " + entry.getValue().size());
             if (entry.getValue().isEmpty()) {
@@ -79,11 +151,11 @@ public final class RetailSalePrediction {
             }
 
             try {
-                final Instances trainingSet = createTrainingSet(entry.getValue());
+                final Instances trainingSet = createTrainingSet(entry.getValue(), productIds);
                 //
                 final ArffSaver saver = new ArffSaver();
                 saver.setInstances(trainingSet);
-                saver.setFile(new File(baseDir + "weka" + File.separator + entry.getKey() + ".arff"));
+                saver.setFile(new File(baseDir + WEKA + File.separator + entry.getKey() + ".arff"));
                 saver.writeBatch();
                 // Create a LinearRegression classifier
                 final J48 tree = new J48();
@@ -119,7 +191,7 @@ public final class RetailSalePrediction {
         }
     }
 
-    private static Instances createTrainingSet(final List<RetailAnalytics> retailAnalytics) {
+    private static Instances createTrainingSet(final Set<RetailAnalytics> retailAnalytics, final Set<String> productIds) {
         final FastVector attrs = new FastVector(ATTR.values().length);
         for (final ATTR attr : ATTR.values()) {
             if (attr.ordinal() == ATTR.MARKET_INDEX.ordinal()) {
@@ -162,6 +234,10 @@ public final class RetailSalePrediction {
                 sizes.addElement("100000");
 
                 attrs.addElement(new Attribute(attr.name(), sizes));
+            } else if (attr.ordinal() == ATTR.PRODUCT_ID.ordinal()) {
+                final FastVector fv = new FastVector(productIds.size());
+                productIds.forEach(fv::addElement);
+                attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.SELL_VOLUME.ordinal() || attr.ordinal() == ATTR.VISITORS_COUNT.ordinal()) {
                 final FastVector values = new FastVector(numbers.length * words.length + 2);
                 values.addElement("менее 50");
@@ -238,8 +314,9 @@ public final class RetailSalePrediction {
         return instance;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        Wizard.collectToJsonTradeAtCities("vera");
+
+        createCommonPrediction();
     }
 }

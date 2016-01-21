@@ -22,7 +22,7 @@ public final class Utils {
     private static final Logger logger = LoggerFactory.getLogger(Utils.class);
     private static final Pattern fraction_pattern = Pattern.compile("^\\d+(\\.\\d+)?/\\d+(\\.\\d+)?$");
 
-    public static String getDir() throws IOException {
+    public static String getDir() {
         String dir = System.getProperty("java.io.tmpdir");
         if (dir.charAt(dir.length() - 1) != File.separatorChar) {
             dir += File.separator;
@@ -35,16 +35,17 @@ public final class Utils {
         Utils.writeFile(path, getGson(obj));
     }
 
-    public static String getGson(final Object obj) throws IOException {
+    public static String getGson(final Object obj) {
         final Gson gson = new Gson();
         return gson.toJson(obj);
     }
 
-    public static String getPrettyGson(final Object obj) throws IOException {
+    public static String getPrettyGson(final Object obj) {
         final Gson gson = new GsonBuilder().setPrettyPrinting().create();
         return gson.toJson(obj);
     }
-    public static File mkdirs(final String path){
+
+    public static File mkdirs(final String path) {
         final File file = new File(path);
         if (!file.exists()) {
             final File dir = new File(file.getParent());
@@ -156,8 +157,12 @@ public final class Utils {
         return "";
     }
 
-    public static String getLastFromUrl(final String url) {
-        final String[] data = url.split("/");
+    public static String getLastBySep(final String str, final String sep) {
+        final String[] data = str.split(sep);
         return data[data.length - 1];
+    }
+
+    public static String getLastFromUrl(final String url) {
+        return getLastBySep(url, "/");
     }
 }

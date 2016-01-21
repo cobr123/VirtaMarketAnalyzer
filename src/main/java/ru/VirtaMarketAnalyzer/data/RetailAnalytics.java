@@ -1,11 +1,15 @@
 package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Created by cobr123 on 16.01.16.
  */
 public final class RetailAnalytics {
+    @SerializedName("pi")
+    private final String productId;
     @SerializedName("ss")
     private final int shopSize;
     @SerializedName("td")
@@ -45,16 +49,17 @@ public final class RetailAnalytics {
     @SerializedName("lq")
     final private double localQuality;
 
-    public RetailAnalytics(int shopSize, String townDistrict, double departmentCount,
-                           double notoriety, String visitorsCount, String serviceLevel,
-                           String sellVolume, double price, double quality, double brand,
-                           double wealthIndex, double educationIndex, double averageSalary,
-                           String marketIdx, long marketVolume, long sellerCnt, double localPercent,
-                           double localPrice, double localQuality) {
+    public RetailAnalytics(final String productId, final int shopSize, final String townDistrict, final double departmentCount,
+                           final double notoriety, final String visitorsCount, final String serviceLevel,
+                           final String sellVolume, final double price, final double quality, final double brand,
+                           final double wealthIndex, final double educationIndex, final double averageSalary,
+                           final String marketIdx, final long marketVolume, final long sellerCnt, final double localPercent,
+                           final double localPrice, final double localQuality) {
+        this.productId = productId;
         this.shopSize = shopSize;
-        this.townDistrict = townDistrict.replace("City centre","Центр города")
-                .replace("Centro de la ciudad","Центр города")
-                .replace("Trendy neighborhood","Фешенебельный район");
+        this.townDistrict = townDistrict.replace("City centre", "Центр города")
+                .replace("Centro de la ciudad", "Центр города")
+                .replace("Trendy neighborhood", "Фешенебельный район");
         this.departmentCount = departmentCount;
         this.notoriety = notoriety;
         this.visitorsCount = visitorsCount;
@@ -72,6 +77,99 @@ public final class RetailAnalytics {
         this.localPercent = localPercent;
         this.localPrice = localPrice;
         this.localQuality = localQuality;
+    }
+
+    //для совместимости
+    public RetailAnalytics(final String productId, final RetailAnalytics ra) {
+        this.productId = productId;
+        this.shopSize = ra.shopSize;
+        this.townDistrict = ra.townDistrict;
+        this.departmentCount = ra.departmentCount;
+        this.notoriety = ra.notoriety;
+        this.visitorsCount = ra.visitorsCount;
+        this.serviceLevel = ra.serviceLevel;
+        this.sellVolume = ra.sellVolume;
+        this.price = ra.price;
+        this.quality = ra.quality;
+        this.brand = ra.brand;
+        this.wealthIndex = ra.wealthIndex;
+        this.educationIndex = ra.educationIndex;
+        this.averageSalary = ra.averageSalary;
+        this.marketIdx = ra.marketIdx;
+        this.marketVolume = ra.marketVolume;
+        this.sellerCnt = ra.sellerCnt;
+        this.localPercent = ra.localPercent;
+        this.localPrice = ra.localPrice;
+        this.localQuality = ra.localQuality;
+    }
+
+    public static RetailAnalytics fillProductId(final String productId, final RetailAnalytics ra) {
+        if (ra.getProductId() == null || ra.getProductId().isEmpty()) {
+            return new RetailAnalytics(productId, ra);
+        } else {
+            return ra;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(productId)
+                .append(shopSize)
+                .append(townDistrict)
+                .append(departmentCount)
+                .append(notoriety)
+                .append(visitorsCount)
+                .append(serviceLevel)
+                .append(sellVolume)
+                .append(price)
+                .append(quality)
+                .append(brand)
+                .append(wealthIndex)
+                .append(educationIndex)
+                .append(averageSalary)
+                .append(marketIdx)
+                .append(marketVolume)
+                .append(sellerCnt)
+                .append(localPercent)
+                .append(localPrice)
+                .append(localQuality)
+                .toHashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj instanceof RetailAnalytics) {
+            final RetailAnalytics other = (RetailAnalytics) obj;
+            return new EqualsBuilder()
+                    .append(productId, other.productId)
+                    .append(shopSize, other.shopSize)
+                    .append(townDistrict, other.townDistrict)
+                    .append(departmentCount, other.departmentCount)
+                    .append(notoriety, other.notoriety)
+                    .append(visitorsCount, other.visitorsCount)
+                    .append(serviceLevel, other.serviceLevel)
+                    .append(sellVolume, other.sellVolume)
+                    .append(price, other.price)
+                    .append(quality, other.quality)
+                    .append(brand, other.brand)
+                    .append(wealthIndex, other.wealthIndex)
+                    .append(educationIndex, other.educationIndex)
+                    .append(averageSalary, other.averageSalary)
+                    .append(marketIdx, other.marketIdx)
+                    .append(marketVolume, other.marketVolume)
+                    .append(sellerCnt, other.sellerCnt)
+                    .append(localPercent, other.localPercent)
+                    .append(localPrice, other.localPrice)
+                    .append(localQuality, other.localQuality)
+                    .isEquals();
+        } else {
+            return false;
+        }
+    }
+
+    public String getProductId() {
+        return productId;
     }
 
     public int getShopSize() {

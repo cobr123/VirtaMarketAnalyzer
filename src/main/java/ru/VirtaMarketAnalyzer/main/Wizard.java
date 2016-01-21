@@ -44,6 +44,10 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publish(realms);
+        //собираем данные со всех реалмов и продуктов
+        RetailSalePrediction.createCommonPrediction();
+        //публикуем на сайте
+        GitHubPublisher.publish(realms);
     }
 
     public static void collectToJsonTradeAtCities(final String realm) throws IOException {
@@ -94,10 +98,10 @@ public final class Wizard {
         //группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой
         final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats);
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
-            Utils.writeToGson(baseDir + "retail_analytics_" + entry.getKey() + ".json", entry.getValue());
+            Utils.writeToGson(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
         }
         //ищем формулу для объема продаж в рознице
-        RetailSalePrediction.createPrediction(realm, retailAnalytics);
+//        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
     }
 
     public static void collectToJsonIndustries(final String realm) throws IOException {
