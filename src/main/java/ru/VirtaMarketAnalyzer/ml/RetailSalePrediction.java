@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
+import ru.VirtaMarketAnalyzer.data.UpdateDate;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
@@ -26,6 +27,8 @@ import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,6 +120,10 @@ public final class RetailSalePrediction {
 
                 trainJ48BySet(trainingSet);
                 trainJ48CrossValidation(trainingSet);
+
+                //запоминаем дату обновления данных
+                final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+                Utils.writeToGson(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
