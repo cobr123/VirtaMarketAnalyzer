@@ -167,6 +167,10 @@ public final class RetailSalePrediction {
     public static void trainJ48BySet(final Instances trainingSet) throws Exception {
         // Create a classifier
         final J48 tree = new J48();
+        tree.setMinNumObj(1);
+        //tree.setConfidenceFactor(0.5f);
+        tree.setReducedErrorPruning(true);
+        //
         tree.buildClassifier(trainingSet);
 
         // Test the model
@@ -188,7 +192,9 @@ public final class RetailSalePrediction {
     public static void trainJ48CrossValidation(final Instances trainingSet) throws Exception {
         // Create a classifier
         final J48 tree = new J48();
-        tree.setUnpruned(true);        // using an unpruned J48
+        tree.setMinNumObj(1);
+        //tree.setConfidenceFactor(0.5f);
+        tree.setReducedErrorPruning(true);
 
         //evaluate j48 with cross validation
         final Evaluation eval = new Evaluation(trainingSet);
