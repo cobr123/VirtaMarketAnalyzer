@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.j48.C45Split;
@@ -227,7 +226,7 @@ public final class ClassifierToJs {
             return sourceExpression((C45Split) m_localModel, index, data);
         } else {
             logger.error(m_localModel.getClass().getName());
-            throw new NotImplementedException();
+            throw new Exception("метод sourceExpression не реализован для класса \"" + m_localModel.getClass().getName() + "\"");
         }
     }
 
