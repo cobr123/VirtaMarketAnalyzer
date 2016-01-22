@@ -59,6 +59,18 @@ public final class ShopParser {
                 .replace("Leeds","Лидс")
                 .replace("Coventry","Ковентри")
                 .replace("Bamako","Бамако")
+                .replace("Los Angeles","Лос-Анджелес")
+                .replace("Hartford","Хартфорд")
+                .replace("Rotterdam","Роттердам")
+                .replace("Andijon","Андижан")
+                .replace("Almere","Алмере")
+                .replace("Moscow","Москва")
+                .replace("Lipetsk","Липецк")
+                .replace("Perm","Пермь")
+                .replace("Ufa","Уфа")
+                .replace("Omsk","Омск")
+                .replace("Vladivostok","Владивосток")
+                .replace("Nizhni Novgorod","Нижний Новгород")
                 .replace("Rhodes","Родос");
         String townId;
         try {

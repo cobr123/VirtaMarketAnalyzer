@@ -13,22 +13,23 @@ import java.util.stream.Collectors;
 public final class PrepareAnalitics {
     private static final Logger logger = LoggerFactory.getLogger(PrepareAnalitics.class);
 
-    public static Map<String, List<RetailAnalytics>> getRetailAnalitincsByProducts(final List<Shop> shops, final Map<String, List<TradeAtCity>> stats) {
+    public static Map<String, List<RetailAnalytics>> getRetailAnalitincsByProducts(final List<Shop> shops, final Map<String, List<TradeAtCity>> stats, final List<Product> products) {
         final Map<String, List<Shop>> shopBy = shops.parallelStream().collect(Collectors.groupingBy(Shop::getCountryRegionTownIds));
 
         final Map<String, List<RetailAnalytics>> retailAnalitincs = new HashMap<>();
 
         for (final Map.Entry<String, List<TradeAtCity>> entry : stats.entrySet()) {
-            retailAnalitincs.put(entry.getKey(), getRetailAnalitincsByProduct(entry.getKey(), shopBy, entry.getValue()));
+            final Product product = products.stream().filter(p -> p.getId().equals(entry.getKey())).findFirst().get();
+            retailAnalitincs.put(entry.getKey(), getRetailAnalitincsByProduct(product, shopBy, entry.getValue()));
         }
         return retailAnalitincs;
     }
 
-    public static List<RetailAnalytics> getRetailAnalitincsByProduct(final String productId,
+    public static List<RetailAnalytics> getRetailAnalitincsByProduct(final Product product,
                                                                      final Map<String, List<Shop>> shopBy,
                                                                      final List<TradeAtCity> stats) {
         final Map<String, List<TradeAtCity>> statsBy = stats.parallelStream()
-                .filter(tradeAtCity -> tradeAtCity.getProductId().equals(productId))
+                .filter(tradeAtCity -> tradeAtCity.getProductId().equals(product.getId()))
                 .collect(Collectors.groupingBy(TradeAtCity::getCountryRegionTownIds));
         final List<RetailAnalytics> retailAnalitincs = new ArrayList<>();
 
@@ -40,14 +41,15 @@ public final class PrepareAnalitics {
                     }
                     for (final Shop shop : shopBy.get(entry.getKey())) {
                         try {
-                            final Optional<ShopProduct> shopProductOpt = shop.getShopProducts().stream().filter(sp -> sp.getProductId().equals(productId)).findFirst();
+                            final Optional<ShopProduct> shopProductOpt = shop.getShopProducts().stream().filter(sp -> sp.getProductId().equals(product.getId())).findFirst();
                             if (!shopProductOpt.isPresent()) {
                                 continue;
                             }
                             final ShopProduct shopProduct = shopProductOpt.get();
                             retailAnalitincs.add(
                                     new RetailAnalytics(
-                                            productId,
+                                            product.getId(),
+                                            product.getProductCategory(),
                                             shop.getShopSize(),
                                             shop.getTownDistrict(),
                                             shop.getDepartmentCount(),

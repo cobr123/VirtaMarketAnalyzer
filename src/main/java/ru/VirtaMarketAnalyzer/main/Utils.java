@@ -31,7 +31,7 @@ public final class Utils {
     }
 
     public static void writeToGson(final String path, final Object obj) throws IOException {
-        logger.info(path);
+        logger.trace(path);
         Utils.writeFile(path, getGson(obj));
     }
 

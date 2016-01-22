@@ -42,6 +42,10 @@ public final class Wizard {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
         }
+        final File localPathFile = new File(GitHubPublisher.localPath);
+        if (localPathFile.exists()) {
+            FileUtils.deleteDirectory(localPathFile);
+        }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
         //собираем данные со всех реалмов и продуктов
@@ -96,7 +100,7 @@ public final class Wizard {
         //собираем данные из магазинов
         final List<Shop> shops = TopRetailParser.getShopList(host, realm, cities, products);
         //группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой
-        final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats);
+        final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, products);
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             Utils.writeToGson(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
         }

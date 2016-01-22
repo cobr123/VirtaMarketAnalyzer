@@ -10,6 +10,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public final class RetailAnalytics {
     @SerializedName("pi")
     private final String productId;
+    @SerializedName("pc")
+    private final String productCategory;
     @SerializedName("ss")
     private final int shopSize;
     @SerializedName("td")
@@ -49,15 +51,17 @@ public final class RetailAnalytics {
     @SerializedName("lq")
     final private double localQuality;
 
-    public RetailAnalytics(final String productId, final int shopSize, final String townDistrict, final double departmentCount,
+    public RetailAnalytics(final String productId, final String productCategory, final int shopSize, final String townDistrict, final double departmentCount,
                            final double notoriety, final String visitorsCount, final String serviceLevel,
                            final String sellVolume, final double price, final double quality, final double brand,
                            final double wealthIndex, final double educationIndex, final double averageSalary,
                            final String marketIdx, final long marketVolume, final long sellerCnt, final double localPercent,
                            final double localPrice, final double localQuality) {
         this.productId = productId;
+        this.productCategory = productCategory;
         this.shopSize = shopSize;
         this.townDistrict = townDistrict.replace("City centre", "Центр города")
+                .replace("Residential area", "Спальный район")
                 .replace("Centro de la ciudad", "Центр города")
                 .replace("Trendy neighborhood", "Фешенебельный район");
         this.departmentCount = departmentCount;
@@ -80,8 +84,9 @@ public final class RetailAnalytics {
     }
 
     //для совместимости
-    public RetailAnalytics(final String productId, final RetailAnalytics ra) {
+    public RetailAnalytics(final String productId, final String productCategory, final RetailAnalytics ra) {
         this.productId = productId;
+        this.productCategory = productCategory;
         this.shopSize = ra.shopSize;
         this.townDistrict = ra.townDistrict;
         this.departmentCount = ra.departmentCount;
@@ -103,9 +108,9 @@ public final class RetailAnalytics {
         this.localQuality = ra.localQuality;
     }
 
-    public static RetailAnalytics fillProductId(final String productId, final RetailAnalytics ra) {
-        if (ra.getProductId() == null || ra.getProductId().isEmpty()) {
-            return new RetailAnalytics(productId, ra);
+    public static RetailAnalytics fillProductId(final String productId, final String productCategory, final RetailAnalytics ra) {
+        if (ra.getProductId() == null || ra.getProductId().isEmpty() || ra.getProductCategory() == null || ra.getProductCategory().isEmpty()) {
+            return new RetailAnalytics(productId, productCategory, ra);
         } else {
             return ra;
         }
@@ -115,6 +120,7 @@ public final class RetailAnalytics {
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(productId)
+                .append(productCategory)
                 .append(shopSize)
                 .append(townDistrict)
                 .append(departmentCount)
@@ -143,6 +149,7 @@ public final class RetailAnalytics {
             final RetailAnalytics other = (RetailAnalytics) obj;
             return new EqualsBuilder()
                     .append(productId, other.productId)
+                    .append(productCategory, other.productCategory)
                     .append(shopSize, other.shopSize)
                     .append(townDistrict, other.townDistrict)
                     .append(departmentCount, other.departmentCount)
@@ -172,12 +179,19 @@ public final class RetailAnalytics {
         return productId;
     }
 
+    public String getProductCategory() {
+        return productCategory;
+    }
+
     public int getShopSize() {
         return shopSize;
     }
 
     public String getTownDistrict() {
-        return townDistrict;
+        return townDistrict.replace("City centre", "Центр города")
+                .replace("Residential area", "Спальный район")
+                .replace("Centro de la ciudad", "Центр города")
+                .replace("Trendy neighborhood", "Фешенебельный район");
     }
 
     public double getDepartmentCount() {

@@ -9,6 +9,7 @@ import org.apache.log4j.PatternLayout;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
@@ -42,7 +43,7 @@ final public class GitHubPublisher {
     public static void publishRetail(final List<String> realms) throws IOException, GitAPIException {
         final Git git = getRepo();
         copyToLocalRepo(realms);
-        final String pattern = "./" + Wizard.by_trade_at_cities + "/.";
+        final String pattern = ".";
         logger.info("git add " + pattern);
         git.add().addFilepattern(pattern).call();
         logger.info("git commit");
@@ -54,7 +55,7 @@ final public class GitHubPublisher {
 
     public static void publishPredictions() throws IOException, GitAPIException {
         final Git git = getRepo();
-        final String pattern = "./" + RetailSalePrediction.predict_retail_sales + "/.";
+        final String pattern = ".";
         logger.info("git add " + pattern);
         git.add().addFilepattern(pattern).call();
         logger.info("git commit");
@@ -67,6 +68,7 @@ final public class GitHubPublisher {
     public static List<String> getAllVersions(final Git git, final String file) throws IOException, GitAPIException {
         final List<String> list = new ArrayList<>();
         final Iterable<RevCommit> logs = git.log()
+                .add(git.getRepository().resolve(Constants.HEAD))
                 .addPath(file)
                 .call();
         for (final RevCommit rev : logs) {
@@ -184,7 +186,8 @@ final public class GitHubPublisher {
 
     public static void testGetAllVersions() throws IOException, GitAPIException {
         final Git git = getRepo();
-        final List<String> list = getAllVersions(git, Wizard.by_trade_at_cities + "/" + "olga" + "/" + "retail_analytics_1526.json");
+        final List<String> list = getAllVersions(git, Wizard.by_trade_at_cities + "/" + "olga" + "/" + "retail_analytics_380000.json");
+        logger.info("getAllVersions.size = {}", list.size());
         final Set<RetailAnalytics> set = new HashSet<>();
 
         for (String file : list) {
