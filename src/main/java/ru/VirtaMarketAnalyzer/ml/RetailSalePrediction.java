@@ -19,6 +19,7 @@ import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
+import weka.classifiers.functions.LibSVM;
 import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -137,6 +138,7 @@ public final class RetailSalePrediction {
                 saver.setFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff"));
                 saver.writeBatch();
 
+                //trainLibSvm(trainingSet);
                 trainJ48BySet(trainingSet);
                 trainJ48CrossValidation(trainingSet);
 
@@ -149,6 +151,19 @@ public final class RetailSalePrediction {
         }
     }
 
+    public static void trainLibSvm(final Instances trainingSet) throws Exception {
+        // Create a classifier
+        final LibSVM tree = new LibSVM();
+        tree.buildClassifier(trainingSet);
+
+        // Test the model
+        final Evaluation eval = new Evaluation(trainingSet);
+        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+
+    }
     public static void trainJ48BySet(final Instances trainingSet) throws Exception {
         // Create a classifier
         final J48 tree = new J48();
