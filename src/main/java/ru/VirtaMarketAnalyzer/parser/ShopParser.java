@@ -30,11 +30,12 @@ public final class ShopParser {
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        final String url = "http://virtonomica.ru/olga/main/unit/view/5788675";
-        final String url = "http://virtonomica.ru/mary/main/unit/view/3463932";
+        final String url = "http://virtonomica.ru/vera/main/unit/view/6199090";
         final List<City> cities = new ArrayList<>();
-        cities.add(new City("7060", "7062", "7073", "Астана", 0.0, 0.0, 0.0));
+        cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0));
         final List<Product> products = new ArrayList<>();
         products.add(new Product("категория", "/img/products/bourbon.gif", "123", "Бурбон"));
+        products.add(new Product("категория", "/img/products/gps.gif", "123", "GPS-навигаторы"));
         System.out.println(Utils.getPrettyGson(parse(url, cities, products)));
     }
 
@@ -47,31 +48,31 @@ public final class ShopParser {
         doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").first().children().remove();
         final String dyrtyCaption = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").text();
         final String dyrtyCaptionReplaced = dyrtyCaption.replaceFirst("\\([^\\)]*\\)$", "").trim()
-                .replace("San Diego","Сан-Диего")
-                .replace("Indianapolis","Индианаполис")
-                .replace("San Luis Potosí","Сан-Луис-Потоси")
-                .replace("San Luis Potosi","Сан-Луис-Потоси")
-                .replace("León","Леон")
-                .replace("Filadelfia","Филадельфия")
-                .replace("Tartu","Тарту")
-                .replace("Belfast","Белфаст")
-                .replace("Lisburn","Лисберн")
-                .replace("Leeds","Лидс")
-                .replace("Coventry","Ковентри")
-                .replace("Bamako","Бамако")
-                .replace("Los Angeles","Лос-Анджелес")
-                .replace("Hartford","Хартфорд")
-                .replace("Rotterdam","Роттердам")
-                .replace("Andijon","Андижан")
-                .replace("Almere","Алмере")
-                .replace("Moscow","Москва")
-                .replace("Lipetsk","Липецк")
-                .replace("Perm","Пермь")
-                .replace("Ufa","Уфа")
-                .replace("Omsk","Омск")
-                .replace("Vladivostok","Владивосток")
-                .replace("Nizhni Novgorod","Нижний Новгород")
-                .replace("Rhodes","Родос");
+                .replace("San Diego", "Сан-Диего")
+                .replace("Indianapolis", "Индианаполис")
+                .replace("San Luis Potosí", "Сан-Луис-Потоси")
+                .replace("San Luis Potosi", "Сан-Луис-Потоси")
+                .replace("León", "Леон")
+                .replace("Filadelfia", "Филадельфия")
+                .replace("Tartu", "Тарту")
+                .replace("Belfast", "Белфаст")
+                .replace("Lisburn", "Лисберн")
+                .replace("Leeds", "Лидс")
+                .replace("Coventry", "Ковентри")
+                .replace("Bamako", "Бамако")
+                .replace("Los Angeles", "Лос-Анджелес")
+                .replace("Hartford", "Хартфорд")
+                .replace("Rotterdam", "Роттердам")
+                .replace("Andijon", "Андижан")
+                .replace("Almere", "Алмере")
+                .replace("Moscow", "Москва")
+                .replace("Lipetsk", "Липецк")
+                .replace("Perm", "Пермь")
+                .replace("Ufa", "Уфа")
+                .replace("Omsk", "Омск")
+                .replace("Vladivostok", "Владивосток")
+                .replace("Nizhni Novgorod", "Нижний Новгород")
+                .replace("Rhodes", "Родос");
         String townId;
         try {
             townId = cities.stream()
@@ -107,17 +108,18 @@ public final class ShopParser {
                 if (row.select("> td:nth-child(1) > img").first().attr("src").contains("/brand/")) {
                     continue;
                 }
-                final String productId = productsByImgSrc.get(row.select("> td:nth-child(1) > img").first().attr("src")).get(0).getId();
-                final String sellVolume = row.select("> td:nth-child(2)").first().text().trim();
-                final double quality = Utils.toDouble(row.select("> td:nth-child(3)").first().text());
-                final double brand = Utils.toDouble(row.select("> td:nth-child(4)").first().text());
-                final double price = Utils.toDouble(row.select("> td:nth-child(5)").first().text());
-                final double marketShare = Utils.toDouble(row.select("> td:nth-child(6)").first().text());
+                final String productId = productsByImgSrc.get(row.select("> td:eq(0) > img").first().attr("src")).get(0).getId();
+                final String sellVolume = row.select("> td").eq(1).text().trim();
+                final double quality = Utils.toDouble(row.select("> td").eq(2).text());
+                final double brand = Utils.toDouble(row.select("> td").eq(3).text());
+                final double price = Utils.toDouble(row.select("> td").eq(4).text());
+                final double marketShare = Utils.toDouble(row.select("> td").eq(5).text());
 
                 final ShopProduct shopProduct = new ShopProduct(productId, sellVolume, price, quality, brand, marketShare);
                 shopProducts.add(shopProduct);
             } catch (final Exception e) {
-                logger.info("rows.size() = " + rows.size());
+                logger.info("url = {}", url);
+                logger.info("rows.size() = {}", rows.size());
                 logger.error(row.outerHtml());
                 logger.error(e.getLocalizedMessage(), e);
             }
