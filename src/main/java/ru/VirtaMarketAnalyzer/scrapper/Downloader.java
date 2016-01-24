@@ -68,7 +68,7 @@ public final class Downloader {
                     break;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
-                    logger.error("Ошибка: ", e);
+                    logger.trace("Ошибка: ", e);
                     if (maxTriesCnt == tries) {
                         throw new IOException(e);
                     } else {
