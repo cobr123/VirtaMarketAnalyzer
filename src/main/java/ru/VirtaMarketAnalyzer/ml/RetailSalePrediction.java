@@ -88,12 +88,14 @@ public final class RetailSalePrediction {
     public static List<Product> getAllProducts(final File dir) throws IOException {
         final Set<Product> set = new HashSet<>();
         for (final File realmDir : dir.listFiles()) {
-            for (final File file : realmDir.listFiles()) {
-                if (file.getName().equals("products.json")) {
-                    final String text = FileUtils.readFileToString(file, "UTF-8");
-                    final Product[] arr = new GsonBuilder().create().fromJson(text, Product[].class);
-                    for (final Product item : arr) {
-                        set.add(item);
+            if (realmDir.isDirectory()) {
+                for (final File file : realmDir.listFiles()) {
+                    if (file.isFile() && file.getName().equals("products.json")) {
+                        final String text = FileUtils.readFileToString(file, "UTF-8");
+                        final Product[] arr = new GsonBuilder().create().fromJson(text, Product[].class);
+                        for (final Product item : arr) {
+                            set.add(item);
+                        }
                     }
                 }
             }
@@ -103,24 +105,30 @@ public final class RetailSalePrediction {
 
     public static void createCommonPrediction() throws IOException, GitAPIException {
         final Set<RetailAnalytics> set = new HashSet<>();
-        final File dir = new File(Utils.getDir() + Wizard.by_trade_at_cities + File.separator);
+        final File dir = new File(GitHubPublisher.localPath + Wizard.by_trade_at_cities + File.separator);
         final Git git = GitHubPublisher.getRepo();
         final List<Product> products = getAllProducts(dir);
+        logger.trace("dir = {}", dir.getAbsoluteFile());
         final Set<String> productCategories = products.stream().map(Product::getProductCategory).collect(Collectors.toSet());
         for (final File realmDir : dir.listFiles()) {
-            for (final File file : realmDir.listFiles()) {
-                if (file.getName().startsWith(RETAIL_ANALYTICS_)) {
-                    final List<String> list = GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realmDir.getName() + "/" + file.getName());
-                    final String productId = Utils.getLastBySep(FilenameUtils.removeExtension(file.getName()), "_");
-                    final Product product = products.stream().filter(p -> p.getId().equals(productId)).findFirst().get();
-                    for (final String str : list) {
-                        try {
-                            final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(str, RetailAnalytics[].class);
-                            for (final RetailAnalytics ra : arr) {
-                                set.add(RetailAnalytics.fillProductId(product.getId(), product.getProductCategory(), ra));
+            if (realmDir.isDirectory()) {
+                for (final File file : realmDir.listFiles()) {
+                    if (file.isFile() && file.getName().startsWith(RETAIL_ANALYTICS_)) {
+                        final List<String> list = GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realmDir.getName() + "/" + file.getName());
+                        final String productId = Utils.getLastBySep(FilenameUtils.removeExtension(file.getName()), "_");
+                        final Product product = products.stream().filter(p -> p.getId().equals(productId)).findFirst().get();
+                        for (final String str : list) {
+                            try {
+                                final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(str, RetailAnalytics[].class);
+                                for (final RetailAnalytics ra : arr) {
+                                    //раньше посетители были числом, теперь как объем продаж, например "менее 50"
+                                    if (ra.getVisitorsCount().contains(" ")) {
+                                        set.add(RetailAnalytics.fillProductId(product.getId(), product.getProductCategory(), ra));
+                                    }
+                                }
+                            } catch (final Exception e) {
+                                logger.error(e.getLocalizedMessage(), e);
                             }
-                        } catch (final Exception e) {
-                            logger.error(e.getLocalizedMessage(), e);
                         }
                     }
                 }
@@ -128,6 +136,7 @@ public final class RetailSalePrediction {
         }
 
         logger.info("set.size() = " + set.size());
+
         if (!set.isEmpty()) {
             final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
             try {
@@ -164,6 +173,7 @@ public final class RetailSalePrediction {
         logger.info(eval.toSummaryString());
 
     }
+
     public static void trainJ48BySet(final Instances trainingSet) throws Exception {
         // Create a classifier
         final J48 tree = new J48();

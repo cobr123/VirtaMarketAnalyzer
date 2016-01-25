@@ -28,10 +28,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by cobr123 on 06.05.2015.
@@ -71,12 +68,14 @@ final public class GitHubPublisher {
                 .add(git.getRepository().resolve(Constants.HEAD))
                 .addPath(file)
                 .call();
+        logger.trace("file = {}", file);
         for (final RevCommit rev : logs) {
             logger.trace("Commit: {}, name: {}, id: {}", rev, rev.getName(), rev.getId().getName());
             final ByteArrayOutputStream os = new ByteArrayOutputStream();
             getFileFromCommit(os, file, git.getRepository(), rev.getTree());
             list.add(os.toString("UTF-8"));
         }
+        logger.trace("logs.count = {}", list.size());
         return list;
     }
 
