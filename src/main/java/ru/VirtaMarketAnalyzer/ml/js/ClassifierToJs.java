@@ -2,15 +2,14 @@ package ru.VirtaMarketAnalyzer.ml.js;
 
 import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
-import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
+import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 import weka.classifiers.Classifier;
 import weka.classifiers.trees.J48;
 import weka.classifiers.trees.j48.C45Split;
@@ -26,17 +25,13 @@ import java.lang.reflect.Field;
  */
 public final class ClassifierToJs {
     private static final Logger logger = LoggerFactory.getLogger(ClassifierToJs.class);
-    private static long printID = 0;
+    private static long PRINT_ID = 0;
 
     public static void main(String[] args) throws Exception {
-        final String realm = "olga";
-        final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
-        File dir = new File(baseDir + "weka" + File.separator + "java" + File.separator);
-        for (final File file : dir.listFiles()) {
-            final J48 tree = (J48) loadModel(file.getAbsolutePath());
-            final String path = file.getAbsolutePath().replace(".model", ".js").replace(File.separator + "java" + File.separator, File.separator + "js" + File.separator);
-            FileUtils.writeStringToFile(new File(path), ClassifierToJs.toSource(tree, "predictByProd" + FilenameUtils.removeExtension(file.getName())), "UTF-8");
-        }
+        final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.model");
+        final J48 tree = (J48) loadModel(file.getAbsolutePath());
+        final String path = file.getAbsolutePath().replace(".model", ".test.js");
+        FileUtils.writeStringToFile(new File(path), ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
     }
 
     public static Classifier loadModel(final String path) throws Exception {
@@ -101,9 +96,11 @@ public final class ClassifierToJs {
     }
 
     public static String toSource(final J48 tree, final String prefix) throws Exception {
-        printID = 0;
+        PRINT_ID = 0;
         /** The decision tree */
         final ClassifierTree m_root = (ClassifierTree) getPrivateFieldValue(tree.getClass(), tree, "m_root");
+        /** Local model at node. */
+        final ClassifierSplitModel m_localModel = (ClassifierSplitModel) getPrivateFieldValue(m_root.getClass(), m_root, "m_localModel");
 
         final StringBuilder[] source = toSourceClassifierTree(m_root, prefix);
         final StringBuilder sb = new StringBuilder();
@@ -122,7 +119,7 @@ public final class ClassifierToJs {
         sb.append("    return param;\n");
         sb.append("  }\n");
 
-        sb.append("  function getValueByPredictionIdx(idx){\n");
+        sb.append("  function getValueFor" + WordUtils.capitalize(prefix) + "(idx){\n");
         sb.append("    values = [];\n");
         sb.append("    values[0] = 'менее 50';\n");
         sb.append("    values[1] = 'около 50';\n");
@@ -137,11 +134,12 @@ public final class ClassifierToJs {
         sb.append("  }\n");
 
         return sb.toString()
-                + "  function " + prefix + "(i) {\n"
-                + "    p = " + prefix + "N1(i);\n"
-                + "    return getValueByPredictionIdx(p);\n"
+                + "  function " + prefix + "() {\n"
+                + "    i = getParamFor" + WordUtils.capitalize(prefix) + "();\n"
+                + "    p = " + prefix + "Classify(i);\n"
+                + "    return getValueFor" + WordUtils.capitalize(prefix) + "(p);\n"
                 + "  }\n"
-                + "  function " + prefix + "classify(i) {\n"
+                + "  function " + prefix + "Classify(i) {\n"
                 + "    p = NaN;\n"
                 + source[0]  // Assignment code
                 + "    return p;\n"
@@ -182,10 +180,11 @@ public final class ClassifierToJs {
             final StringBuilder atEnd = new StringBuilder();
 
             //nextID
-            printID++;
+            PRINT_ID++;
+            final long printID = PRINT_ID;
 
             text.append("  function ").append(prefix).append("N")
-                    .append(/*Integer.toHexString(m_localModel.hashCode()) +*/ printID)
+                    .append(Integer.toHexString(m_localModel.hashCode()) + printID)
                     .append("(i) {\n")
                     .append("    p = NaN;\n");
 
@@ -214,7 +213,7 @@ public final class ClassifierToJs {
             text.append("    return p;\n  }\n");
 
             result[0] = new StringBuilder("    p = " + prefix + "N");
-            result[0].append(/*Integer.toHexString(m_localModel.hashCode()) + */printID)
+            result[0].append(Integer.toHexString(m_localModel.hashCode()) + printID)
                     .append("(i);\n");
             result[1] = text.append(atEnd);
         }

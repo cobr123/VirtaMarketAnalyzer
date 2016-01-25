@@ -3,12 +3,14 @@
 
 ## Directory-based project format:
 .idea/
+logs/
 
 ## File-based project format:
 *.ipr
 *.iws
 
 ## Plugin-specific files:
+run.bat
 
 # IntelliJ
 /out/

@@ -182,6 +182,7 @@ public final class RetailSalePrediction {
         tree.setReducedErrorPruning(true);
         //
         tree.buildClassifier(trainingSet);
+//        ClassifierToJs.saveModel(tree, GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.model");
 
         // Test the model
         final Evaluation eval = new Evaluation(trainingSet);
