@@ -60,10 +60,7 @@ public final class RetailAnalytics {
         this.productId = productId;
         this.productCategory = productCategory;
         this.shopSize = shopSize;
-        this.townDistrict = townDistrict.replace("City centre", "Центр города")
-                .replace("Residential area", "Спальный район")
-                .replace("Centro de la ciudad", "Центр города")
-                .replace("Trendy neighborhood", "Фешенебельный район");
+        this.townDistrict = fixTownDistrict(townDistrict);
         this.departmentCount = departmentCount;
         this.notoriety = notoriety;
         this.visitorsCount = visitorsCount;
@@ -81,6 +78,15 @@ public final class RetailAnalytics {
         this.localPercent = localPercent;
         this.localPrice = localPrice;
         this.localQuality = localQuality;
+    }
+
+    public static String fixTownDistrict(final String townDistrict) {
+        return townDistrict
+                .replace("City centre", "Центр города")
+                .replace("Центр міста", "Центр города")
+                .replace("Centro de la ciudad", "Центр города")
+                .replace("Residential area", "Спальный район")
+                .replace("Trendy neighborhood", "Фешенебельный район");
     }
 
     //для совместимости
@@ -188,10 +194,7 @@ public final class RetailAnalytics {
     }
 
     public String getTownDistrict() {
-        return townDistrict.replace("City centre", "Центр города")
-                .replace("Residential area", "Спальный район")
-                .replace("Centro de la ciudad", "Центр города")
-                .replace("Trendy neighborhood", "Фешенебельный район");
+        return fixTownDistrict(townDistrict);
     }
 
     public double getDepartmentCount() {
