@@ -72,6 +72,8 @@ public final class ShopParser {
                 .replace("Omsk", "Омск")
                 .replace("Vladivostok", "Владивосток")
                 .replace("Nizhni Novgorod", "Нижний Новгород")
+                .replace("Харків", "Харьков")
+                .replace("Львів", "Львов")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
