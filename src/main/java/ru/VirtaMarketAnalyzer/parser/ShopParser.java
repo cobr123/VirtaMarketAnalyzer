@@ -74,6 +74,22 @@ public final class ShopParser {
                 .replace("Nizhni Novgorod", "Нижний Новгород")
                 .replace("Харків", "Харьков")
                 .replace("Львів", "Львов")
+                .replace("Novosibirsk", "Новосибирск")
+                .replace("Khabarovsk", "Хабаровск")
+                .replace("Hongkong", "Гонконг")
+                .replace("Nankin", "Нанкин")
+                .replace("Amsterdam", "Амстердам")
+                .replace("Beijing", "Пекин")
+                .replace("Singapore", "Сингапур")
+                .replace("Chengdu", "Чэнду")
+                .replace("Shimkent", "Шымкент")
+                .replace("Guangzhou", "Гуанчжоу")
+                .replace("Shanghai", "Шанхай")
+                .replace("Seoul", "Сеул")
+                .replace("Hanoi", "Ханой")
+                .replace("Bangkok", "Бангкок")
+                .replace("Hoshimin", "Хошимин")
+                .replace("San Antonio", "Сан-Антонио")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
