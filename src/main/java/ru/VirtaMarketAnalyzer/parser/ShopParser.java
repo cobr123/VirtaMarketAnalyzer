@@ -90,6 +90,20 @@ public final class ShopParser {
                 .replace("Bangkok", "Бангкок")
                 .replace("Hoshimin", "Хошимин")
                 .replace("San Antonio", "Сан-Антонио")
+                .replace("Santiago de Cuba", "Сантьяго-де-Куба")
+                .replace("Pretoria", "Претория")
+                .replace("Aguascalientes", "Агуаскальентес")
+                .replace("Phoenix", "Финикс")
+                .replace("Vilnius", "Вильнюс")
+                .replace("Camaguey", "Камагуэй")
+                .replace("Klaipeda", "Клайпеда")
+                .replace("Buenos Aires", "Буэнос Айрес")
+                .replace("Bergen", "Берген")
+                .replace("Ecatepec de Morelos", "Экатепек-де-Морелос")
+                .replace("Narva", "Нарва")
+                .replace("Madrid", "Мадрид")
+                .replace("Liepaja", "Лиепая")
+                .replace("San Miguel de Tucuman", "Сан-Мигель-де-Тукуман")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
