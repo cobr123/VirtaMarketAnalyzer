@@ -63,6 +63,7 @@ public final class Downloader {
                         logger.trace("referrer: {}", referrer);
                         conn.referrer(referrer);
                     }
+                    conn.header("Accept-Language", "ru");
                     final Document doc = conn.get();
                     Utils.writeFile(fileToSave, doc.outerHtml());
                     break;
