@@ -26,6 +26,7 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
+import weka.filters.unsupervised.instance.Normalize;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -148,8 +149,13 @@ public final class RetailSalePrediction {
                 saver.writeBatch();
 
                 //trainLibSvm(trainingSet);
-                trainJ48BySet(trainingSet);
-                trainJ48CrossValidation(trainingSet);
+                //logger.info("begin trainJ48BySet");
+                //trainJ48BySet(trainingSet);
+                //logger.info("end trainJ48BySet");
+
+//                logger.info("begin trainJ48CrossValidation");
+//                trainJ48CrossValidation(trainingSet);
+//                logger.info("end trainJ48CrossValidation");
 
                 //запоминаем дату обновления данных
                 final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -180,6 +186,7 @@ public final class RetailSalePrediction {
         tree.setMinNumObj(1);
         //tree.setConfidenceFactor(0.5f);
         tree.setReducedErrorPruning(true);
+        //tree.setDebug(true);
         //
         tree.buildClassifier(trainingSet);
 //        ClassifierToJs.saveModel(tree, GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.model");
@@ -206,6 +213,7 @@ public final class RetailSalePrediction {
         tree.setMinNumObj(1);
         //tree.setConfidenceFactor(0.5f);
         tree.setReducedErrorPruning(true);
+        tree.setDebug(true);
 
         //evaluate j48 with cross validation
         final Evaluation eval = new Evaluation(trainingSet);
@@ -331,6 +339,22 @@ public final class RetailSalePrediction {
                 final FastVector fv = new FastVector(productCategories.size());
                 productCategories.forEach(fv::addElement);
                 attrs.addElement(new Attribute(attr.name(), fv));
+            } else if (attr.ordinal() == ATTR.DEPARTMENT_COUNT.ordinal()) {
+                final int maxDepCnt = retailAnalytics.parallelStream().max((o1, o2) -> o1.getDepartmentCount() - o2.getDepartmentCount()).get().getDepartmentCount();
+                logger.info("maxDepCnt =  {}", maxDepCnt);
+                final FastVector fv = new FastVector(maxDepCnt);
+                for (int i = 1; i <= maxDepCnt; ++i) {
+                    fv.addElement(i + "");
+                }
+                attrs.addElement(new Attribute(attr.name(), fv));
+            } else if (attr.ordinal() == ATTR.SELLER_COUNT.ordinal()) {
+                final int maxSellerCnt = retailAnalytics.parallelStream().max((o1, o2) -> o1.getSellerCnt() - o2.getSellerCnt()).get().getSellerCnt();
+                logger.info("maxSellerCnt =  {}", maxSellerCnt);
+                final FastVector fv = new FastVector(maxSellerCnt + 1);
+                for (int i = 0; i <= maxSellerCnt; ++i) {
+                    fv.addElement(i + "");
+                }
+                attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.SELL_VOLUME.ordinal() || attr.ordinal() == ATTR.VISITORS_COUNT.ordinal()) {
                 final FastVector values = new FastVector(numbers.length * words.length + 2);
                 values.addElement("менее 50");
@@ -384,14 +408,24 @@ public final class RetailSalePrediction {
             logger.info("retailAnalytics.getProductCategory() = '{}'", retailAnalytics.getProductCategory());
             throw e;
         }
-        instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_SIZE.ordinal()), retailAnalytics.getShopSize() + "");
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_SIZE.ordinal()), retailAnalytics.getShopSize() + "");
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getShopSize() = '{}'", retailAnalytics.getShopSize());
+            throw e;
+        }
         try {
             instance.setValue((Attribute) attrs.elementAt(ATTR.TOWN_DISTRICT.ordinal()), retailAnalytics.getTownDistrict());
         } catch (final Exception e) {
             logger.info("retailAnalytics.getTownDistrict() = '{}'", retailAnalytics.getTownDistrict());
             throw e;
         }
-        instance.setValue((Attribute) attrs.elementAt(ATTR.DEPARTMENT_COUNT.ordinal()), retailAnalytics.getDepartmentCount());
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.DEPARTMENT_COUNT.ordinal()), retailAnalytics.getDepartmentCount() + "");
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getDepartmentCount() = '{}'", retailAnalytics.getDepartmentCount());
+            throw e;
+        }
         instance.setValue((Attribute) attrs.elementAt(ATTR.NOTORIETY.ordinal()), retailAnalytics.getNotoriety());
         try {
             instance.setValue((Attribute) attrs.elementAt(ATTR.VISITORS_COUNT.ordinal()), retailAnalytics.getVisitorsCount());
@@ -405,7 +439,12 @@ public final class RetailSalePrediction {
             logger.info("retailAnalytics.getServiceLevel() = '{}'", retailAnalytics.getServiceLevel());
             throw e;
         }
-        instance.setValue((Attribute) attrs.elementAt(ATTR.SELLER_COUNT.ordinal()), retailAnalytics.getSellerCnt());
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.SELLER_COUNT.ordinal()), retailAnalytics.getSellerCnt() + "");
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getSellerCnt() = '{}'", retailAnalytics.getSellerCnt());
+            throw e;
+        }
 
         instance.setValue((Attribute) attrs.elementAt(ATTR.BRAND.ordinal()), retailAnalytics.getBrand());
         instance.setValue((Attribute) attrs.elementAt(ATTR.PRICE.ordinal()), retailAnalytics.getPrice());
