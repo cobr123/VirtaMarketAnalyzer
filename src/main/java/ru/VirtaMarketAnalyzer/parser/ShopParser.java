@@ -103,6 +103,7 @@ public final class ShopParser {
                 .replace("Narva", "Нарва")
                 .replace("Madrid", "Мадрид")
                 .replace("Liepaja", "Лиепая")
+                .replace("Київ", "Киев")
                 .replace("San Miguel de Tucuman", "Сан-Мигель-де-Тукуман")
                 .replace("Rhodes", "Родос");
         String townId;
