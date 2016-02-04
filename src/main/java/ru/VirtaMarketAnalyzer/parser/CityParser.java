@@ -92,7 +92,7 @@ public final class CityParser {
 
         builder.setMarketIdx(table.select("table > tbody > tr > td").eq(2).text().replaceAll("[\\W]+", ""));
         builder.setVolume(Utils.toLong(table.select("table > tbody > tr > td").eq(4).text()));
-        builder.setSellerCnt(Utils.toLong(table.select("table > tbody > tr > td").eq(6).text()));
+        builder.setSellerCnt(Utils.toInt(table.select("table > tbody > tr > td").eq(6).text()));
         builder.setCompaniesCnt(Utils.toLong(table.select("table > tbody > tr > td").eq(8).text()));
 
         builder.setProductId(product.getId());

@@ -17,7 +17,7 @@ public final class RetailAnalytics {
     @SerializedName("td")
     private final String townDistrict;
     @SerializedName("dc")
-    private final double departmentCount;
+    private final int departmentCount;
     @SerializedName("n")
     private final double notoriety;
     @SerializedName("vc")
@@ -43,7 +43,7 @@ public final class RetailAnalytics {
     @SerializedName("mv")
     final private long marketVolume;
     @SerializedName("sc")
-    final private long sellerCnt;
+    final private int sellerCnt;
     @SerializedName("lpe")
     final private double localPercent;
     @SerializedName("lpr")
@@ -51,11 +51,11 @@ public final class RetailAnalytics {
     @SerializedName("lq")
     final private double localQuality;
 
-    public RetailAnalytics(final String productId, final String productCategory, final int shopSize, final String townDistrict, final double departmentCount,
+    public RetailAnalytics(final String productId, final String productCategory, final int shopSize, final String townDistrict, final int departmentCount,
                            final double notoriety, final String visitorsCount, final String serviceLevel,
                            final String sellVolume, final double price, final double quality, final double brand,
                            final double wealthIndex, final double educationIndex, final double averageSalary,
-                           final String marketIdx, final long marketVolume, final long sellerCnt, final double localPercent,
+                           final String marketIdx, final long marketVolume, final int sellerCnt, final double localPercent,
                            final double localPrice, final double localQuality) {
         this.productId = productId;
         this.productCategory = productCategory;
@@ -197,7 +197,7 @@ public final class RetailAnalytics {
         return fixTownDistrict(townDistrict);
     }
 
-    public double getDepartmentCount() {
+    public int getDepartmentCount() {
         return departmentCount;
     }
 
@@ -249,7 +249,7 @@ public final class RetailAnalytics {
         return marketVolume;
     }
 
-    public long getSellerCnt() {
+    public int getSellerCnt() {
         return sellerCnt;
     }
 

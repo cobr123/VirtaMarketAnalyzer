@@ -126,7 +126,7 @@ public final class ShopParser {
         }
         final int shopSize = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
         final String townDistrict = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text();
-        final double departmentCount = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text());
+        final int departmentCount = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text());
         final double notoriety = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(5) > td:nth-child(2)").text());
         final String visitorsCount = doc.select("table.infoblock > tbody > tr:nth-child(6) > td:nth-child(2)").text().trim();
         final String serviceLevel = doc.select("table.infoblock > tbody > tr:nth-child(7) > td:nth-child(2)").text();

@@ -29,7 +29,7 @@ public final class TradeAtCity {
     @SerializedName("v")
     final private long volume;
     @SerializedName("sc")
-    final private long sellerCnt;
+    final private int sellerCnt;
     @SerializedName("cc")
     final private long companiesCnt;
     @SerializedName("lpe")
@@ -58,7 +58,7 @@ public final class TradeAtCity {
             , final double wealthIndex
             , final double educationIndex
             , final double averageSalary
-            , final long sellerCnt
+            , final int sellerCnt
             , final long companiesCnt
             , final double localPercent
             , final double localPrice
@@ -137,7 +137,7 @@ public final class TradeAtCity {
         return volume;
     }
 
-    public long getSellerCnt() {
+    public int getSellerCnt() {
         return sellerCnt;
     }
 

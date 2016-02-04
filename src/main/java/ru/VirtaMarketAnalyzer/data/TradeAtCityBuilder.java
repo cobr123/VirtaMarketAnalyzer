@@ -16,7 +16,7 @@ public final class TradeAtCityBuilder {
     private String productId;
     private String marketIdx;
     private long volume;
-    private long sellerCnt;
+    private int sellerCnt;
     private long companiesCnt;
     private double localPercent;
     private double localPrice;
@@ -105,7 +105,7 @@ public final class TradeAtCityBuilder {
         return this;
     }
 
-    public TradeAtCityBuilder setSellerCnt(final long sellerCnt) {
+    public TradeAtCityBuilder setSellerCnt(final int sellerCnt) {
         this.sellerCnt = sellerCnt;
         return this;
     }

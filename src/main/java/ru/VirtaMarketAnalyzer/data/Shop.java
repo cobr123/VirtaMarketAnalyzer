@@ -19,7 +19,7 @@ public final class Shop {
     @SerializedName("td")
     private final String townDistrict;
     @SerializedName("dc")
-    private final double departmentCount;
+    private final int departmentCount;
     @SerializedName("n")
     private final double notoriety;
     @SerializedName("vc")
@@ -30,7 +30,7 @@ public final class Shop {
     final private List<ShopProduct> shopProducts;
 
     public Shop(final String countryId, final String regionId, final String townId,
-                final int shopSize, final String townDistrict, final double departmentCount,
+                final int shopSize, final String townDistrict, final int departmentCount,
                 final double notoriety, final String visitorsCount, final String serviceLevel,
                 final List<ShopProduct> shopProducts) {
         this.countryId = countryId;
@@ -69,7 +69,7 @@ public final class Shop {
         return townDistrict;
     }
 
-    public double getDepartmentCount() {
+    public int getDepartmentCount() {
         return departmentCount;
     }
 
