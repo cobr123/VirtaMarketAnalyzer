@@ -33,7 +33,7 @@ public final class ProductRemainParser {
     public static Map<String, List<ProductRemain>> getRemains(final String url, final List<Product> materials) throws IOException {
         final Map<String, ProductRemain> map = new HashMap<>();
 
-        logger.info("греем кэш");
+        logger.info("греем кэш: {}", url);
         materials.stream()
                 .map(material -> url + material.getId())
                 .collect(Collectors.toList())
@@ -46,7 +46,7 @@ public final class ProductRemainParser {
                     }
                 });
 
-        logger.info("парсим остатки: " + materials.size());
+        logger.info("парсим остатки: {}, {}", materials.size(), url);
         for (final Product material : materials) {
             String nextPageUrl = url + material.getId();
             String ref = "";

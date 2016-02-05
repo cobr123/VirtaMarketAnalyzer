@@ -149,9 +149,9 @@ public final class RetailSalePrediction {
                 saver.writeBatch();
 
                 //trainLibSvm(trainingSet);
-                //logger.info("begin trainJ48BySet");
-                //trainJ48BySet(trainingSet);
-                //logger.info("end trainJ48BySet");
+//                logger.info("begin trainJ48BySet");
+//                trainJ48BySet(trainingSet);
+//                logger.info("end trainJ48BySet");
 
 //                logger.info("begin trainJ48CrossValidation");
 //                trainJ48CrossValidation(trainingSet);
@@ -213,7 +213,7 @@ public final class RetailSalePrediction {
         tree.setMinNumObj(1);
         //tree.setConfidenceFactor(0.5f);
         tree.setReducedErrorPruning(true);
-        tree.setDebug(true);
+//        tree.setDebug(true);
 
         //evaluate j48 with cross validation
         final Evaluation eval = new Evaluation(trainingSet);

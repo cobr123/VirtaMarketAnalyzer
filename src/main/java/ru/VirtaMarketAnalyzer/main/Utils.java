@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,6 +72,15 @@ public final class Utils {
 
     public static String clearNumber(final String text) {
         return text.replace("$", "").replace("+", "").replace("%", "").replaceAll("\\p{InCyrillic}+\\.?", "").replaceAll("\\s+", "").trim();
+    }
+
+    public static int doubleToInt(final double num) {
+        final int res = (int) num;
+        if (res == num) {
+            return res;
+        } else {
+            throw new IllegalArgumentException("Не удалось преобразовать double \"" + num + "\" в int без потери точности");
+        }
     }
 
     public static double toDouble(final String text) {
