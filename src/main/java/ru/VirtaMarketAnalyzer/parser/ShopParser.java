@@ -30,7 +30,8 @@ public final class ShopParser {
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        final String url = "http://virtonomica.ru/olga/main/unit/view/5788675";
-        final String url = "http://virtonomica.ru/vera/main/unit/view/6199090";
+        final String url = "http://virtonomica.ru/mary/main/unit/view/3943258";
+//        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
         cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0));
         final List<Product> products = new ArrayList<>();
@@ -115,6 +116,25 @@ public final class ShopParser {
                 .replace("Xi'an", "Сиань")
                 .replace("Manila", "Манила")
                 .replace("ChiangMai", "Чиенгмай")
+                .replace("Jacksonville", "Джексонвиль")
+                .replace("Memphis", "Мемфис")
+                .replace("Washington", "Вашингтон")
+                .replace("Charlotte", "Шарлотт")
+                .replace("Bristol", "Бристоль")
+                .replace("Guadalupe", "Гуадалупе")
+                .replace("New York", "Нью-Йорк")
+                .replace("Tijuana", "Тихуана")
+                .replace("Saint-Étienne", "Сент-Этьен")
+                .replace("Dortmund", "Дортмунд")
+                .replace("Montpellier", "Монпелье")
+                .replace("Las Palmas de Gran Canaria", "Лас-Пальмас-де-Гран-Канария")
+                .replace("Sevilla", "Севилья")
+                .replace("Gao", "Гао")
+                .replace("Samarqand", "Самарканд")
+                .replace("Abu Dhabi", "Абу-Даби")
+                .replace("Stuttgart", "Штутгарт")
+                .replace("La Plata", "Ла-Плата")
+                .replace("Gaziantep", "Газиантеп")
                 .replace("Rhodes", "Родос");
         String townId;
         try {

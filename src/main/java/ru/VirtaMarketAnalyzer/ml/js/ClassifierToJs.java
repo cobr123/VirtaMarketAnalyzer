@@ -100,7 +100,7 @@ public final class ClassifierToJs {
         /** The decision tree */
         final ClassifierTree m_root = (ClassifierTree) getPrivateFieldValue(tree.getClass(), tree, "m_root");
         /** Local model at node. */
-        final ClassifierSplitModel m_localModel = (ClassifierSplitModel) getPrivateFieldValue(m_root.getClass(), m_root, "m_localModel");
+//        final ClassifierSplitModel m_localModel = (ClassifierSplitModel) getPrivateFieldValue(m_root.getClass(), m_root, "m_localModel");
 
         final StringBuilder[] source = toSourceClassifierTree(m_root, prefix);
         final StringBuilder sb = new StringBuilder();
