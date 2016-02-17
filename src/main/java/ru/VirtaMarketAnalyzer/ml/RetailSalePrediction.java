@@ -54,6 +54,7 @@ public final class RetailSalePrediction {
     };
     public static final String[] words = new String[]{"около", "более"};
     public static final String RETAIL_ANALYTICS_ = "retail_analytics_";
+    public static final String RETAIL_ANALYTICS_HIST = "retail_analytics_hist";
     public static final String WEKA = "weka";
 
     public enum ATTR {
@@ -139,14 +140,23 @@ public final class RetailSalePrediction {
         logger.info("set.size() = " + set.size());
 
         if (!set.isEmpty()) {
+            //группируем аналитику по товарам и сохраняем
+            final Map<String, List<RetailAnalytics>> retailAnalyticsHist = set.parallelStream()
+                    .collect(Collectors.groupingBy(RetailAnalytics::getProductId));
+            for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalyticsHist.entrySet()) {
+                final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
+                Utils.writeToGson(fileNamePath, entry.getValue());
+            }
             final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
             try {
                 final Instances trainingSet = createTrainingSet(set, productIds, productCategories);
                 //
-                final ArffSaver saver = new ArffSaver();
-                saver.setInstances(trainingSet);
-                saver.setFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff"));
-                saver.writeBatch();
+//                final ArffSaver saver = new ArffSaver();
+//                saver.setInstances(trainingSet);
+//                saver.setFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff"));
+//                saver.writeBatch();
+//                final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff");
+//                file.delete();
 
                 //trainLibSvm(trainingSet);
 //                logger.info("begin trainJ48BySet");

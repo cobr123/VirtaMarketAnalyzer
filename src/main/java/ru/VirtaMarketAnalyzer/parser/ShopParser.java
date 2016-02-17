@@ -150,9 +150,7 @@ public final class ShopParser {
             cities.stream()
                     .filter(c -> c.getCountryId().equals(countryId))
 //                    .filter(c -> c.getRegionId().equals(regionId))
-                    .forEach(c -> logger.info("'{}'", c.getCaption()));
-            logger.info("'countryId = {}'", countryId);
-            logger.info("'regionId = {}'", regionId);
+                    .forEach(c -> logger.info(".replace(\"{}\", \"{}\")", c.getCaption(), dyrtyCaptionReplaced));
             logger.info("'dyrtyCaption = {}'", dyrtyCaptionReplaced);
             throw e;
         }
