@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.ml;
 
+import com.google.gson.ExclusionStrategy;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -10,6 +11,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.data.HistAnalytExclStrat;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.data.UpdateDate;
@@ -143,9 +145,10 @@ public final class RetailSalePrediction {
             //группируем аналитику по товарам и сохраняем
             final Map<String, List<RetailAnalytics>> retailAnalyticsHist = set.parallelStream()
                     .collect(Collectors.groupingBy(RetailAnalytics::getProductId));
+            final ExclusionStrategy es = new HistAnalytExclStrat();
             for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalyticsHist.entrySet()) {
                 final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
-                Utils.writeToGson(fileNamePath, entry.getValue());
+                Utils.writeToGson(fileNamePath, entry.getValue(), es);
             }
             final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
             try {

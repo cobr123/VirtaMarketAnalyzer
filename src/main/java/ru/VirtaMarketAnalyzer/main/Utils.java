@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.main;
 
+import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.jsoup.nodes.Document;
@@ -36,8 +37,18 @@ public final class Utils {
         Utils.writeFile(path, getGson(obj));
     }
 
+    public static void writeToGson(final String path, final Object obj, final ExclusionStrategy es) throws IOException {
+        logger.trace(path);
+        Utils.writeFile(path, getGson(obj, es));
+    }
+
     public static String getGson(final Object obj) {
         final Gson gson = new Gson();
+        return gson.toJson(obj);
+    }
+
+    public static String getGson(final Object obj, final ExclusionStrategy es) {
+        final Gson gson = new GsonBuilder().setExclusionStrategies(es).create();
         return gson.toJson(obj);
     }
 
