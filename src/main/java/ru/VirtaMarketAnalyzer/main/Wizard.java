@@ -123,8 +123,10 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
         //собираем рецепты производства товаров и материалов
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
-        final List<ProductRecipe> recipes = ProductRecipeParser.getRecipes(host + realm + "/main/industry/unit_type/info/", manufactures);
         Utils.writeToGson(baseDir + "manufactures.json", manufactures);
+        final List<Manufacture> manufactures_en = ManufactureListParser.getManufactures(host_en + realm + "/main/common/main_page/game_info/industry/");
+        Utils.writeToGson(baseDir + "manufactures_en.json", manufactures_en);
+        final List<ProductRecipe> recipes = ProductRecipeParser.getRecipes(host + realm + "/main/industry/unit_type/info/", manufactures);
         //иногда один продукт можно получить разными способами
         final Map<String, List<ProductRecipe>> productRecipes = new HashMap<>();
         for (final ProductRecipe recipe : recipes) {
@@ -142,6 +144,8 @@ public final class Wizard {
         //получаем список всех доступных товаров и материалов
         final List<Product> materials = ProductInitParser.getProducts(host + realm + "/main/common/main_page/game_info/products/");
         Utils.writeToGson(baseDir + "materials.json", materials);
+        final List<Product> materials_en = ProductInitParser.getProducts(host_en + realm + "/main/common/main_page/game_info/products/");
+        Utils.writeToGson(baseDir + "materials_en.json", materials_en);
         logger.info("materials.size() = {}", materials.size());
         //собираем данные о доступных товарах на оптовом рынке
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", materials);
