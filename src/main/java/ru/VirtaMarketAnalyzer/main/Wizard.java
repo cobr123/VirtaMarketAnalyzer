@@ -25,6 +25,7 @@ import java.util.*;
 public final class Wizard {
     private static final Logger logger = LoggerFactory.getLogger(Wizard.class);
     public static final String host = "http://virtonomica.ru/";
+    public static final String host_en = "http://virtonomica.com/";
     public static final String industry = "industry";
     public static final String by_trade_at_cities = "by_trade_at_cities";
 
@@ -74,20 +75,30 @@ public final class Wizard {
         //страны
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
         Utils.writeToGson(baseDir + "countries.json", countries);
+        final List<Country> countries_en = CityInitParser.getCountries(host_en + realm + "/main/common/main_page/game_info/world/");
+        Utils.writeToGson(baseDir + "countries_en.json", countries_en);
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
         Utils.writeToGson(baseDir + "regions.json", regions);
+        final List<Region> regions_en = CityInitParser.getRegions(host_en + realm + "/main/geo/regionlist/", countries);
+        Utils.writeToGson(baseDir + "regions_en.json", regions_en);
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex(host + realm + "/main/geo/citylist/", regions);
         Utils.writeToGson(baseDir + "cities.json", cities);
+        final List<City> cities_en = CityListParser.fillWealthIndex(host_en + realm + "/main/geo/citylist/", regions);
+        Utils.writeToGson(baseDir + "cities_en.json", cities_en);
         logger.info("cities.size() = {}", cities.size());
         //получаем список доступных розничных товаров
         final List<Product> products = ProductInitParser.getProducts(host + realm + "/main/common/main_page/game_info/trading/");
         Utils.writeToGson(baseDir + "products.json", products);
+        final List<Product> products_en = ProductInitParser.getProducts(host_en + realm + "/main/common/main_page/game_info/trading/");
+        Utils.writeToGson(baseDir + "products_en.json", products_en);
         logger.info("products.size() = {}", products.size());
         //получаем список доступных розничных категорий товаров
         final List<ProductCategory> product_categories = ProductInitParser.getProductCategories(products);
         Utils.writeToGson(baseDir + "product_categories.json", product_categories);
+        final List<ProductCategory> product_categories_en = ProductInitParser.getProductCategories(products_en);
+        Utils.writeToGson(baseDir + "product_categories_en.json", product_categories_en);
         //собираем данные продаж товаров в городах
         final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host + realm + "/main/globalreport/marketing/by_trade_at_cities/", cities, products);
         //сохраняем их в json
