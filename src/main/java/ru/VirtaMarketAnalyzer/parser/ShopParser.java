@@ -137,8 +137,8 @@ public final class ShopParser {
                 .replace("Gaziantep", "Газиантеп")
                 .replace("Houston", "Хьюстон")
                 .replace("Haikou", "Хайкоу")
-                .replace("Пинар-дель-Рио", "Pinar del Rio")
-                .replace("Осло", "Oslo")
+                .replace("Pinar del Rio", "Пинар-дель-Рио")
+                .replace("Oslo", "Осло")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
@@ -152,7 +152,7 @@ public final class ShopParser {
             cities.stream()
                     .filter(c -> c.getCountryId().equals(countryId))
 //                    .filter(c -> c.getRegionId().equals(regionId))
-                    .forEach(c -> logger.info(".replace(\"{}\", \"{}\")", c.getCaption(), dyrtyCaptionReplaced));
+                    .forEach(c -> logger.info(".replace(\"{}\", \"{}\")", dyrtyCaptionReplaced, c.getCaption()));
             logger.info("'dyrtyCaption = {}'", dyrtyCaptionReplaced);
             throw e;
         }
