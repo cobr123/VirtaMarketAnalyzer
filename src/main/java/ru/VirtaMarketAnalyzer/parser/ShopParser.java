@@ -137,6 +137,8 @@ public final class ShopParser {
                 .replace("Gaziantep", "Газиантеп")
                 .replace("Houston", "Хьюстон")
                 .replace("Haikou", "Хайкоу")
+                .replace("Пинар-дель-Рио", "Pinar del Rio")
+                .replace("Осло", "Oslo")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
