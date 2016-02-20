@@ -83,6 +83,7 @@ public final class RetailAnalytics {
     public static String fixTownDistrict(final String townDistrict) {
         return townDistrict
                 .replace("Outskirts", "Окраина")
+                .replace("Suburb", "Пригород")
                 .replace("City centre", "Центр города")
                 .replace("Центр міста", "Центр города")
                 .replace("Centro de la ciudad", "Центр города")
