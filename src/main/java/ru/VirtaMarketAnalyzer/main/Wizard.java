@@ -122,6 +122,11 @@ public final class Wizard {
         Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
         final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
         Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
+        //данные о сервисах по городам
+        for (final UnitType ut : unitTypes) {
+            final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut.getId());
+            Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + ".json", serviceAtCity);
+        }
 
         //ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);

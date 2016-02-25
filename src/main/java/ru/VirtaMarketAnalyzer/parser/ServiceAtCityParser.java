@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 26.02.16.
@@ -64,5 +65,16 @@ public final class ServiceAtCityParser {
                 , marketDevelopmentIndex
                 , percentBySpec
         );
+    }
+
+    public static List<ServiceAtCity> get(final String host, final String realm, final List<City> cities, final String serviceId) {
+        return cities.parallelStream().map(city -> {
+            try {
+                return get(host, realm, city, serviceId);
+            } catch (final IOException e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            return null;
+        }).collect(Collectors.toList());
     }
 }
