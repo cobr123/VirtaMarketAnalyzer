@@ -28,6 +28,7 @@ public final class Wizard {
     public static final String host_en = "http://virtonomica.com/";
     public static final String industry = "industry";
     public static final String by_trade_at_cities = "by_trade_at_cities";
+    public static final String by_service = "by_service";
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
@@ -57,6 +58,7 @@ public final class Wizard {
 
     public static void collectToJsonTradeAtCities(final String realm) throws IOException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
+        final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
 
         final Calendar today = Calendar.getInstance();
         final File baseDirFile = new File(baseDir);
@@ -115,6 +117,12 @@ public final class Wizard {
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             Utils.writeToGson(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
         }
+        //сервисы
+        final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(host, realm);
+        Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
+        final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
+        Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
+
         //ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
     }
