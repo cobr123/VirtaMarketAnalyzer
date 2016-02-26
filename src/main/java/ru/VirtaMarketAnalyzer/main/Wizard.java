@@ -129,6 +129,7 @@ public final class Wizard {
             final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities, ut.getId());
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
         }
+        Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
 
         //ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
