@@ -151,6 +151,11 @@ public final class ShopParser {
                 .replace("Valencia (Ve)", "Валенсия (Ve)")
                 .replace("Groningen", "Гронинген")
                 .replace("Bouake", "Буаке")
+                .replace("Iokogama", "Иокогама")
+                .replace("Inchon", "Инчхон")
+                .replace("Fukuoka", "Фукуока")
+                .replace("Medan", "Медан")
+                .replace("Asahikawa", "Асахикава")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
