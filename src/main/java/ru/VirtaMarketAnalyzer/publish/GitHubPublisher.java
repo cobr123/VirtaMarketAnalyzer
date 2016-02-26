@@ -39,7 +39,9 @@ final public class GitHubPublisher {
 
     public static void publishRetail(final List<String> realms) throws IOException, GitAPIException {
         final Git git = getRepo();
-        copyToLocalRepo(realms);
+        copyToLocalRepo(Wizard.by_trade_at_cities, realms);
+        copyToLocalRepo(Wizard.by_service, realms);
+        copyToLocalRepo(Wizard.industry, realms);
         final String pattern = ".";
         logger.info("git add " + pattern);
         git.add().addFilepattern(pattern).call();
@@ -96,23 +98,11 @@ final public class GitHubPublisher {
     }
 
 
-    private static void copyToLocalRepo(final List<String> realms) throws IOException {
+    private static void copyToLocalRepo(final String dir, final List<String> realms) throws IOException {
         for (final String realm : realms) {
-            final File srcDir = new File(Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator);
+            final File srcDir = new File(Utils.getDir() + dir + File.separator + realm + File.separator);
             if (srcDir.exists()) {
-                final File destDir = new File(localPath + Wizard.by_trade_at_cities + File.separator + realm + File.separator);
-                if (destDir.exists()) {
-                    logger.info("удаляем {}", destDir.getAbsolutePath());
-                    FileUtils.deleteDirectory(destDir);
-                }
-                logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
-                FileUtils.copyDirectory(srcDir, destDir);
-            }
-        }
-        for (final String realm : realms) {
-            final File srcDir = new File(Utils.getDir() + Wizard.industry + File.separator + realm + File.separator);
-            if (srcDir.exists()) {
-                final File destDir = new File(localPath + Wizard.industry + File.separator + realm + File.separator);
+                final File destDir = new File(localPath + dir + File.separator + realm + File.separator);
                 if (destDir.exists()) {
                     logger.info("удаляем {}", destDir.getAbsolutePath());
                     FileUtils.deleteDirectory(destDir);
