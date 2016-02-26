@@ -15,9 +15,9 @@ public final class UnitType {
     @SerializedName("iu")
     final private String imgUrl;
     @SerializedName("s")
-    final private List<String> specializations;
+    final private List<UnitTypeSpec> specializations;
 
-    public UnitType(final String id,final String caption,final String imgUrl,final List<String> specializations) {
+    public UnitType(final String id,final String caption,final String imgUrl,final List<UnitTypeSpec> specializations) {
         this.id = id;
         this.caption = caption;
         this.imgUrl = imgUrl;
@@ -36,7 +36,7 @@ public final class UnitType {
         return imgUrl;
     }
 
-    public List<String> getSpecializations() {
+    public List<UnitTypeSpec> getSpecializations() {
         return specializations;
     }
 }
