@@ -126,6 +126,8 @@ public final class Wizard {
         for (final UnitType ut : unitTypes) {
             final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut.getId());
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + ".json", serviceAtCity);
+            final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities, ut.getId());
+            Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
         }
 
         //ищем формулу для объема продаж в рознице
