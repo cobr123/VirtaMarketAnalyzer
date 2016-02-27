@@ -36,7 +36,7 @@ public final class TopRetailParser {
         final String newRef = baseUrl + realm + "/main/company/toplist/retail";
         String nextPageUrl = newRef;
         String ref = "";
-        for (int page = 1; page <= 15; ++page) {
+        for (int page = 1; page <= 10; ++page) {
             try {
                 final Document doc = Downloader.getDoc(nextPageUrl, ref);
                 final Elements companyLinks = doc.select("table > tbody > tr > td:nth-child(2) > span > a");
