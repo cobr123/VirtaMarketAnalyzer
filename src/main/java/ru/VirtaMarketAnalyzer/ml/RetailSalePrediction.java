@@ -144,15 +144,17 @@ public final class RetailSalePrediction {
         if (!set.isEmpty()) {
             //группируем аналитику по товарам и сохраняем
             final Map<String, List<RetailAnalytics>> retailAnalyticsHist = set.parallelStream()
+                    .filter(ra -> ra.getNotoriety() >= 100)
                     .collect(Collectors.groupingBy(RetailAnalytics::getProductId));
             final ExclusionStrategy es = new HistAnalytExclStrat();
             for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalyticsHist.entrySet()) {
-                final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
+                final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator
+                        + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
                 Utils.writeToGson(fileNamePath, entry.getValue(), es);
             }
-            final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
+//            final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
             try {
-                final Instances trainingSet = createTrainingSet(set, productIds, productCategories);
+//                final Instances trainingSet = createTrainingSet(set, productIds, productCategories);
                 //
 //                final ArffSaver saver = new ArffSaver();
 //                saver.setInstances(trainingSet);
