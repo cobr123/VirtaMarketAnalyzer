@@ -156,6 +156,22 @@ public final class ShopParser {
                 .replace("Fukuoka", "Фукуока")
                 .replace("Medan", "Медан")
                 .replace("Asahikawa", "Асахикава")
+                .replace("Kano", "Кано")
+                .replace("Riad", "Эр-Рияд")
+                .replace("Cologne", "Кёльн")
+                .replace("Francfort-sur-le-Main", "Франкфурт")
+                .replace("Berlin", "Берлин")
+                .replace("Leipzig", "Лейпциг")
+                .replace("Konya", "Конья")
+                .replace("Stavanger", "Ставангер")
+                .replace("Larissa", "Ларисса")
+                .replace("Istanbul", "Стамбул")
+                .replace("Jeddah", "Джидда")
+                .replace("Dammam", "Даммам")
+                .replace("Medina", "Медина")
+                .replace("Dubai", "Дубай")
+                .replace("Kuwait City", "Эль-Кувейт")
+                .replace("Mecca", "Мекка")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
