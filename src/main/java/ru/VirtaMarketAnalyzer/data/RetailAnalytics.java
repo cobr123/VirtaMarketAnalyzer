@@ -3,6 +3,7 @@ package ru.VirtaMarketAnalyzer.data;
 import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import ru.VirtaMarketAnalyzer.main.Utils;
 
 /**
  * Created by cobr123 on 16.01.16.
@@ -50,6 +51,7 @@ public final class RetailAnalytics {
     final private double localPrice;
     @SerializedName("lq")
     final private double localQuality;
+    transient final private long sellVolumeAsNumber;
 
     public RetailAnalytics(final String productId, final String productCategory, final int shopSize, final String townDistrict, final int departmentCount,
                            final double notoriety, final String visitorsCount, final String serviceLevel,
@@ -78,6 +80,7 @@ public final class RetailAnalytics {
         this.localPercent = localPercent;
         this.localPrice = localPrice;
         this.localQuality = localQuality;
+        this.sellVolumeAsNumber = calcSellVolumeAsNumber();
     }
 
     public static String fixTownDistrict(final String townDistrict) {
@@ -116,6 +119,7 @@ public final class RetailAnalytics {
         this.localPercent = ra.localPercent;
         this.localPrice = ra.localPrice;
         this.localQuality = ra.localQuality;
+        this.sellVolumeAsNumber = calcSellVolumeAsNumber();
     }
 
     public static RetailAnalytics fillProductId(final String productId, final String productCategory, final RetailAnalytics ra) {
@@ -267,5 +271,18 @@ public final class RetailAnalytics {
 
     public double getLocalQuality() {
         return localQuality;
+    }
+
+    private long calcSellVolumeAsNumber() {
+        long mod = 0;
+        if(sellVolume.startsWith("менее")){
+            mod = -1;
+        } else if(sellVolume.startsWith("более")){
+            mod = 1;
+        }
+        return Utils.toLong(sellVolume) + mod;
+    }
+    public long getSellVolumeAsNumber() {
+        return sellVolumeAsNumber;
     }
 }

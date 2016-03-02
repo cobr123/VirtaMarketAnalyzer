@@ -146,11 +146,12 @@ public final class RetailSalePrediction {
             final Map<String, List<RetailAnalytics>> retailAnalyticsHist = set.parallelStream()
                     .filter(ra -> ra.getNotoriety() >= 100)
                     .collect(Collectors.groupingBy(RetailAnalytics::getProductId));
+
             final ExclusionStrategy es = new HistAnalytExclStrat();
             for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalyticsHist.entrySet()) {
                 final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator
                         + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
-                Utils.writeToGson(fileNamePath, entry.getValue(), es);
+                Utils.writeToGson(fileNamePath, normalize(entry.getValue()), es);
             }
 //            final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
             try {
@@ -179,6 +180,31 @@ public final class RetailSalePrediction {
                 logger.error(e.getLocalizedMessage(), e);
             }
         }
+    }
+
+    /**
+     * Оставляет не более 50 элементов для каждого уровня качества продукта
+     *
+     * @param list
+     * @return
+     */
+    private static List<RetailAnalytics> normalize(final List<RetailAnalytics> list) {
+        final Map<Long, List<RetailAnalytics>> map = list.stream()
+                .collect(Collectors.groupingBy(ra -> Math.round(ra.getQuality())));
+        final Comparator<RetailAnalytics> comparator = new RetailAnalyticsHistCompare();
+        final int maxCnt = 50;
+        final List<RetailAnalytics> result = new ArrayList<>();
+        for (final Map.Entry<Long, List<RetailAnalytics>> entry : map.entrySet()) {
+            final List<RetailAnalytics> tmp = entry.getValue();
+            if (tmp.size() > maxCnt) {
+                tmp.sort(comparator);
+                result.addAll(tmp.subList(0, maxCnt));
+            } else {
+                result.addAll(tmp);
+            }
+        }
+        result.sort(comparator);
+        return result;
     }
 
     public static void trainLibSvm(final Instances trainingSet) throws Exception {
