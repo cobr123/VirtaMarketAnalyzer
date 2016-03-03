@@ -40,24 +40,26 @@ public final class UnitListParser {
                 final Document doc = Downloader.getDoc(nextPageUrl, ref);
                 final Elements shopLinks = doc.select("table > tbody > tr > td[class=\"info i-shop\"] > a");
 
-                logger.trace("shopLinks.size() = " + shopLinks.size());
-                final List<Shop> tmpShops = shopLinks.parallelStream()
-                        .map(sl -> {
-                            Shop shop = null;
-                            try {
-                                shop = ShopParser.parse(sl.attr("href"), cities, products);
-                            } catch (final Exception e) {
-                                logger.error(e.getLocalizedMessage(), e);
-                            }
-                            return shop;
-                        })
-                        .filter(s -> s != null)
-                        .filter(s -> s.getShopProducts().size() > 0)
-                        .filter(s -> !"Не известен".equals(s.getTownDistrict()))
-                        .filter(s -> !"Не известен".equals(s.getServiceLevel()))
-                        .collect(Collectors.toList());
+                if (shopLinks.size() > 0) {
+                    logger.trace("page {}, shopLinks.size() = {}", Utils.getLastBySep(nextPageUrl, "/"), shopLinks.size());
+                    final List<Shop> tmpShops = shopLinks.parallelStream()
+                            .map(sl -> {
+                                Shop shop = null;
+                                try {
+                                    shop = ShopParser.parse(sl.attr("href"), cities, products);
+                                } catch (final Exception e) {
+                                    logger.error(e.getLocalizedMessage(), e);
+                                }
+                                return shop;
+                            })
+                            .filter(s -> s != null)
+                            .filter(s -> s.getShopProducts().size() > 0)
+                            .filter(s -> !"Не известен".equals(s.getTownDistrict()))
+                            .filter(s -> !"Не известен".equals(s.getServiceLevel()))
+                            .collect(Collectors.toList());
 
-                shops.addAll(tmpShops);
+                    shops.addAll(tmpShops);
+                }
 
                 nextPageUrl = Utils.getNextPageHref(doc);
                 ref = newRef;
