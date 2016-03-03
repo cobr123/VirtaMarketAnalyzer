@@ -55,7 +55,7 @@ public final class TopRetailParser {
                 }
                 logger.info("shops.size(): {}", shops.size());
                 logger.info("shops.size() diff: {}", shops.size() - shopsSizeBefore);
-                logger.info("nextPageUrl: {}", nextPageUrl);
+                logger.info("nextPageUrl: {}", Utils.getLastBySep(nextPageUrl,"/"));
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
