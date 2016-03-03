@@ -19,7 +19,6 @@ import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
-import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.LibSVM;
 import weka.classifiers.trees.J48;
@@ -28,12 +27,12 @@ import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
-import weka.filters.unsupervised.instance.Normalize;
 
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -151,7 +150,7 @@ public final class RetailSalePrediction {
             for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalyticsHist.entrySet()) {
                 final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator
                         + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
-                Utils.writeToGson(fileNamePath, normalize(entry.getValue()), es);
+                Utils.writeToGson(fileNamePath, squeeze(entry.getValue()), es);
             }
 //            final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
             try {
@@ -183,14 +182,42 @@ public final class RetailSalePrediction {
     }
 
     /**
-     * Оставляет не более 50 элементов для каждого уровня качества продукта
+     * Оставляет не более 50 элементов для каждого:
+     * индекса рынка
+     * , уровня благосостояния
+     * , объёма рынка
      *
      * @param list
      * @return
      */
-    private static List<RetailAnalytics> normalize(final List<RetailAnalytics> list) {
+    private static List<RetailAnalytics> squeeze(final List<RetailAnalytics> list) {
+        final Map<String, List<RetailAnalytics>> map = list.stream()
+                .collect(Collectors.groupingBy(RetailAnalytics::getMarketIdx));
+
+        final List<RetailAnalytics> result = new ArrayList<>();
+        for (final Map.Entry<String, List<RetailAnalytics>> entry : map.entrySet()) {
+            final List<RetailAnalytics> tmp = groupByWealthIndex(entry.getValue());
+            result.addAll(tmp);
+        }
+        return result;
+    }
+
+    private static List<RetailAnalytics> groupByWealthIndex(final List<RetailAnalytics> list) {
         final Map<Long, List<RetailAnalytics>> map = list.stream()
-                .collect(Collectors.groupingBy(ra -> Math.round(ra.getQuality())));
+                .collect(Collectors.groupingBy(RetailAnalytics::getWealthIndexRounded));
+
+        final List<RetailAnalytics> result = new ArrayList<>();
+        for (final Map.Entry<Long, List<RetailAnalytics>> entry : map.entrySet()) {
+            final List<RetailAnalytics> tmp = groupByMarketVolume(entry.getValue());
+            result.addAll(tmp);
+        }
+        return result;
+    }
+
+    private static List<RetailAnalytics> groupByMarketVolume(final List<RetailAnalytics> list) {
+        final Map<Long, List<RetailAnalytics>> map = list.stream()
+                .collect(Collectors.groupingBy(RetailAnalytics::getMarketVolume));
+
         final Comparator<RetailAnalytics> comparator = new RetailAnalyticsHistCompare();
         final int maxCnt = 50;
         final List<RetailAnalytics> result = new ArrayList<>();
@@ -203,7 +230,6 @@ public final class RetailSalePrediction {
                 result.addAll(tmp);
             }
         }
-        result.sort(comparator);
         return result;
     }
 

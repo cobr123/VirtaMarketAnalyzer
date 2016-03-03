@@ -241,6 +241,10 @@ public final class RetailAnalytics {
         return wealthIndex;
     }
 
+    public long getWealthIndexRounded() {
+        return Math.round(wealthIndex);
+    }
+
     public double getEducationIndex() {
         return educationIndex;
     }
@@ -275,14 +279,16 @@ public final class RetailAnalytics {
 
     private long calcSellVolumeAsNumber() {
         long mod = 0;
-        if(sellVolume.startsWith("менее")){
+        if (sellVolume.startsWith("менее")) {
             mod = -1;
-        } else if(sellVolume.startsWith("более")){
+        } else if (sellVolume.startsWith("более")) {
             mod = 1;
         }
         return Utils.toLong(sellVolume) + mod;
     }
+
     public long getSellVolumeAsNumber() {
         return sellVolumeAsNumber;
     }
+
 }

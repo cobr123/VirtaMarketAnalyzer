@@ -12,7 +12,18 @@ public final class RetailAnalyticsHistCompare implements Comparator<RetailAnalyt
     public int compare(final RetailAnalytics o1, final RetailAnalytics o2) {
         int result = 0;
 
-        if (o1.getSellVolumeAsNumber() < o2.getSellVolumeAsNumber()) {
+        final int marketIdxCompRes = o1.getMarketIdx().compareTo(o2.getMarketIdx());
+        if (marketIdxCompRes != 0) {
+            result = marketIdxCompRes;
+        } else if (o1.getWealthIndexRounded() < o2.getWealthIndexRounded()) {
+            result = 1;
+        } else if (o1.getWealthIndexRounded() > o2.getWealthIndexRounded()) {
+            result = -1;
+        } else if (o1.getMarketVolume() < o2.getMarketVolume()) {
+            result = 1;
+        } else if (o1.getMarketVolume() > o2.getMarketVolume()) {
+            result = -1;
+        } else if (o1.getSellVolumeAsNumber() < o2.getSellVolumeAsNumber()) {
             result = 1;
         } else if (o1.getSellVolumeAsNumber() > o2.getSellVolumeAsNumber()) {
             result = -1;
