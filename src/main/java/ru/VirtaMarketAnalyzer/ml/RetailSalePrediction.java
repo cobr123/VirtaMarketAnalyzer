@@ -186,40 +186,45 @@ public final class RetailSalePrediction {
      * индекса рынка
      * , уровня благосостояния
      * , объёма рынка
-     *
-     * @param list
-     * @return
      */
     private static List<RetailAnalytics> squeeze(final List<RetailAnalytics> list) {
         final Map<String, List<RetailAnalytics>> map = list.stream()
                 .collect(Collectors.groupingBy(RetailAnalytics::getMarketIdx));
 
+        final Comparator<RetailAnalytics> comparator = new RetailAnalyticsHistCompare();
+        final int maxCnt = 50;
         final List<RetailAnalytics> result = new ArrayList<>();
         for (final Map.Entry<String, List<RetailAnalytics>> entry : map.entrySet()) {
-            final List<RetailAnalytics> tmp = groupByWealthIndex(entry.getValue());
-            result.addAll(tmp);
+            final List<RetailAnalytics> tmp = entry.getValue();
+            if (tmp.size() > maxCnt) {
+                result.addAll(groupByWealthIndex(tmp, comparator, maxCnt));
+            } else {
+                result.addAll(tmp);
+            }
         }
         return result;
     }
 
-    private static List<RetailAnalytics> groupByWealthIndex(final List<RetailAnalytics> list) {
+    private static List<RetailAnalytics> groupByWealthIndex(final List<RetailAnalytics> list, final Comparator<RetailAnalytics> comparator, final int maxCnt) {
         final Map<Long, List<RetailAnalytics>> map = list.stream()
                 .collect(Collectors.groupingBy(RetailAnalytics::getWealthIndexRounded));
 
         final List<RetailAnalytics> result = new ArrayList<>();
         for (final Map.Entry<Long, List<RetailAnalytics>> entry : map.entrySet()) {
-            final List<RetailAnalytics> tmp = groupByMarketVolume(entry.getValue());
-            result.addAll(tmp);
+            final List<RetailAnalytics> tmp = entry.getValue();
+            if (tmp.size() > maxCnt) {
+                result.addAll(groupByMarketVolume(tmp, comparator, maxCnt));
+            } else {
+                result.addAll(tmp);
+            }
         }
         return result;
     }
 
-    private static List<RetailAnalytics> groupByMarketVolume(final List<RetailAnalytics> list) {
+    private static List<RetailAnalytics> groupByMarketVolume(final List<RetailAnalytics> list, final Comparator<RetailAnalytics> comparator, final int maxCnt) {
         final Map<Long, List<RetailAnalytics>> map = list.stream()
                 .collect(Collectors.groupingBy(RetailAnalytics::getMarketVolume));
 
-        final Comparator<RetailAnalytics> comparator = new RetailAnalyticsHistCompare();
-        final int maxCnt = 50;
         final List<RetailAnalytics> result = new ArrayList<>();
         for (final Map.Entry<Long, List<RetailAnalytics>> entry : map.entrySet()) {
             final List<RetailAnalytics> tmp = entry.getValue();
