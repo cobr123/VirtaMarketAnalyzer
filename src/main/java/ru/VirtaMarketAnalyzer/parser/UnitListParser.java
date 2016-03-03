@@ -42,7 +42,7 @@ public final class UnitListParser {
 
                 if (shopLinks.size() > 0) {
                     logger.trace("page {}, shopLinks.size() = {}", Utils.getLastBySep(nextPageUrl, "/"), shopLinks.size());
-                    final List<Shop> tmpShops = shopLinks.parallelStream()
+                    final List<Shop> tmpShops = shopLinks.stream()
                             .map(sl -> {
                                 Shop shop = null;
                                 try {

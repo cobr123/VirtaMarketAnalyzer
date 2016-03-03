@@ -16,7 +16,10 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by cobr123 on 16.01.16.
@@ -41,21 +44,29 @@ public final class TopRetailParser {
                 final Document doc = Downloader.getDoc(nextPageUrl, ref);
                 final Elements companyLinks = doc.select("table > tbody > tr > td:nth-child(2) > span > a");
                 logger.info("companyLinks.size() = {}", companyLinks.size());
-                final int shopsSizeBefore = shops.size();
-                for (final Element link : companyLinks) {
-                    final String companyId = Utils.getLastFromUrl(link.attr("href"));
-                    final List<Shop> tmp = UnitListParser.getShopList(baseUrl, realm, companyId, cities, products);
-                    shops.addAll(tmp);
-                }
+                final List<Shop> tmp = companyLinks.parallelStream()
+                        .map(link -> {
+                            try {
+                                final String companyId = Utils.getLastFromUrl(link.attr("href"));
+                                return UnitListParser.getShopList(baseUrl, realm, companyId, cities, products);
+                            } catch (final Exception e) {
+                                logger.error(e.getLocalizedMessage(), e);
+                                return null;
+                            }
+                        })
+                        .flatMap(Collection::stream)
+                        .collect(toList());
+                shops.addAll(tmp);
 
                 nextPageUrl = Utils.getNextPageHref(doc);
                 ref = newRef;
-                if (nextPageUrl.isEmpty()) {
+
+                logger.info("shops.size(): {}", shops.size());
+                logger.info("shops.size() diff: {}", tmp.size());
+                if (nextPageUrl.isEmpty() || tmp.size() < 500) {
                     break;
                 }
-                logger.info("shops.size(): {}", shops.size());
-                logger.info("shops.size() diff: {}", shops.size() - shopsSizeBefore);
-                logger.info("nextPageUrl: {}", Utils.getLastBySep(nextPageUrl,"/"));
+                logger.info("nextPageUrl: {}", Utils.getLastBySep(nextPageUrl, "/"));
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
