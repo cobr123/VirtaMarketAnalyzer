@@ -172,6 +172,7 @@ public final class ShopParser {
                 .replace("Dubai", "Дубай")
                 .replace("Kuwait City", "Эль-Кувейт")
                 .replace("Mecca", "Мекка")
+                .replace("Sapporo", "Саппоро")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
