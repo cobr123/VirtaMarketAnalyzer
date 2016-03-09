@@ -13,6 +13,7 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -141,7 +142,7 @@ final public class GitHubPublisher {
             logger.info("git open");
             final Git git = Git.open(localPathFile);
             logger.info("git pull");
-            git.pull().call();
+            git.pull().setStrategy(MergeStrategy.THEIRS).call();
             return git;
         } else {
             //"https://github.com/user/repo.git"
