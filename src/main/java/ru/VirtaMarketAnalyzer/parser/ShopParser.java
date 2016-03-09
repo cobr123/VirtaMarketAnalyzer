@@ -173,6 +173,11 @@ public final class ShopParser {
                 .replace("Kuwait City", "Эль-Кувейт")
                 .replace("Mecca", "Мекка")
                 .replace("Sapporo", "Саппоро")
+                .replace("Bloemfontein", "Блумфонтейн")
+                .replace("Johannesburg", "Йоханнесбург")
+                .replace("Strasbourg", "Страсбург")
+                .replace("Лієпая", "Лиепая")
+                .replace("Запоріжжя", "Запорожье")
                 .replace("Rhodes", "Родос");
         String townId;
         try {
