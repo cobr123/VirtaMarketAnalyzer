@@ -44,10 +44,10 @@ public final class Wizard {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
         }
-        final File localPathFile = new File(GitHubPublisher.localPath);
-        if (localPathFile.exists()) {
-            FileUtils.deleteDirectory(localPathFile);
-        }
+//        final File localPathFile = new File(GitHubPublisher.localPath);
+//        if (localPathFile.exists()) {
+//            FileUtils.deleteDirectory(localPathFile);
+//        }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
         //собираем данные со всех реалмов и продуктов
