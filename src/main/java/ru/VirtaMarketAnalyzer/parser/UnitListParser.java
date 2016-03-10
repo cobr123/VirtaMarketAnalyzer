@@ -35,7 +35,7 @@ public final class UnitListParser {
         final String newRef = baseUrl + realm + "/main/company/view/" + companyId + "/unit_list";
         String nextPageUrl = newRef;
         String ref = "";
-        for (; ; ) {
+        for (int i = 0; i < 50; ++i) {
             try {
                 final Document doc = Downloader.getDoc(nextPageUrl, ref);
                 final Elements shopLinks = doc.select("table > tbody > tr > td[class=\"info i-shop\"] > a");
