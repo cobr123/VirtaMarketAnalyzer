@@ -12,14 +12,17 @@ final public class ProductRecipe {
     final private String manufactureID;
     @SerializedName("s")
     final private String specialization;
+    @SerializedName("e")
+    final private Product equipment;
     @SerializedName("ip")
     final private List<ManufactureIngredient> inputProducts;
     @SerializedName("rp")
     final private List<ManufactureResult> resultProducts;
 
-    public ProductRecipe(final String manufactureID, final String specialization, final List<ManufactureIngredient> inputProducts, final List<ManufactureResult> resultProducts) {
+    public ProductRecipe(final String manufactureID, final String specialization, final Product equipment, final List<ManufactureIngredient> inputProducts, final List<ManufactureResult> resultProducts) {
         this.manufactureID = manufactureID;
         this.specialization = specialization;
+        this.equipment = equipment;
         this.inputProducts = inputProducts;
         this.resultProducts = resultProducts;
     }
@@ -38,5 +41,9 @@ final public class ProductRecipe {
 
     public String getSpecialization() {
         return specialization;
+    }
+
+    public Product getEquipment() {
+        return equipment;
     }
 }

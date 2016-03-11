@@ -1,14 +1,14 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.Manufacture;
-import ru.VirtaMarketAnalyzer.data.ManufactureIngredient;
-import ru.VirtaMarketAnalyzer.data.ManufactureResult;
-import ru.VirtaMarketAnalyzer.data.ProductRecipe;
+import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
@@ -25,6 +25,7 @@ final public class ProductRecipeParser {
     private static final Logger logger = LoggerFactory.getLogger(ProductRecipeParser.class);
 
     public static void main(final String[] args) throws IOException {
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/15751");
 //        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/422209");
 //        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/2425");
@@ -106,7 +107,10 @@ final public class ProductRecipeParser {
                             ++resultIdx;
                         }
 
-                        final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, inputProducts, resultProducts);
+                        final Element equipElem = row.select(" > td:nth-child(2) > a:nth-child(1) > img").first();
+                        final Product equipment = getProduct(equipElem);
+
+                        final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, inputProducts, resultProducts);
                         recipes.add(recipe);
                     }
                 }
@@ -116,5 +120,13 @@ final public class ProductRecipeParser {
             }
         }
         return recipes;
+    }
+
+    private static Product getProduct(final Element equipElem) {
+        final String productCategory = "";
+        final String imgUrl = equipElem.attr("src");
+        final String id = Utils.getLastBySep(equipElem.parent().attr("href"), "/");
+        final String caption = equipElem.attr("title");
+        return new Product(productCategory, imgUrl, id, caption);
     }
 }
