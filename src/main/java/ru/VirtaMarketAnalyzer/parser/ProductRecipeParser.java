@@ -108,7 +108,11 @@ final public class ProductRecipeParser {
                         }
 
                         final Element equipElem = row.select(" > td:nth-child(2) > a:nth-child(1) > img").first();
-                        final Product equipment = getProduct(equipElem);
+                        Product equipment = null;
+                        //если не "склад"
+                        if (!"2011".equals(manufacture.getId())) {
+                            equipment = getProduct(equipElem);
+                        }
 
                         final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, inputProducts, resultProducts);
                         recipes.add(recipe);
