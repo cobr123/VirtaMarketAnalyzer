@@ -45,8 +45,9 @@ public final class UnitListParser {
                     final List<Shop> tmpShops = shopLinks.stream()
                             .map(sl -> {
                                 Shop shop = null;
+                                final String cityCaption = sl.parent().previousElementSibling().text();
                                 try {
-                                    shop = ShopParser.parse(sl.attr("href"), cities, products);
+                                    shop = ShopParser.parse(sl.attr("href"), cities, products, cityCaption);
                                 } catch (final Exception e) {
                                     logger.error(e.getLocalizedMessage(), e);
                                 }
