@@ -103,7 +103,8 @@ public final class Wizard {
         final List<ProductCategory> product_categories_en = ProductInitParser.getProductCategories(products_en);
         Utils.writeToGson(baseDir + "product_categories_en.json", product_categories_en);
         //группируем таможенные пошлины по странам
-        final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(host + realm + "/main/geo/countrydutylist/", countries, products);
+        final List<Product> materials = ProductInitParser.getProducts(host + realm + "/main/common/main_page/game_info/products/");
+        final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(host + realm + "/main/geo/countrydutylist/", countries, materials);
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
