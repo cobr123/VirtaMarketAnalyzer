@@ -55,17 +55,27 @@ final public class CountryDutyListParser {
     public static List<CountryDutyList> getCountryDutyList(final String url, final Country country, final List<Product> products) throws IOException {
         final Document doc = Downloader.getDoc(url + country.getId());
         final Elements imgElems = doc.select("table.list > tbody > tr > td:nth-child(1) > img");
-        return imgElems.stream().map(el -> getCountryDutyList(el, country, products)).collect(Collectors.toList());
+        return imgElems.stream().map(el -> {
+            try {
+                return getCountryDutyList(el, country, products);
+            } catch (Exception e) {
+                logger.info(url + country.getId());
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            return null;
+        }).collect(Collectors.toList());
     }
 
-    public static CountryDutyList getCountryDutyList(final Element elem, final Country country, final List<Product> products) {
+    public static CountryDutyList getCountryDutyList(final Element elem, final Country country, final List<Product> products) throws Exception {
         final String countryId = country.getId();
         final Optional<Product> product = products.stream().filter(p -> p.getImgUrl().equalsIgnoreCase(elem.attr("src"))).findFirst();
         if (!product.isPresent()) {
-            logger.error("Не найден продукт с изображением '" + elem.attr("src") + "'");
+            throw new Exception("Не найден продукт с изображением '" + elem.attr("src") + "'");
         }
         final String productId = product.get().getId();
+        elem.parent().nextElementSibling().nextElementSibling().children().remove();
         final int exportTaxPercent = Utils.toInt(elem.parent().nextElementSibling().nextElementSibling().text());
+        elem.parent().nextElementSibling().nextElementSibling().nextElementSibling().children().remove();
         final int importTaxPercent = Utils.toInt(elem.parent().nextElementSibling().nextElementSibling().nextElementSibling().text());
         final double indicativePrice = Utils.toDouble(elem.parent().nextElementSibling().nextElementSibling().nextElementSibling().nextElementSibling().text());
         return new CountryDutyList(countryId, productId, exportTaxPercent, importTaxPercent, indicativePrice);
