@@ -7,8 +7,8 @@ import com.google.gson.annotations.SerializedName;
  * Таможенные пошлины страны.
  */
 final public class CountryDutyList {
-    @SerializedName("ri")
-    final private String regionId;
+    //в файл не выгружаем, т.к. id будет в имени файла
+    transient final private String countryId;
     @SerializedName("pi")
     final private String productId;
     @SerializedName("etp")
@@ -18,16 +18,16 @@ final public class CountryDutyList {
     @SerializedName("ip")
     final private double indicativePrice;
 
-    public CountryDutyList(final String regionId, final String productId, final int exportTaxPercent, final int importTaxPercent, final double indicativePrice) {
-        this.regionId = regionId;
+    public CountryDutyList(final String countryId, final String productId, final int exportTaxPercent, final int importTaxPercent, final double indicativePrice) {
+        this.countryId = countryId;
         this.productId = productId;
         this.exportTaxPercent = exportTaxPercent;
         this.importTaxPercent = importTaxPercent;
         this.indicativePrice = indicativePrice;
     }
 
-    public String getRegionId() {
-        return regionId;
+    public String getCountryId() {
+        return countryId;
     }
 
     public String getProductId() {
@@ -45,4 +45,6 @@ final public class CountryDutyList {
     public double getIndicativePrice() {
         return indicativePrice;
     }
+
+
 }

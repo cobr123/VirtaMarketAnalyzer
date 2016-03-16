@@ -6,16 +6,21 @@ import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.City;
-import ru.VirtaMarketAnalyzer.data.Region;
+
+import ru.VirtaMarketAnalyzer.data.Country;
+import ru.VirtaMarketAnalyzer.data.CountryDutyList;
+import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 /**
  * Created by cobr123 on 16.03.2016.
@@ -26,30 +31,43 @@ final public class CountryDutyListParser {
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final String url = "http://virtonomica.ru/olga/main/geo/countrydutylist/";
-        final List<Region> regions = new ArrayList<>();
-        regions.add(new Region("", "3054", "", 0.0));
-        logger.info(Utils.getPrettyGson(getCountryDutyList(url, regions)));
+        final List<Country> countries = new ArrayList<>();
+        countries.add(new Country("3054", "Азербайджан"));
+        final List<Product> products = new ArrayList<>();
+        products.add(new Product("", "/img/products/diamonds.gif", "1460", "Алмазы"));
+        logger.info(Utils.getPrettyGson(getAllCountryDutyList(url, countries, products)));
     }
 
-    public static List<CountryDutyList> getCountryDutyList(final String url, final List<Region> regions) throws IOException {
-        return regions.stream().map(region -> {
-            return getCountryDuty(url + region.getId());
-        }).collect(toList());
+    public static Map<String, List<CountryDutyList>> getAllCountryDutyList(final String url, final List<Country> countries, final List<Product> products) throws IOException {
+        return countries.stream().map(country -> {
+            try {
+                return getCountryDutyList(url, country, products);
+            } catch (final Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            return null;
+        })
+                .flatMap(Collection::stream)
+                .filter(elem -> elem != null)
+                .collect(groupingBy(CountryDutyList::getCountryId));
     }
 
-    public static CountryDutyList getCountryDuty(final String url) throws IOException {
-        final Document doc = Downloader.getDoc(url);
-        final Element table = doc.select("table[class=\"grid\"]").last();
-//        System.out.println(table.outerHtml());
-        final Elements towns = table.select("table > tbody > tr");
-        towns.stream().filter(town -> !town.select("tr > td:nth-child(1) > a").isEmpty()).forEach(town -> {
-            final String[] parts = town.select("tr > td:nth-child(1) > a").eq(0).attr("href").split("/");
-            final String caption = town.select("tr > td:nth-child(1) > a").eq(0).text();
-            final String id = parts[parts.length - 1];
-            final String averageSalary = town.select("tr > td:nth-child(3)").text();
-            final String educationIndex = town.select("tr > td:nth-child(5)").text();
-            final String wealthIndex = town.select("tr > td:nth-child(6)").html();
-            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary)));
-        });
+    public static List<CountryDutyList> getCountryDutyList(final String url, final Country country, final List<Product> products) throws IOException {
+        final Document doc = Downloader.getDoc(url + country.getId());
+        final Elements imgElems = doc.select("table.list > tbody > tr > td:nth-child(1) > img");
+        return imgElems.stream().map(el -> getCountryDutyList(el, country, products)).collect(Collectors.toList());
+    }
+
+    public static CountryDutyList getCountryDutyList(final Element elem, final Country country, final List<Product> products) {
+        final String countryId = country.getId();
+        final Optional<Product> product = products.stream().filter(p -> p.getImgUrl().equalsIgnoreCase(elem.attr("src"))).findFirst();
+        if (!product.isPresent()) {
+            logger.error("Не найден продукт с изображением '" + elem.attr("src") + "'");
+        }
+        final String productId = product.get().getId();
+        final int exportTaxPercent = Utils.toInt(elem.parent().nextElementSibling().nextElementSibling().text());
+        final int importTaxPercent = Utils.toInt(elem.parent().nextElementSibling().nextElementSibling().nextElementSibling().text());
+        final double indicativePrice = Utils.toDouble(elem.parent().nextElementSibling().nextElementSibling().nextElementSibling().nextElementSibling().text());
+        return new CountryDutyList(countryId, productId, exportTaxPercent, importTaxPercent, indicativePrice);
     }
 }

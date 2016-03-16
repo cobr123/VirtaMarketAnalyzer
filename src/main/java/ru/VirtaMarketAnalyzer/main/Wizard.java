@@ -29,6 +29,7 @@ public final class Wizard {
     public static final String industry = "industry";
     public static final String by_trade_at_cities = "by_trade_at_cities";
     public static final String by_service = "by_service";
+    public static final String countrydutylist = "countrydutylist";
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
@@ -101,6 +102,11 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "product_categories.json", product_categories);
         final List<ProductCategory> product_categories_en = ProductInitParser.getProductCategories(products_en);
         Utils.writeToGson(baseDir + "product_categories_en.json", product_categories_en);
+        //группируем таможенные пошлины по странам
+        final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(host + realm + "/main/geo/countrydutylist/", countries, products);
+        for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
+            Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
+        }
         //собираем данные продаж товаров в городах
         final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host + realm + "/main/globalreport/marketing/by_trade_at_cities/", cities, products);
         //сохраняем их в json
