@@ -1,5 +1,8 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -21,6 +24,7 @@ public final class CityListParser {
     private static final Logger logger = LoggerFactory.getLogger(CityListParser.class);
 
     public static void main(final String[] args) throws IOException {
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/geo/citylist/331858");
         final Element table = doc.select("table[class=\"grid\"]").last();
         //System.out.println(list.outerHtml());
@@ -52,7 +56,7 @@ public final class CityListParser {
             final String averageSalary = town.select("tr > td:nth-child(3)").text();
             final String educationIndex = town.select("tr > td:nth-child(5)").text();
             final String wealthIndex = town.select("tr > td:nth-child(6)").html();
-            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary)));
+            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary), region.getIncomeTaxRate()));
         });
     }
 }

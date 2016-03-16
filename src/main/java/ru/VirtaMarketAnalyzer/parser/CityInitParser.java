@@ -1,5 +1,8 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -21,6 +24,7 @@ public final class CityInitParser {
     private static final Logger logger = LoggerFactory.getLogger(CityInitParser.class);
 
     public static void main(final String[] args) throws IOException {
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/");
 
         final Elements options = doc.select("option");
@@ -41,7 +45,8 @@ public final class CityInitParser {
             for (final Element row : rows) {
                 final String id = Utils.getLastFromUrl(row.attr("href"));
                 final String caption = row.text();
-                list.add(new Region(country.getId(), id, caption));
+                final double incomeTaxRate = Utils.toDouble(row.parent().parent().select(">td").eq(3).text());
+                list.add(new Region(country.getId(), id, caption, incomeTaxRate));
             }
         }
         return list;

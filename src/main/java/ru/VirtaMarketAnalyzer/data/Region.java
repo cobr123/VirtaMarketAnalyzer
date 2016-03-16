@@ -12,11 +12,14 @@ public final class Region {
     final private String id;
     @SerializedName("c")
     final private String caption;
+    @SerializedName("itr")
+    final private double incomeTaxRate;
 
-    public Region(final String countryId, final String id, final String caption) {
+    public Region(final String countryId, final String id, final String caption, final double incomeTaxRate) {
         this.countryId = countryId;
         this.id = id;
         this.caption = caption;
+        this.incomeTaxRate = incomeTaxRate;
     }
 
     public String getId() {
@@ -31,4 +34,7 @@ public final class Region {
         return caption;
     }
 
+    public double getIncomeTaxRate() {
+        return incomeTaxRate;
+    }
 }

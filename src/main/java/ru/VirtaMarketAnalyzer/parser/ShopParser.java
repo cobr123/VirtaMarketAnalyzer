@@ -34,7 +34,7 @@ public final class ShopParser {
         final String url = "http://virtonomica.ru/mary/main/unit/view/3943258";
 //        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
-        cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0));
+        cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0, 19.00));
         final List<Product> products = new ArrayList<>();
         products.add(new Product("категория", "/img/products/bourbon.gif", "123", "Бурбон"));
         products.add(new Product("категория", "/img/products/gps.gif", "123", "GPS-навигаторы"));
