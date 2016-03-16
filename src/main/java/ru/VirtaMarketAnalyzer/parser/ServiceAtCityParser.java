@@ -27,7 +27,7 @@ public final class ServiceAtCityParser {
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
 //http://virtonomica.ru/olga/main/globalreport/marketing/by_service/422825/422607/422609/422626
-        final ServiceAtCity city = get(Wizard.host, "olga", new City("422607", "422609", "422626", "Агуаскальентес", 0, 0, 0, 25.00 ), "422825");
+        final ServiceAtCity city = get(Wizard.host, "olga", new City("422607", "422609", "422626", "Агуаскальентес", 0, 0, 0 ), "422825");
         logger.info(Utils.getPrettyGson(city));
     }
 
