@@ -46,6 +46,10 @@ public final class TradeAtCity {
     final private double shopBrand;
     @SerializedName("ms")
     final private List<MajorSellInCity> majorSellInCityList;
+    @SerializedName("itr")
+    final private double incomeTaxRate;
+    @SerializedName("itp")
+    final private int importTaxPercent;
 
     public TradeAtCity(
             final String countryId
@@ -67,6 +71,8 @@ public final class TradeAtCity {
             , final double shopQuality
             , final double shopBrand
             , final List<MajorSellInCity> majorSellInCityList
+            , final double incomeTaxRate
+            , final int importTaxPercent
     ) {
         this.countryId = countryId;
         this.regionId = regionId;
@@ -87,6 +93,8 @@ public final class TradeAtCity {
         this.shopQuality = shopQuality;
         this.shopBrand = shopBrand;
         this.majorSellInCityList = majorSellInCityList;
+        this.incomeTaxRate = incomeTaxRate;
+        this.importTaxPercent = importTaxPercent;
     }
 
     public String getCountryRegionTownIds() {
@@ -167,5 +175,13 @@ public final class TradeAtCity {
 
     public double getShopBrand() {
         return shopBrand;
+    }
+
+    public double getIncomeTaxRate() {
+        return incomeTaxRate;
+    }
+
+    public int getImportTaxPercent() {
+        return importTaxPercent;
     }
 }

@@ -6,6 +6,8 @@ import ru.VirtaMarketAnalyzer.parser.CityParser;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by cobr123 on 27.06.2015.
@@ -34,13 +36,13 @@ final public class CityProduct {
         return product;
     }
 
-    public TradeAtCity getTradeAtCity() {
+    public TradeAtCity getTradeAtCity(final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) {
         final int maxTriesCnt = 3;
         for (int tries = 1; tries <= maxTriesCnt; ++tries) {
             try {
-                return CityParser.get(getUrl(), getCity(), getProduct());
-            } catch (final IOException e) {
-                logger.error("Ошибка при запросе, попытка #{}: {}", tries, url);
+                return CityParser.get(getUrl(), getCity(), getProduct(), countriesDutyList, regions);
+            } catch (final Exception e) {
+                logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
                 logger.error("Ошибка: ", e);
                 if (tries < maxTriesCnt) {
                     Downloader.waitSecond(3);

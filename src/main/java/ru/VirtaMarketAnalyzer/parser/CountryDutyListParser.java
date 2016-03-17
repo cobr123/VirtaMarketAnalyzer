@@ -14,6 +14,7 @@ import ru.VirtaMarketAnalyzer.data.Country;
 import ru.VirtaMarketAnalyzer.data.CountryDutyList;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -32,32 +33,33 @@ final public class CountryDutyListParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final String url = "http://virtonomica.ru/olga/main/geo/countrydutylist/";
         final List<Country> countries = new ArrayList<>();
-        countries.add(new Country("3054", "Азербайджан"));
-        final List<Product> products = new ArrayList<>();
-        products.add(new Product("", "/img/products/diamonds.gif", "1460", "Алмазы"));
-        logger.info(Utils.getPrettyGson(getAllCountryDutyList(url, countries, products)));
+        countries.add(new Country("2931", "Россия"));
+        final List<Product> materials = ProductInitParser.getProducts(Wizard.host + "olga" + "/main/common/main_page/game_info/products/");
+        logger.info(Utils.getPrettyGson(materials));
+        final Map<String, List<CountryDutyList>> allCountryDutyList = getAllCountryDutyList(url, countries, materials);
+        logger.info(Utils.getPrettyGson(allCountryDutyList));
+        logger.info("\n" + materials.size() + " = " + allCountryDutyList.get("2931").size());
     }
 
-    public static Map<String, List<CountryDutyList>> getAllCountryDutyList(final String url, final List<Country> countries, final List<Product> products) throws IOException {
+    public static Map<String, List<CountryDutyList>> getAllCountryDutyList(final String url, final List<Country> countries, final List<Product> materials) throws IOException {
         return countries.stream().map(country -> {
             try {
-                return getCountryDutyList(url, country, products);
+                return getCountryDutyList(url, country, materials);
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
             return null;
         })
                 .flatMap(Collection::stream)
-                .filter(elem -> elem != null)
                 .collect(groupingBy(CountryDutyList::getCountryId));
     }
 
-    public static List<CountryDutyList> getCountryDutyList(final String url, final Country country, final List<Product> products) throws IOException {
+    public static List<CountryDutyList> getCountryDutyList(final String url, final Country country, final List<Product> materials) throws IOException {
         final Document doc = Downloader.getDoc(url + country.getId());
-        final Elements imgElems = doc.select("table.list > tbody > tr > td:nth-child(1) > img");
+        final Elements imgElems = doc.select("table.list > tbody > tr > td > img");
         return imgElems.stream().map(el -> {
             try {
-                return getCountryDutyList(el, country, products);
+                return getCountryDutyList(el, country, materials);
             } catch (Exception e) {
                 logger.info(url + country.getId());
                 logger.error(e.getLocalizedMessage(), e);
@@ -66,9 +68,9 @@ final public class CountryDutyListParser {
         }).collect(Collectors.toList());
     }
 
-    public static CountryDutyList getCountryDutyList(final Element elem, final Country country, final List<Product> products) throws Exception {
+    public static CountryDutyList getCountryDutyList(final Element elem, final Country country, final List<Product> materials) throws Exception {
         final String countryId = country.getId();
-        final Optional<Product> product = products.stream().filter(p -> p.getImgUrl().equalsIgnoreCase(elem.attr("src"))).findFirst();
+        final Optional<Product> product = materials.stream().filter(p -> p.getImgUrl().equalsIgnoreCase(elem.attr("src"))).findFirst();
         if (!product.isPresent()) {
             throw new Exception("Не найден продукт с изображением '" + elem.attr("src") + "'");
         }

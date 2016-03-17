@@ -25,6 +25,8 @@ public final class TradeAtCityBuilder {
     private double shopQuality;
     private double shopBrand;
     private List<MajorSellInCity> majorSellInCityList;
+    private double incomeTaxRate;
+    private int importTaxPercent;
 
     public TradeAtCity build() {
         return new TradeAtCity(
@@ -47,7 +49,19 @@ public final class TradeAtCityBuilder {
                 , shopQuality
                 , shopBrand
                 , majorSellInCityList
+                , incomeTaxRate
+                , importTaxPercent
         );
+    }
+
+    public TradeAtCityBuilder setIncomeTaxRate(final double incomeTaxRate) {
+        this.incomeTaxRate = incomeTaxRate;
+        return this;
+    }
+
+    public TradeAtCityBuilder setImportTaxPercent(final int importTaxPercent) {
+        this.importTaxPercent = importTaxPercent;
+        return this;
     }
 
     public TradeAtCityBuilder setCityCaption(final String cityCaption) {

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -67,7 +68,7 @@ public final class CityParser {
 //        }
     }
 
-    public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products) throws IOException {
+    public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products, final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) throws IOException {
         final List<CityProduct> cityProducts = new ArrayList<>(cities.size() * products.size());
 
         for (final City city : cities) {
@@ -75,10 +76,10 @@ public final class CityParser {
         }
         logger.info("парсим данные: {}", cityProducts.size());
 
-        return cityProducts.parallelStream().map(CityProduct::getTradeAtCity).collect(Collectors.groupingBy(TradeAtCity::getProductId));
+        return cityProducts.parallelStream().map(city -> city.getTradeAtCity(countriesDutyList, regions)).collect(Collectors.groupingBy(TradeAtCity::getProductId));
     }
 
-    public static TradeAtCity get(final String url, final City city, final Product product) throws IOException {
+    public static TradeAtCity get(final String url, final City city, final Product product, final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) throws Exception {
         final String fullUrl = url + product.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId();
         final Document doc = Downloader.getDoc(fullUrl);
         final Element table = doc.select("table.grid").first();
@@ -103,6 +104,19 @@ public final class CityParser {
         builder.setWealthIndex(city.getWealthIndex());
         builder.setEducationIndex(city.getEducationIndex());
         builder.setAverageSalary(city.getAverageSalary());
+
+        if (!countriesDutyList.containsKey(city.getCountryId())) {
+            throw new Exception("Не найдены таможенные пошлины для страны " + url.replace("/main/globalreport/marketing/by_trade_at_cities/", "/main/geo/countrydutylist/") + city.getCountryId());
+        }
+        final Optional<CountryDutyList> importTaxPercent = countriesDutyList.get(city.getCountryId())
+                .stream().filter(cdl -> cdl.getProductId().equals(product.getId())).findFirst();
+
+        if (!importTaxPercent.isPresent()) {
+            throw new Exception("Не найдены таможенные пошлины для продукта '" + product.getCaption() + "', id = '" + product.getId() + "', " + url.replace("/main/globalreport/marketing/by_trade_at_cities/", "/main/geo/countrydutylist/") + city.getCountryId());
+        }
+        builder.setImportTaxPercent(importTaxPercent.get().getImportTaxPercent());
+        final double incomeTaxRate = regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
+        builder.setIncomeTaxRate(incomeTaxRate);
 
         final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
         for (int i = 0; i < percs.size(); ++i) {

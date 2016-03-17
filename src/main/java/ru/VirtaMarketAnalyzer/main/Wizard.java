@@ -109,7 +109,7 @@ public final class Wizard {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
         //собираем данные продаж товаров в городах
-        final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host + realm + "/main/globalreport/marketing/by_trade_at_cities/", cities, products);
+        final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host + realm + "/main/globalreport/marketing/by_trade_at_cities/", cities, products, countriesDutyList, regions);
         //сохраняем их в json
         for (final Map.Entry<String, List<TradeAtCity>> entry : stats.entrySet()) {
             Utils.writeToGson(baseDir + "tradeAtCity_" + entry.getKey() + ".json", entry.getValue());
