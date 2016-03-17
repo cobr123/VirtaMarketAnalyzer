@@ -26,11 +26,17 @@ public final class ServiceAtCity {
     final private double marketDevelopmentIndex;
     @SerializedName("pbs")
     final private Map<String, Double> percentBySpec;
+    @SerializedName("wi")
+    final private double wealthIndex;
+    @SerializedName("itr")
+    final private double incomeTaxRate;
 
 
     public ServiceAtCity(final String countryId, final String regionId, final String townId,
                          final long volume, final double price, final int subdivisionsCnt, final long companiesCnt,
-                         final double marketDevelopmentIndex, final Map<String, Double> percentBySpec) {
+                         final double marketDevelopmentIndex, final Map<String, Double> percentBySpec,
+                         final double wealthIndex, final double incomeTaxRate
+    ) {
         this.countryId = countryId;
         this.regionId = regionId;
         this.townId = townId;
@@ -40,6 +46,8 @@ public final class ServiceAtCity {
         this.companiesCnt = companiesCnt;
         this.marketDevelopmentIndex = marketDevelopmentIndex;
         this.percentBySpec = percentBySpec;
+        this.wealthIndex = wealthIndex;
+        this.incomeTaxRate = incomeTaxRate;
     }
 
     public String getCountryId() {
@@ -76,5 +84,13 @@ public final class ServiceAtCity {
 
     public Map<String, Double> getPercentBySpec() {
         return percentBySpec;
+    }
+
+    public double getWealthIndex() {
+        return wealthIndex;
+    }
+
+    public double getIncomeTaxRate() {
+        return incomeTaxRate;
     }
 }

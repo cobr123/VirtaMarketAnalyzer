@@ -27,11 +27,14 @@ public final class ServiceAtCityParser {
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
 //http://virtonomica.ru/olga/main/globalreport/marketing/by_service/422825/422607/422609/422626
-        final ServiceAtCity city = get(Wizard.host, "olga", new City("422607", "422609", "422626", "Агуаскальентес", 0, 0, 0 ), "422825");
+        final String realm = "olga";
+        final List<Country> countries = CityInitParser.getCountries(Wizard.host + realm + "/main/common/main_page/game_info/world/");
+        final List<Region> regions = CityInitParser.getRegions(Wizard.host + realm + "/main/geo/regionlist/", countries);
+        final ServiceAtCity city = get(Wizard.host, realm, new City("422607", "422609", "422626", "Агуаскальентес", 10, 0, 0), "422825", regions);
         logger.info(Utils.getPrettyGson(city));
     }
 
-    public static ServiceAtCity get(final String host, final String realm, final City city, final String serviceId) throws IOException {
+    public static ServiceAtCity get(final String host, final String realm, final City city, final String serviceId, final List<Region> regions) throws IOException {
         final String fullUrl = host + realm + "/main/globalreport/marketing/by_service/" + serviceId + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId();
         final Document doc = Downloader.getDoc(fullUrl);
         final Element table = doc.select("table.grid").first();
@@ -53,6 +56,7 @@ public final class ServiceAtCityParser {
                     final Double val = Utils.toDouble(element.nextElementSibling().nextElementSibling().text());
                     percentBySpec.put(key, val);
                 });
+        final double incomeTaxRate = regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
 
         return new ServiceAtCity(city.getCountryId()
                 , city.getRegionId()
@@ -63,13 +67,15 @@ public final class ServiceAtCityParser {
                 , companiesCnt
                 , marketDevelopmentIndex
                 , percentBySpec
+                , city.getWealthIndex()
+                , incomeTaxRate
         );
     }
 
-    public static List<ServiceAtCity> get(final String host, final String realm, final List<City> cities, final String serviceId) {
+    public static List<ServiceAtCity> get(final String host, final String realm, final List<City> cities, final String serviceId, final List<Region> regions) {
         return cities.parallelStream().map(city -> {
             try {
-                return get(host, realm, city, serviceId);
+                return get(host, realm, city, serviceId, regions);
             } catch (final IOException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
