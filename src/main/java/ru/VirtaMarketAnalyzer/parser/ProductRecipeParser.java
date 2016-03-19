@@ -33,10 +33,11 @@ final public class ProductRecipeParser {
         final String url = "http://virtonomica.ru/olga/main/industry/unit_type/info/";
         final List<Manufacture> manufactures = new ArrayList<>();
 //        manufactures.add(new Manufacture("423140", "manufactureCategory", "caption"));
-        manufactures.add(new Manufacture("2425", "manufactureCategory", "caption"));
+//        manufactures.add(new Manufacture("2425", "manufactureCategory", "caption"));
+        manufactures.add(new Manufacture("2438", "manufactureCategory", "caption"));
 
         final Map<String, List<ProductRecipe>> result = getProductRecipes(url, manufactures);
-        logger.info(Utils.getPrettyGson(result));
+//        logger.info(Utils.getPrettyGson(result));
     }
 
     public static Map<String, List<ProductRecipe>> getProductRecipes(final String url, final List<Manufacture> manufactures) throws IOException {
@@ -66,6 +67,9 @@ final public class ProductRecipeParser {
 
                 final Element lastTableRow = doc.select("table.grid > tbody > tr:nth-child(3)").last();
                 final Elements rows = doc.select("table.grid > tbody > tr[class]");
+                //количество товаров производимых 1 человеком
+                final String minWorkerQty = Utils.getFirstBySep(lastTableRow.select("> td:nth-child(2)").text()," ");
+//                logger.info("minWorkerQty = {}", minWorkerQty);
                 //System.out.println(list.outerHtml());
                 int minProdQtyCellIdx = 3;
                 for (final Element row : rows) {
@@ -83,9 +87,6 @@ final public class ProductRecipeParser {
                             final String qty = ing.parent().parent().parent().nextElementSibling().child(0).text();
                             inputProducts.add(new ManufactureIngredient(productID, Utils.toDouble(qty), Utils.toDouble(minQuality)));
                         }
-                        //количество товаров производимых 1 человеком
-                        final String minWorkerQty = lastTableRow.select("> td:nth-child(1)").text().replaceAll("\\W+", "");
-//                        logger.info("minWorkerQty = {}", minWorkerQty);
 
                         final List<ManufactureResult> resultProducts = new ArrayList<>();
                         final Elements results = row.select("> td:nth-child(4) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1)");

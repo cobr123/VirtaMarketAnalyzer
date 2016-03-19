@@ -178,6 +178,11 @@ public final class Utils {
         return "";
     }
 
+    public static String getFirstBySep(final String str, final String sep) {
+        final String[] data = str.split(sep);
+        return data[0];
+    }
+
     public static String getLastBySep(final String str, final String sep) {
         final String[] data = str.split(sep);
         return data[data.length - 1];
