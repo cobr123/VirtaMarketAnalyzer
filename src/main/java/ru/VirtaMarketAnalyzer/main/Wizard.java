@@ -165,6 +165,15 @@ public final class Wizard {
         final List<Product> materials_en = ProductInitParser.getProducts(host_en + realm + "/main/common/main_page/game_info/products/");
         Utils.writeToGson(baseDir + "materials_en.json", materials_en);
         logger.info("materials.size() = {}", materials.size());
+        //страны
+        final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
+        //регионы
+        final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        //группируем ставки енвд по регионам
+        final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/countrydutylist/", regions, materials);
+        for (final Map.Entry<String, List<RegionCTIE>> entry : allRegionsCTIEList.entrySet()) {
+            Utils.writeToGson(baseDir + "region_ctie" + File.separator + entry.getKey() + ".json", entry.getValue());
+        }
         //собираем данные о доступных товарах на оптовом рынке
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", materials);
         //сохраняем их в json
