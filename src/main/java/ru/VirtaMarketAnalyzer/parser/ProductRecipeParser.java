@@ -67,62 +67,64 @@ final public class ProductRecipeParser {
 
                 final Element lastTableRow = doc.select("table.grid > tbody > tr:nth-child(3)").last();
                 final Elements rows = doc.select("table.grid > tbody > tr[class]");
-                //количество товаров производимых 1 человеком
-                final String minWorkerQty = Utils.getFirstBySep(lastTableRow.select("> td:nth-child(2)").text()," ");
+                if (rows.size() > 0) {
+                    //количество товаров производимых 1 человеком
+                    final String minWorkerQty = Utils.getFirstBySep(lastTableRow.select("> td:nth-child(2)").text(), " ");
 //                logger.info("minWorkerQty = {}", minWorkerQty);
-                //System.out.println(list.outerHtml());
-                int minProdQtyCellIdx = 3;
-                for (final Element row : rows) {
-                    if (!row.select("> td:nth-child(1) > b").text().isEmpty()) {
-                        final String specialization = row.select("td:nth-child(1) > b").text();
+                    //System.out.println(list.outerHtml());
+                    int minProdQtyCellIdx = 3;
+                    for (final Element row : rows) {
+                        if (!row.select("> td:nth-child(1) > b").text().isEmpty()) {
+                            final String specialization = row.select("td:nth-child(1) > b").text();
 //                        logger.info("specialization = {}", specialization);
-                        final List<ManufactureIngredient> inputProducts = new ArrayList<>();
-                        //td:nth-child(3) > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img
-                        //td:nth-child(3) > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img
-                        final Elements ings = row.select("> td:nth-child(3) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img");
-                        for (final Element ing : ings) {
-                            final String productID = Utils.getLastBySep(ing.parent().attr("href"), "/");
-                            final String minQuality = Utils.clearNumber(ing.parent().parent().parent().nextElementSibling().child(0).select("> div > nobr > b").text());
-                            ing.parent().parent().parent().nextElementSibling().child(0).children().remove();
-                            final String qty = ing.parent().parent().parent().nextElementSibling().child(0).text();
-                            inputProducts.add(new ManufactureIngredient(productID, Utils.toDouble(qty), Utils.toDouble(minQuality)));
-                        }
+                            final List<ManufactureIngredient> inputProducts = new ArrayList<>();
+                            //td:nth-child(3) > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img
+                            //td:nth-child(3) > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img
+                            final Elements ings = row.select("> td:nth-child(3) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img");
+                            for (final Element ing : ings) {
+                                final String productID = Utils.getLastBySep(ing.parent().attr("href"), "/");
+                                final String minQuality = Utils.clearNumber(ing.parent().parent().parent().nextElementSibling().child(0).select("> div > nobr > b").text());
+                                ing.parent().parent().parent().nextElementSibling().child(0).children().remove();
+                                final String qty = ing.parent().parent().parent().nextElementSibling().child(0).text();
+                                inputProducts.add(new ManufactureIngredient(productID, Utils.toDouble(qty), Utils.toDouble(minQuality)));
+                            }
 
-                        final List<ManufactureResult> resultProducts = new ArrayList<>();
-                        final Elements results = row.select("> td:nth-child(4) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1)");
-                        int resultIdx = 0;
-                        for (final Element result : results) {
-                            final String minProdQty = lastTableRow.select("> td").eq(minProdQtyCellIdx).select("> nobr").text();
+                            final List<ManufactureResult> resultProducts = new ArrayList<>();
+                            final Elements results = row.select("> td:nth-child(4) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1)");
+                            int resultIdx = 0;
+                            for (final Element result : results) {
+                                final String minProdQty = lastTableRow.select("> td").eq(minProdQtyCellIdx).select("> nobr").text();
 //                            logger.info("minProdQty = {}", minProdQty);
-                            final Double prodBaseQty = Utils.toDouble(minProdQty) / Utils.toDouble(minWorkerQty);
+                                final Double prodBaseQty = Utils.toDouble(minProdQty) / Utils.toDouble(minWorkerQty);
 //                            logger.info("prodBaseQty = {}", prodBaseQty);
 
-                            final String resultID = Utils.getLastBySep(result.attr("href"), "/");
-                            result.parent().parent().nextElementSibling().child(0).children().remove();
-                            final String resultQty = result.parent().parent().nextElementSibling().child(0).text();
+                                final String resultID = Utils.getLastBySep(result.attr("href"), "/");
+                                result.parent().parent().nextElementSibling().child(0).children().remove();
+                                final String resultQty = result.parent().parent().nextElementSibling().child(0).text();
 //                            logger.info("resultQty = {}", Utils.toDouble(resultQty));
 
-                            String qualityBonus = row.select("> td:nth-child(5)").text();
-                            if (results.size() > 1) {
-                                final Element bonusTD = row.select("> td:nth-child(5) > table > tbody > tr").eq(resultIdx).select("> td").first();
-                                bonusTD.children().remove();
-                                qualityBonus = bonusTD.text();
+                                String qualityBonus = row.select("> td:nth-child(5)").text();
+                                if (results.size() > 1) {
+                                    final Element bonusTD = row.select("> td:nth-child(5) > table > tbody > tr").eq(resultIdx).select("> td").first();
+                                    bonusTD.children().remove();
+                                    qualityBonus = bonusTD.text();
+                                }
+                                final ManufactureResult manufactureResult = new ManufactureResult(resultID, prodBaseQty, Utils.toDouble(resultQty), Utils.toDouble(qualityBonus));
+                                resultProducts.add(manufactureResult);
+                                ++resultIdx;
+                                ++minProdQtyCellIdx;
                             }
-                            final ManufactureResult manufactureResult = new ManufactureResult(resultID, prodBaseQty, Utils.toDouble(resultQty), Utils.toDouble(qualityBonus));
-                            resultProducts.add(manufactureResult);
-                            ++resultIdx;
-                            ++minProdQtyCellIdx;
-                        }
 
-                        final Element equipElem = row.select(" > td:nth-child(2) > a:nth-child(1) > img").first();
-                        Product equipment = null;
-                        //если не "склад"
-                        if (!"2011".equals(manufacture.getId())) {
-                            equipment = getProduct(equipElem);
-                        }
+                            final Element equipElem = row.select(" > td:nth-child(2) > a:nth-child(1) > img").first();
+                            Product equipment = null;
+                            //если не "склад"
+                            if (!"2011".equals(manufacture.getId())) {
+                                equipment = getProduct(equipElem);
+                            }
 
-                        final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, inputProducts, resultProducts);
-                        recipes.add(recipe);
+                            final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, inputProducts, resultProducts);
+                            recipes.add(recipe);
+                        }
                     }
                 }
             } catch (final Exception e) {
