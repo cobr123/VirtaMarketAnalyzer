@@ -170,7 +170,7 @@ public final class Wizard {
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
         //группируем ставки енвд по регионам
-        final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/countrydutylist/", regions, materials);
+        final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/regionENVD/", regions, materials);
         for (final Map.Entry<String, List<RegionCTIE>> entry : allRegionsCTIEList.entrySet()) {
             Utils.writeToGson(baseDir + "region_ctie" + File.separator + entry.getKey() + ".json", entry.getValue());
         }
