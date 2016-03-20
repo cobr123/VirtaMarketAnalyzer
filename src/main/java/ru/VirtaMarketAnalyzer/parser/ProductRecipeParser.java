@@ -70,6 +70,8 @@ final public class ProductRecipeParser {
                 if (rows.size() > 0) {
                     //количество товаров производимых 1 человеком
                     final String minWorkerQty = Utils.getFirstBySep(lastTableRow.select("> td:nth-child(2)").text(), " ");
+                    final String minEquipQty = Utils.getLastBySep(lastTableRow.select("> td:nth-child(2)").text(), " ");
+                    final double equipmentPerWorker = Utils.toDouble(minEquipQty) / Utils.toDouble(minWorkerQty);
 //                logger.info("minWorkerQty = {}", minWorkerQty);
                     //System.out.println(list.outerHtml());
                     int minProdQtyCellIdx = 3;
@@ -122,7 +124,7 @@ final public class ProductRecipeParser {
                                 equipment = getProduct(equipElem);
                             }
 
-                            final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, inputProducts, resultProducts);
+                            final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, equipmentPerWorker, inputProducts, resultProducts);
                             recipes.add(recipe);
                         }
                     }
