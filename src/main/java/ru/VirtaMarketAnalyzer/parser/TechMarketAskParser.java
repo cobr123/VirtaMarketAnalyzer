@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -42,6 +43,8 @@ final public class TechMarketAskParser {
 //        logger.info(Utils.getPrettyGson(techIdAsks));
         logger.info("techIdAsks.size() = {}", techIdAsks.size());
 
+
+        final List<TechLvl> askWoBidTechLvl = new ArrayList<>();
         for (final TechLvl techIdAsk : techIdAsks) {
             //http://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
             final String url2 = Wizard.host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
@@ -57,7 +60,19 @@ final public class TechMarketAskParser {
 //            logger.info(Utils.getPrettyGson(techBids));
 //            logger.info("techBids.size() = {}", techBids.size());
 //            break;
+            final List<TechAskBid> tmp = getAskWoBid(techAsks, techBids);
+            if (tmp.size() > 0) {
+                askWoBidTechLvl.add(new TechLvl(techIdAsk, tmp));
+            }
         }
+        logger.info(Utils.getPrettyGson(askWoBidTechLvl));
+        logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
+    }
+
+    private static List<TechAskBid> getAskWoBid(final List<TechAskBid> asks, final List<TechAskBid> bids) {
+        return asks.stream()
+                .filter(ask -> !bids.stream().filter(bid -> ask.getPrice() < bid.getPrice() || (ask.getPrice() >= bid.getPrice() && ask.getQuantity() > bid.getQuantity())).findAny().isPresent())
+                .collect(Collectors.toList());
     }
 
     private static List<TechAskBid> getTechAskBids(final String url) throws IOException {
