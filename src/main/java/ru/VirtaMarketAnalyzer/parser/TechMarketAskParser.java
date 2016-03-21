@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.summarizingDouble;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -37,7 +38,18 @@ final public class TechMarketAskParser {
 
         final String realm = "olga";
         final List<TechLvl> askWoBidTechLvl = getLicenseAskWoBid(Wizard.host, realm);
-        logger.info(Utils.getPrettyGson(askWoBidTechLvl));
+//        logger.info(Utils.getPrettyGson(askWoBidTechLvl));
+        for (final TechLvl tl : askWoBidTechLvl) {
+            //http://virtonomica.ru/olga/main/globalreport/technology/2423/10/target_market_summary/21-03-2016/ask
+            if (tl.getTechId().equals("2423") && tl.getLvl() == 10) {
+                logger.info(Utils.getPrettyGson(tl));
+            }
+            //http://virtonomica.ru/olga/main/globalreport/technology/423140/2/target_market_summary/21-03-2016/ask
+            if (tl.getTechId().equals("423140") && tl.getLvl() == 2) {
+                logger.info(Utils.getPrettyGson(tl));
+            }
+
+        }
         logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
     }
 
@@ -76,8 +88,11 @@ final public class TechMarketAskParser {
     }
 
     private static List<TechAskBid> getAskWoBid(final List<TechAskBid> asks, final List<TechAskBid> bids) {
+        //(ask.getPrice() >= bid.getPrice() && ask.getQuantity() > bid.getQuantity())
+        //найти спрос без предложения (для цены спроса нет такой же или меньше цены предложения )
+        //найти спрос без достаточного предложения (для количества спроса нет такого же или больше количества предложения с такой же или меньшей ценой)
         return asks.stream()
-                .filter(ask -> !bids.stream().filter(bid -> ask.getPrice() < bid.getPrice() || (ask.getPrice() >= bid.getPrice() && ask.getQuantity() > bid.getQuantity())).findAny().isPresent())
+                .filter(ask -> ask.getQuantity() > bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).mapToInt(TechAskBid::getQuantity).sum() || !bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).findAny().isPresent())
                 .collect(Collectors.toList());
     }
 
