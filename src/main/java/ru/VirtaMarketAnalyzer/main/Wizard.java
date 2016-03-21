@@ -30,6 +30,7 @@ public final class Wizard {
     public static final String by_trade_at_cities = "by_trade_at_cities";
     public static final String by_service = "by_service";
     public static final String countrydutylist = "countrydutylist";
+    public static final String tech = "tech";
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
@@ -44,6 +45,7 @@ public final class Wizard {
         for (final String realm : realms) {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
+            collectToJsonTech(realm);
         }
 //        final File localPathFile = new File(GitHubPublisher.localPath);
 //        if (localPathFile.exists()) {
@@ -55,6 +57,19 @@ public final class Wizard {
         RetailSalePrediction.createCommonPrediction();
         //публикуем на сайте
         GitHubPublisher.publishPredictions();
+    }
+
+    private static void collectToJsonTech(final String realm) throws IOException {
+        final String baseDir = Utils.getDir() + tech + File.separator + realm + File.separator;
+
+        //типы подразделений для технологий
+        final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
+        Utils.writeToGson(baseDir + "unit_types.json", techList);
+        final List<TechUnitType> techList_en = TechListParser.getTechUnitTypes(Wizard.host_en, realm);
+        Utils.writeToGson(baseDir + "unit_types_en.json", techList_en);
+        //спрос на технологии без предложений
+        final List<TechLvl> licenseAskWoBid = TechMarketAskParser.getLicenseAskWoBid(Wizard.host, realm);
+        Utils.writeToGson(baseDir + "license_ask_wo_bid.json", licenseAskWoBid);
     }
 
     public static void collectToJsonTradeAtCities(final String realm) throws IOException {

@@ -7,9 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.Tech;
-import ru.VirtaMarketAnalyzer.data.TechAskBid;
-import ru.VirtaMarketAnalyzer.data.TechLvl;
+import ru.VirtaMarketAnalyzer.data.TechUnitType;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
@@ -29,20 +27,19 @@ final public class TechListParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 
         final String realm = "olga";
-        final String url = Wizard.host + realm + "/main/globalreport/technology";
-        final List<Tech> techList = getTechList(url);
+        final List<TechUnitType> techList = getTechUnitTypes(Wizard.host , realm);
         logger.info(Utils.getPrettyGson(techList));
         logger.info("techList.size() = {}", techList.size());
     }
 
-    private static List<Tech> getTechList(final String url) throws IOException {
-        final Document doc = Downloader.getDoc(url);
+    public static List<TechUnitType> getTechUnitTypes(final String host,final String realm) throws IOException {
+        final Document doc = Downloader.getDoc(host + realm + "/main/globalreport/technology");
         final Elements types = doc.select("select#unittype > option");
 
         return types.stream().map(type -> {
             final String id = type.attr("value");
             final String caption = type.text();
-            return new Tech(id, caption);
+            return new TechUnitType(id, caption);
         }).collect(toList());
     }
 }

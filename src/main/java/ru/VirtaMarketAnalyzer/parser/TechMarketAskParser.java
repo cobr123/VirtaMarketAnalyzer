@@ -35,26 +35,32 @@ final public class TechMarketAskParser {
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 
+        final String realm = "olga";
+        final List<TechLvl> askWoBidTechLvl = getLicenseAskWoBid(Wizard.host, realm);
+        logger.info(Utils.getPrettyGson(askWoBidTechLvl));
+        logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
+    }
+
+    public static List<TechLvl> getLicenseAskWoBid(final String host, final String realm) throws IOException {
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String dateStr = df.format(new Date());
-        final String realm = "olga";
-        final String url1 = Wizard.host + realm + "/main/globalreport/technology_target_market/total";
+
+        final String url1 = host + realm + "/main/globalreport/technology_target_market/total";
         final List<TechLvl> techIdAsks = getAskTech(url1);
 //        logger.info(Utils.getPrettyGson(techIdAsks));
         logger.info("techIdAsks.size() = {}", techIdAsks.size());
 
-
-        final List<TechLvl> askWoBidTechLvl = new ArrayList<>();
+        final List<TechLvl> licenseAskWoBid = new ArrayList<>();
         for (final TechLvl techIdAsk : techIdAsks) {
             //http://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
-            final String url2 = Wizard.host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
+            final String url2 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
 //            logger.info("url2 = {}", url2);
             final List<TechAskBid> techAsks = getTechAskBids(url2);
 //            logger.info(Utils.getPrettyGson(techAsks));
 //            logger.info("techAsks.size() = {}", techAsks.size());
 
             //http://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/bid
-            final String url3 = Wizard.host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid";
+            final String url3 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid";
 //            logger.info("url3 = {}", url3);
             final List<TechAskBid> techBids = getTechAskBids(url3);
 //            logger.info(Utils.getPrettyGson(techBids));
@@ -62,11 +68,11 @@ final public class TechMarketAskParser {
 //            break;
             final List<TechAskBid> tmp = getAskWoBid(techAsks, techBids);
             if (tmp.size() > 0) {
-                askWoBidTechLvl.add(new TechLvl(techIdAsk, tmp));
+                licenseAskWoBid.add(new TechLvl(techIdAsk, tmp));
             }
         }
-        logger.info(Utils.getPrettyGson(askWoBidTechLvl));
-        logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
+        logger.info("licenseAskWoBid.size() = {}", licenseAskWoBid.size());
+        return licenseAskWoBid;
     }
 
     private static List<TechAskBid> getAskWoBid(final List<TechAskBid> asks, final List<TechAskBid> bids) {
