@@ -48,6 +48,10 @@ final public class TechMarketAskParser {
             if (tl.getTechId().equals("423140") && tl.getLvl() == 2) {
                 logger.info(Utils.getPrettyGson(tl));
             }
+            //http://virtonomica.ru/olga/main/globalreport/technology/1906/7/target_market_summary/21-03-2016/ask
+            if (tl.getTechId().equals("1906") && tl.getLvl() == 7) {
+                logger.info(Utils.getPrettyGson(tl));
+            }
 
         }
         logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
@@ -88,11 +92,20 @@ final public class TechMarketAskParser {
     }
 
     private static List<TechAskBid> getAskWoBid(final List<TechAskBid> asks, final List<TechAskBid> bids) {
-        //(ask.getPrice() >= bid.getPrice() && ask.getQuantity() > bid.getQuantity())
         //найти спрос без предложения (для цены спроса нет такой же или меньше цены предложения )
         //найти спрос без достаточного предложения (для количества спроса нет такого же или больше количества предложения с такой же или меньшей ценой)
         return asks.stream()
-                .filter(ask -> ask.getQuantity() > bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).mapToInt(TechAskBid::getQuantity).sum() || !bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).findAny().isPresent())
+                .map(ask -> {
+                    final int bidQtySum = bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).mapToInt(TechAskBid::getQuantity).sum();
+                    final boolean bidWithGreaterPriceExist = bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).findAny().isPresent();
+                    if (ask.getQuantity() > bidQtySum) {
+                        return new TechAskBid(ask.getPrice(), ask.getQuantity() - bidQtySum);
+                    } else if (!bidWithGreaterPriceExist) {
+                        return ask;
+                    }
+                    return null;
+                })
+                .filter(ask -> ask != null)
                 .collect(Collectors.toList());
     }
 
