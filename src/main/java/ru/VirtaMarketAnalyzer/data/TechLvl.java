@@ -15,4 +15,12 @@ final public class TechLvl {
         this.techId = techId;
         this.lvl = lvl;
     }
+
+    public String getTechId() {
+        return techId;
+    }
+
+    public int getLvl() {
+        return lvl;
+    }
 }

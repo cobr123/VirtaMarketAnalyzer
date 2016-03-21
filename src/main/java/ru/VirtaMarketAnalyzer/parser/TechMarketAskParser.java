@@ -7,6 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.data.TechAskBid;
 import ru.VirtaMarketAnalyzer.data.TechLvl;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
@@ -33,13 +34,41 @@ final public class TechMarketAskParser {
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 
-        final DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String dateStr = df.format(new Date());
         final String realm = "olga";
-        final String url = Wizard.host + realm + "/main/globalreport/technology_target_market/total/" + dateStr + "/ask";
-        final List<TechLvl> techIdAsks = getAskTech(url);
-        logger.info(Utils.getPrettyGson(techIdAsks));
+        final String url1 = Wizard.host + realm + "/main/globalreport/technology_target_market/total";
+        final List<TechLvl> techIdAsks = getAskTech(url1);
+//        logger.info(Utils.getPrettyGson(techIdAsks));
         logger.info("techIdAsks.size() = {}", techIdAsks.size());
+
+        for (final TechLvl techIdAsk : techIdAsks) {
+            //http://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
+            final String url2 = Wizard.host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
+//            logger.info("url2 = {}", url2);
+            final List<TechAskBid> techAsks = getTechAskBids(url2);
+//            logger.info(Utils.getPrettyGson(techAsks));
+//            logger.info("techAsks.size() = {}", techAsks.size());
+
+            //http://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/bid
+            final String url3 = Wizard.host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid";
+//            logger.info("url3 = {}", url3);
+            final List<TechAskBid> techBids = getTechAskBids(url3);
+//            logger.info(Utils.getPrettyGson(techBids));
+//            logger.info("techBids.size() = {}", techBids.size());
+//            break;
+        }
+    }
+
+    private static List<TechAskBid> getTechAskBids(final String url) throws IOException {
+        final Document doc = Downloader.getDoc(url);
+        final Elements priceAndQty = doc.select("table[class=list] > tbody > tr[class]");
+
+        return priceAndQty.stream().map(paq -> {
+            final double price = Utils.toDouble(paq.select("> td:eq(0)").text());
+            final int quantity = Utils.toInt(paq.select("> td:eq(1)").text());
+            return new TechAskBid(price, quantity);
+        }).collect(toList());
     }
 
     private static List<TechLvl> getAskTech(final String url) throws IOException {
@@ -50,7 +79,6 @@ final public class TechMarketAskParser {
         return asks.stream().map(ask -> {
             final Matcher matcher = tech_lvl_pattern.matcher(ask.attr("href"));
             if (matcher.find()) {
-                System.out.println();
                 final String techID = matcher.group(1);
                 final int lvl = Utils.toInt(matcher.group(2));
                 return new TechLvl(techID, lvl);
