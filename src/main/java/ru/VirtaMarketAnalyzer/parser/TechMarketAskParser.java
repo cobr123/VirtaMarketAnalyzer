@@ -48,7 +48,7 @@ final public class TechMarketAskParser {
         final String url1 = host + realm + "/main/globalreport/technology_target_market/total";
         final List<TechLvl> techIdAsks = getAskTech(url1);
 //        logger.info(Utils.getPrettyGson(techIdAsks));
-        logger.info("techIdAsks.size() = {}", techIdAsks.size());
+        logger.info("techIdAsks.size() = {}, realm = {}", techIdAsks.size(), realm);
 
         final List<TechLvl> licenseAskWoBid = new ArrayList<>();
         for (final TechLvl techIdAsk : techIdAsks) {
@@ -71,7 +71,7 @@ final public class TechMarketAskParser {
                 licenseAskWoBid.add(new TechLvl(techIdAsk, tmp));
             }
         }
-        logger.info("licenseAskWoBid.size() = {}", licenseAskWoBid.size());
+        logger.info("licenseAskWoBid.size() = {}, realm = {}", licenseAskWoBid.size(), realm);
         return licenseAskWoBid;
     }
 
