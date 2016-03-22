@@ -70,6 +70,9 @@ public final class Wizard {
         //спрос на технологии без предложений
         final List<TechLvl> licenseAskWoBid = TechMarketAskParser.getLicenseAskWoBid(Wizard.host, realm);
         Utils.writeToGson(baseDir + "license_ask_wo_bid.json", licenseAskWoBid);
+        //запоминаем дату обновления данных
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
     public static void collectToJsonTradeAtCities(final String realm) throws IOException {
