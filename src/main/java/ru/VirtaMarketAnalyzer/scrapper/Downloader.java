@@ -17,7 +17,7 @@ import java.util.Date;
 public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
-    public static File get(final String url) throws IOException {
+    public static Document get(final String url) throws IOException {
         return get(url, "");
     }
 
@@ -46,12 +46,13 @@ public final class Downloader {
         }
     }
 
-    public static File get(final String url, final String referrer) throws IOException {
+    private static Document get(final String url, final String referrer) throws IOException {
         final String clearedUrl = getCrearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
             logger.trace("Взят из кэша: {}", file.getAbsolutePath());
+            return Jsoup.parse(file, "UTF-8", "http://virtonomica.ru/");
         } else {
             logger.trace("Запрошен адрес: {}", url);
 
@@ -66,7 +67,7 @@ public final class Downloader {
                     conn.header("Accept-Language", "ru");
                     final Document doc = conn.get();
                     Utils.writeFile(fileToSave, doc.outerHtml());
-                    break;
+                    return doc;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
                     logger.trace("Ошибка: ", e);
@@ -78,7 +79,7 @@ public final class Downloader {
                 }
             }
         }
-        return file;
+        return null;
     }
 
     public static void waitSecond(final long seconds) {
@@ -94,8 +95,7 @@ public final class Downloader {
     }
 
     public static Document getDoc(final String url, final String referrer) throws IOException {
-        final File input = Downloader.get(url, referrer);
-        return Jsoup.parse(input, "UTF-8", "http://virtonomica.ru/");
+        return Downloader.get(url, referrer);
     }
 
     public static void main(final String[] args) throws IOException {
