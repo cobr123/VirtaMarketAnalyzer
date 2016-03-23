@@ -3,6 +3,7 @@ package ru.VirtaMarketAnalyzer.main;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.io.FileUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -71,10 +72,7 @@ public final class Utils {
     public static void writeFile(final String path, final String content)
             throws IOException {
         final File file = Utils.mkdirs(path);
-        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(file), "UTF-8"))) {
-            writer.write(content);
-        }
+        FileUtils.writeStringToFile(file, content, "UTF-8");
     }
 
     public static String readFile(final String path) throws IOException {
