@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * Created by cobr123 on 24.04.2015.
  */
@@ -26,21 +28,6 @@ public final class CityParser {
         //final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
         final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422549/3054/3055/3056");
         final Element table = doc.select("table[class=\"grid\"]").first();
-//        System.out.println(table.outerHtml());
-//        System.out.println(table.select("table > tbody > tr > td").eq(2).text().replaceAll("[\\W]+", ""));
-//        System.out.println(table.select("table > tbody > tr > td:nth-child(5)").text());
-//        System.out.println(table.select("table > tbody > tr > td").eq(6).text());
-//        System.out.println(table.select("table > tbody > tr > td").eq(8).text());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td > img").attr("src"));
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td").eq(4).html());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr:nth-child(3) > td").eq(4).html());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(2) > td").eq(0).html());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(2) > td").eq(1).html());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(3) > td").eq(0).html());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(3) > td").eq(1).html());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(0).html());
-//        System.out.println(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(1).html());
-
         final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
 
         for (int i = 0; i < percs.size(); ++i) {
@@ -52,31 +39,16 @@ public final class CityParser {
                 break;
             }
         }
-//        final Element list = doc.select("table[class=\"list\"]").last();
-//        System.out.println(list.outerHtml());
-//        final Elements bestInTown = list.select("table > tbody > tr");
-//        for (Element best : bestInTown) {
-//            System.out.println(best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title"));
-//            best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).remove();
-//            System.out.println(best.select("tr > td:nth-child(1) > div:nth-child(2)").html().replace("&nbsp;", " ").trim());
-//            System.out.println(Utils.toLong(best.select("tr > td").eq(1).html()));
-//            System.out.println(best.select("tr > td").eq(2).html());
-//            System.out.println(Utils.toLong(best.select("tr > td").eq(3).html()));
-//            System.out.println(Utils.toDouble(best.select("tr > td").eq(4).html()));
-//            System.out.println(Utils.toDouble(best.select("tr > td").eq(5).html()));
-//            System.out.println(Utils.toDouble(best.select("tr > td").eq(6).html()));
-//        }
+
     }
 
     public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products, final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) throws IOException {
-        final List<CityProduct> cityProducts = new ArrayList<>(cities.size() * products.size());
-
-        for (final City city : cities) {
-            cityProducts.addAll(products.stream().map(product -> new CityProduct(city, product, url)).collect(Collectors.toList()));
-        }
-        logger.info("парсим данные: {}", cityProducts.size());
-
-        return cityProducts.parallelStream().map(city -> city.getTradeAtCity(countriesDutyList, regions)).collect(Collectors.groupingBy(TradeAtCity::getProductId));
+        logger.info("парсим данные: {}", cities.size() * products.size());
+        return cities
+                .parallelStream()
+                .flatMap(city -> products.stream().map(product -> new CityProduct(city, product, url)))
+                .map(city -> city.getTradeAtCity(countriesDutyList, regions))
+                .collect(Collectors.groupingBy(TradeAtCity::getProductId));
     }
 
     public static TradeAtCity get(final String url, final City city, final Product product, final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) throws Exception {
