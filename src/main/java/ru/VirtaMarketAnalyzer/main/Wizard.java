@@ -34,7 +34,7 @@ public final class Wizard {
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
         final List<String> realms = new ArrayList<>();
         realms.add("olga");
