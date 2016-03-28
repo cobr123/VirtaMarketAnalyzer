@@ -4,6 +4,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -81,11 +83,15 @@ final public class TechMarketAskParser {
             final List<TechAskBid> techBids = getTechAskBids(url3);
 //            logger.info(Utils.getPrettyGson(techBids));
 //            logger.info("techBids.size() = {}", techBids.size());
-//            break;
-            final List<TechAskBid> tmp = getAskWoBid(techAsks, techBids);
-            if (tmp.size() > 0) {
-                licenseAskWoBid.add(new TechLvl(techIdAsk, tmp));
+            if (techAsks.size() > 0 && techBids.size() == 0) {
+                licenseAskWoBid.add(new TechLvl(techIdAsk, Collections.emptyList()));
+            } else {
+                final List<TechAskBid> tmp = getAskWoBid(techAsks, techBids);
+                if (tmp.size() > 0) {
+                    licenseAskWoBid.add(new TechLvl(techIdAsk, tmp));
+                }
             }
+//            throw new IOException("test");
         }
         logger.info("licenseAskWoBid.size() = {}, realm = {}", licenseAskWoBid.size(), realm);
         return licenseAskWoBid;
@@ -110,29 +116,55 @@ final public class TechMarketAskParser {
     }
 
     private static List<TechAskBid> getTechAskBids(final String url) throws IOException {
-        final Document doc = Downloader.getDoc(url);
-        final Elements priceAndQty = doc.select("table[class=list] > tbody > tr[class]");
+        final int maxTryCnt = 3;
+        for (int tryCnt = 1; tryCnt <= maxTryCnt; ++tryCnt) {
+            final Document doc = Downloader.getDoc(url);
+            //итоги
+            final Element table = doc.select("table.list").first();
+            if (table == null) {
+                Downloader.invalidateCache(url);
+                logger.error("На странице '" + url + "' не найдена таблица с классом list");
+                Downloader.waitSecond(3);
+                continue;
+            }
+            //сами ставки\предложения
+            final Elements priceAndQty = doc.select("table.list > tbody > tr[class]");
 
-        return priceAndQty.stream().map(paq -> {
-            final double price = Utils.toDouble(paq.select("> td:eq(0)").text());
-            final int quantity = Utils.toInt(paq.select("> td:eq(1)").text());
-            return new TechAskBid(price, quantity);
-        }).collect(toList());
+            return priceAndQty.stream().map(paq -> {
+                final double price = Utils.toDouble(paq.select("> td:eq(0)").text());
+                final int quantity = Utils.toInt(paq.select("> td:eq(1)").text());
+                return new TechAskBid(price, quantity);
+            }).collect(toList());
+        }
+        return null;
     }
 
     private static List<TechLvl> getAskTech(final String url) throws IOException {
-        final Document doc = Downloader.getDoc(url);
-        final Elements asks = doc.select("table.list > tbody > tr > td > a:not(:contains(--))");
-
-        //http://virtonomica.ru/olga/main/globalreport/technology/2423/16/target_market_summary/21-03-2016/ask
-        return asks.stream().map(ask -> {
-            final Matcher matcher = tech_lvl_pattern.matcher(ask.attr("href"));
-            if (matcher.find()) {
-                final String techID = matcher.group(1);
-                final int lvl = Utils.toInt(matcher.group(2));
-                return new TechLvl(techID, lvl);
+        final int maxTryCnt = 3;
+//        logger.info(url);
+//        Downloader.invalidateCache(url);
+        for (int tryCnt = 1; tryCnt <= maxTryCnt; ++tryCnt) {
+            final Document doc = Downloader.getDoc(url);
+            final Element table = doc.select("table.list").first();
+            if (table == null) {
+                Downloader.invalidateCache(url);
+                logger.error("На странице '" + url + "' не найдена таблица с классом list");
+                Downloader.waitSecond(3);
+                continue;
             }
-            return null;
-        }).collect(toList());
+            final Elements asks = doc.select("table.list > tbody > tr > td > a:not(:contains(--))");
+
+            //http://virtonomica.ru/olga/main/globalreport/technology/2423/16/target_market_summary/21-03-2016/ask
+            return asks.stream().map(ask -> {
+                final Matcher matcher = tech_lvl_pattern.matcher(ask.attr("href"));
+                if (matcher.find()) {
+                    final String techID = matcher.group(1);
+                    final int lvl = Utils.toInt(matcher.group(2));
+                    return new TechLvl(techID, lvl);
+                }
+                return null;
+            }).collect(toList());
+        }
+        return null;
     }
 }
