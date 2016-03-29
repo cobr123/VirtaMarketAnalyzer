@@ -152,6 +152,13 @@ final public class TechMarketAskParser {
                 Downloader.waitSecond(3);
                 continue;
             }
+            final Element footer = doc.select("div#footer").first();
+            if (footer == null) {
+                Downloader.invalidateCache(url);
+                logger.error("На странице '" + url + "' не найден footer");
+                Downloader.waitSecond(3);
+                continue;
+            }
             final Elements asks = doc.select("table.list > tbody > tr > td > a:not(:contains(--))");
 
             //http://virtonomica.ru/olga/main/globalreport/technology/2423/16/target_market_summary/21-03-2016/ask
