@@ -65,6 +65,10 @@ public final class Downloader {
                         conn.referrer(referrer);
                     }
                     conn.header("Accept-Language", "ru");
+                    conn.header("Accept-Encoding", "gzip, deflate");
+                    conn.userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0");
+                    conn.maxBodySize(0);
+                    conn.timeout(600000);
                     final Document doc = conn.get();
                     Utils.writeFile(fileToSave, doc.outerHtml());
                     return doc;
