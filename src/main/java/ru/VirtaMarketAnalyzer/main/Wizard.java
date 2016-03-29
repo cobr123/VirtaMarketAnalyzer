@@ -68,7 +68,7 @@ public final class Wizard {
         final List<TechUnitType> techList_en = TechListParser.getTechUnitTypes(Wizard.host_en, realm);
         Utils.writeToGson(baseDir + "unit_types_en.json", techList_en);
         //спрос на технологии без предложений
-        final List<TechLvl> licenseAskWoBid = TechMarketAskParser.getLicenseAskWoBid(Wizard.host, realm);
+        final List<TechLvl> licenseAskWoBid = TechMarketAskParser.getLicenseAskWoBid(Wizard.host_en, realm);
         Utils.writeToGson(baseDir + "license_ask_wo_bid.json", licenseAskWoBid);
         //запоминаем дату обновления данных
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
