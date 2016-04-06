@@ -13,9 +13,9 @@ public final class UnitTypeSpec {
     @SerializedName("e")
     final private Product equipment;
     @SerializedName("rm")
-    final private List<Product> rawMaterials;
+    final private List<RawMaterial> rawMaterials;
 
-    public UnitTypeSpec(final String caption, final Product equipment, final List<Product> rawMaterials) {
+    public UnitTypeSpec(final String caption, final Product equipment, final List<RawMaterial> rawMaterials) {
         this.caption = caption;
         this.equipment = equipment;
         this.rawMaterials = rawMaterials;
@@ -29,7 +29,7 @@ public final class UnitTypeSpec {
         return equipment;
     }
 
-    public List<Product> getRawMaterials() {
+    public List<RawMaterial> getRawMaterials() {
         return rawMaterials;
     }
 }

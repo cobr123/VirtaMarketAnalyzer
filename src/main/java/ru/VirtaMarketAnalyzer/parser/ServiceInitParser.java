@@ -9,6 +9,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Product;
+import ru.VirtaMarketAnalyzer.data.RawMaterial;
 import ru.VirtaMarketAnalyzer.data.UnitType;
 import ru.VirtaMarketAnalyzer.data.UnitTypeSpec;
 import ru.VirtaMarketAnalyzer.main.Utils;
@@ -76,7 +77,7 @@ public final class ServiceInitParser {
         final Element equipElem = elem.parent().parent().select(" > td:nth-child(2) > a:nth-child(1) > img").first();
         final Product equipment = getProduct(equipElem);
         final Elements rawMaterialElems = elem.parent().parent().select(" > td:nth-child(3) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img");
-        final List<Product> rawMaterials = getRawMaterials(rawMaterialElems);
+        final List<RawMaterial> rawMaterials = getRawMaterials(rawMaterialElems);
         return new UnitTypeSpec(caption, equipment, rawMaterials);
     }
 
@@ -88,7 +89,16 @@ public final class ServiceInitParser {
         return new Product(productCategory, imgUrl, id, caption);
     }
 
-    private static List<Product> getRawMaterials(final Elements rawMaterialElems) {
-        return rawMaterialElems.stream().map(ServiceInitParser::getProduct).collect(Collectors.toList());
+    private static RawMaterial getRawMaterial(final Element equipElem) {
+        final String productCategory = "";
+        final String imgUrl = equipElem.attr("src");
+        final String id = Utils.getLastBySep(equipElem.parent().attr("href"), "/");
+        final String caption = equipElem.attr("title");
+        final int quantity = Utils.toInt(equipElem.parent().parent().parent().nextElementSibling().child(0).text());
+        return new RawMaterial(productCategory, imgUrl, id, caption, quantity);
+    }
+
+    private static List<RawMaterial> getRawMaterials(final Elements rawMaterialElems) {
+        return rawMaterialElems.stream().map(ServiceInitParser::getRawMaterial).collect(Collectors.toList());
     }
 }
