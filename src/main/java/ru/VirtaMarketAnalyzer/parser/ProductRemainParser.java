@@ -40,7 +40,7 @@ public final class ProductRemainParser {
                 .parallelStream()
                 .forEach(s -> {
                     try {
-                        Downloader.get(s);
+                        Downloader.getDoc(s);
                     } catch (final IOException e) {
                         logger.error("Ошибка:", e);
                     }

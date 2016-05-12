@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public final class ShopParser {
     private static final Logger logger = LoggerFactory.getLogger(ShopParser.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        final String url = "http://virtonomica.ru/olga/main/unit/view/5788675";
         final String url = "http://virtonomica.ru/mary/main/unit/view/3943258";
@@ -41,7 +41,7 @@ public final class ShopParser {
         System.out.println(Utils.getPrettyGson(parse(url, cities, products, "")));
     }
 
-    public static Shop parse(final String url, final List<City> cities, final List<Product> products, final String cityCaption) throws IOException {
+    public static Shop parse(final String url, final List<City> cities, final List<Product> products, final String cityCaption) throws Exception {
         final Document doc = Downloader.getDoc(url);
         final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
 
@@ -209,41 +209,92 @@ public final class ShopParser {
                 throw e;
             }
         }
-        final int shopSize = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
-        final String townDistrict = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text();
-        final int departmentCount = Utils.doubleToInt(Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text()));
-        final double notoriety = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(5) > td:nth-child(2)").text());
-        final String visitorsCount = doc.select("table.infoblock > tbody > tr:nth-child(6) > td:nth-child(2)").text().trim();
-        final String serviceLevel = doc.select("table.infoblock > tbody > tr:nth-child(7) > td:nth-child(2)").text();
+        return parse(countryId, regionId, townId, url, products);
+    }
 
-        final List<ShopProduct> shopProducts = new ArrayList<>();
-        final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr[class]");
-        for (final Element row : rows) {
-            try {
-                if ("не изв.".equalsIgnoreCase(row.select("> td:nth-child(3)").first().text())) {
-                    continue;
-                }
-                if (row.select("> td:nth-child(1) > img").first().attr("src").contains("/brand/")) {
-                    continue;
-                }
-                final String productId = productsByImgSrc.get(row.select("> td:eq(0) > img").first().attr("src")).get(0).getId();
-                final String sellVolume = row.select("> td").eq(1).text().trim();
-                final double quality = Utils.toDouble(row.select("> td").eq(2).text());
-                final double brand = Utils.toDouble(row.select("> td").eq(3).text());
-                final double price = Utils.toDouble(row.select("> td").eq(4).text());
-                final double marketShare = Utils.toDouble(row.select("> td").eq(5).text());
-
-                final ShopProduct shopProduct = new ShopProduct(productId, sellVolume, price, quality, brand, marketShare);
-                shopProducts.add(shopProduct);
-            } catch (final Exception e) {
-                logger.info("url = {}", url);
-                logger.info("rows.size() = {}", rows.size());
-                logger.error(row.outerHtml());
-                logger.error(e.getLocalizedMessage(), e);
-            }
+    public static Shop parse(final String countryId, final String regionId, final String townId, final String url, final List<Product> products) throws Exception {
+        Document doc = null;
+        try {
+            final int maxTriesCnt = 1;
+            doc = Downloader.getDoc(url, maxTriesCnt);
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage());
+            return null;
         }
+        try {
+            final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
 
-        return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
-                visitorsCount, serviceLevel, shopProducts);
+            final List<ShopProduct> shopProducts = new ArrayList<>();
+            final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr[class]");
+            for (final Element row : rows) {
+                try {
+                    if ("не изв.".equalsIgnoreCase(row.select("> td:nth-child(3)").first().text())) {
+                        continue;
+                    }
+                    if (row.select("> td:nth-child(1) > img").first().attr("src").contains("/brand/")) {
+                        continue;
+                    }
+                    final String productId = productsByImgSrc.get(row.select("> td:eq(0) > img").first().attr("src")).get(0).getId();
+                    final String sellVolume = row.select("> td").eq(1).text().trim();
+                    final double quality = Utils.toDouble(row.select("> td").eq(2).text());
+                    final double brand = Utils.toDouble(row.select("> td").eq(3).text());
+                    final double price = Utils.toDouble(row.select("> td").eq(4).text());
+                    final double marketShare = Utils.toDouble(row.select("> td").eq(5).text());
+
+                    final ShopProduct shopProduct = new ShopProduct(productId, sellVolume, price, quality, brand, marketShare);
+                    shopProducts.add(shopProduct);
+                } catch (final Exception e) {
+                    logger.info("url = {}", url);
+                    logger.info("rows.size() = {}", rows.size());
+                    logger.error(row.outerHtml());
+                    logger.error(e.getLocalizedMessage(), e);
+                }
+            }
+
+            final int infoRowCnt = doc.select("table.infoblock > tbody > tr").size();
+            if (infoRowCnt == 5) {
+                //заправки
+                int shopSize = 0;
+                final String size = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text().trim();
+
+                if ("Малая городская АЗС".equals(size)) {
+                    shopSize = 1;
+                } else if ("Средняя городская АЗС".equals(size)) {
+                    shopSize = 2;
+                } else if ("Большая городская АЗС".equals(size)) {
+                    shopSize = 3;
+                } else if ("Пригородная сеть АЗС".equals(size)) {
+                    shopSize = 4;
+                } else if ("Областная сеть АЗС".equals(size)) {
+                    shopSize = 5;
+                } else {
+                    throw new Exception("Неизвестный размер юнита: " + size);
+                }
+                final String townDistrict = "";
+                final int departmentCount = 1;
+                final double notoriety = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
+                final String visitorsCount = doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text().trim();
+                final String serviceLevel = doc.select("table.infoblock > tbody > tr:nth-child(5) > td:nth-child(2)").text();
+
+                return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
+                        visitorsCount, serviceLevel, shopProducts);
+            } else if (infoRowCnt == 7) {
+                //магазины
+                final int shopSize = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
+                final String townDistrict = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text();
+                final int departmentCount = Utils.doubleToInt(Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text()));
+                final double notoriety = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(5) > td:nth-child(2)").text());
+                final String visitorsCount = doc.select("table.infoblock > tbody > tr:nth-child(6) > td:nth-child(2)").text().trim();
+                final String serviceLevel = doc.select("table.infoblock > tbody > tr:nth-child(7) > td:nth-child(2)").text();
+
+                return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
+                        visitorsCount, serviceLevel, shopProducts);
+            } else {
+                throw new Exception("Неизвестный тип юнита");
+            }
+        } catch (final Exception e) {
+            logger.error("url = {}", url);
+            throw e;
+        }
     }
 }

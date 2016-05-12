@@ -24,13 +24,13 @@ import java.util.List;
 public final class BestShopsParser {
     private static final Logger logger = LoggerFactory.getLogger(BestShopsParser.class);
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", new ArrayList<>(), new ArrayList<>());
         System.out.println("list.size() = " + list.size());
     }
 
-    public static List<Shop> getShopList(final String baseUrl, final String realm, final List<City> cities, final List<Product> products) throws IOException {
+    public static List<Shop> getShopList(final String baseUrl, final String realm, final List<City> cities, final List<Product> products) throws Exception {
         final List<Shop> shops = new ArrayList<>();
 
         final String newRef = baseUrl + realm + "/main/globalreport/marketing/best_shops";

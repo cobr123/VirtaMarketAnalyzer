@@ -16,8 +16,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 /**
  * Created by cobr123 on 24.04.2015.
  */
@@ -40,6 +38,16 @@ public final class CityParser {
             }
         }
 
+        final Element list = doc.select("table[class=\"list\"]").last();
+        //System.out.println(list.outerHtml());
+        final Elements bestInTown = list.select("table > tbody > tr");
+        for (final Element best : bestInTown) {
+            if (!best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title").isEmpty()) {
+                final String unitID = Utils.getLastFromUrl(best.select("tr > td:nth-child(1) > div:nth-child(1) > a:nth-child(2)").attr("href"));
+
+                System.out.println(unitID);
+            }
+        }
     }
 
     public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String url, final List<City> cities, final List<Product> products, final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) throws IOException {
@@ -108,12 +116,13 @@ public final class CityParser {
 
         builder.setShopBrand(Utils.toDouble(table.nextElementSibling().select("table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(4) > td").eq(1).html()));
 
-//        final List<MajorSellInCity> majorSellInCityList = new ArrayList<>();
-        /*final Element list = doc.select("table[class=\"list\"]").last();
+        final List<MajorSellInCity> majorSellInCityList = new ArrayList<>();
+        final Element list = doc.select("table[class=\"list\"]").last();
         //System.out.println(list.outerHtml());
         final Elements bestInTown = list.select("table > tbody > tr");
         for (final Element best : bestInTown) {
             if (!best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title").isEmpty()) {
+                final String unitUrl = best.select("tr > td:nth-child(1) > div:nth-child(1) > a:nth-child(2)").attr("href");
                 final long shopSize = Utils.toLong(best.select("tr > td").eq(1).html());
                 final String cityDistrict = best.select("tr > td").eq(2).html();
                 final double sellVolume = Utils.toDouble(best.select("tr > td").eq(3).html());
@@ -123,6 +132,10 @@ public final class CityParser {
 
                 majorSellInCityList.add(
                         new MajorSellInCity(
+                                city.getCountryId(),
+                                city.getRegionId(),
+                                city.getId(),
+                                unitUrl,
                                 shopSize,
                                 cityDistrict,
                                 sellVolume,
@@ -133,7 +146,7 @@ public final class CityParser {
                 );
             }
         }
-        builder.setMajorSellInCityList(majorSellInCityList);*/
+        builder.setMajorSellInCityList(majorSellInCityList);
         return builder.build();
     }
 }

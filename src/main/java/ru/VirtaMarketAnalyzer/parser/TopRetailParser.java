@@ -8,9 +8,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.City;
-import ru.VirtaMarketAnalyzer.data.Product;
-import ru.VirtaMarketAnalyzer.data.Shop;
+import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
@@ -18,6 +16,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -31,6 +31,28 @@ public final class TopRetailParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", new ArrayList<>(), new ArrayList<>());
         System.out.println("list.size() = " + list.size());
+    }
+
+    public static List<Shop> getShopList(final Map<String, List<TradeAtCity>> stats, final List<Product> products) throws IOException {
+        return stats.values().parallelStream()
+                .flatMap(Collection::stream)
+                .map(TradeAtCity::getMajorSellInCityList)
+                .flatMap(Collection::stream)
+                .map(msic -> {
+                            Shop shop = null;
+                            try {
+                                shop = ShopParser.parse(msic.getCountryId(), msic.getRegionId(), msic.getTownId(), msic.getUnitUrl(), products);
+                            } catch (final Exception e) {
+                                logger.error(e.getLocalizedMessage(), e);
+                            }
+                            return shop;
+                        }
+                )
+                .filter(s -> s != null)
+                .filter(s -> s.getShopProducts().size() > 0)
+                .filter(s -> !"Не известен".equals(s.getTownDistrict()))
+                .filter(s -> !"Не известен".equals(s.getServiceLevel()))
+                .collect(Collectors.toList());
     }
 
     public static List<Shop> getShopList(final String baseUrl, final String realm, final List<City> cities, final List<Product> products) throws IOException {

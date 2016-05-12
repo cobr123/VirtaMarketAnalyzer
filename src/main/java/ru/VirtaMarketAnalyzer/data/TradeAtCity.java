@@ -44,12 +44,12 @@ public final class TradeAtCity {
     final private double shopQuality;
     @SerializedName("sb")
     final private double shopBrand;
-    @SerializedName("ms")
-    final private List<MajorSellInCity> majorSellInCityList;
     @SerializedName("itr")
     final private double incomeTaxRate;
     @SerializedName("itp")
     final private int importTaxPercent;
+
+    final private transient List<MajorSellInCity> majorSellInCityList;
 
     public TradeAtCity(
             final String countryId

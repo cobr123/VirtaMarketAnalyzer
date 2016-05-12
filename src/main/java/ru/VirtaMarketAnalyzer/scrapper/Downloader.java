@@ -17,10 +17,6 @@ import java.util.Date;
 public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
-    public static Document get(final String url) throws IOException {
-        return get(url, "");
-    }
-
     public static String getCrearedUrl(final String url, final String referrer) {
         String clearedUrl;
         if (referrer != null && !referrer.isEmpty()) {
@@ -46,7 +42,19 @@ public final class Downloader {
         }
     }
 
-    private static Document get(final String url, final String referrer) throws IOException {
+    public static Document getDoc(final String url) throws IOException {
+        return getDoc(url, null);
+    }
+
+    public static Document getDoc(final String url, final int maxTriesCnt) throws IOException {
+        return getDoc(url, null, maxTriesCnt);
+    }
+
+    public static Document getDoc(final String url, final String referrer) throws IOException {
+        return getDoc(url, referrer, 99);
+    }
+
+    public static Document getDoc(final String url, final String referrer, final int maxTriesCnt) throws IOException {
         final String clearedUrl = getCrearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
@@ -56,7 +64,6 @@ public final class Downloader {
         } else {
             logger.trace("Запрошен адрес: {}", url);
 
-            final int maxTriesCnt = 99;
             for (int tries = 1; tries <= maxTriesCnt; ++tries) {
                 try {
                     final Connection conn = Jsoup.connect(url);
@@ -92,14 +99,6 @@ public final class Downloader {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
-    }
-
-    public static Document getDoc(final String url) throws IOException {
-        return getDoc(url, "");
-    }
-
-    public static Document getDoc(final String url, final String referrer) throws IOException {
-        return Downloader.get(url, referrer);
     }
 
     public static void main(final String[] args) throws IOException {
