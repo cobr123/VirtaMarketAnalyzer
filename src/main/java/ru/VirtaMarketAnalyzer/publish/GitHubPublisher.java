@@ -186,9 +186,7 @@ final public class GitHubPublisher {
                 logger.info(file);
                 final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(file, RetailAnalytics[].class);
                 logger.info(arr.length + "");
-                for (RetailAnalytics item : arr) {
-                    set.add(item);
-                }
+                Collections.addAll(set, arr);
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }

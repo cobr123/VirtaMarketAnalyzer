@@ -96,9 +96,7 @@ public final class RetailSalePrediction {
                     if (file.isFile() && file.getName().equals("products.json")) {
                         final String text = FileUtils.readFileToString(file, "UTF-8");
                         final Product[] arr = new GsonBuilder().create().fromJson(text, Product[].class);
-                        for (final Product item : arr) {
-                            set.add(item);
-                        }
+                        Collections.addAll(set, arr);
                     }
                 }
             }
