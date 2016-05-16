@@ -25,8 +25,10 @@ public final class MajorSellInCity {
     final private transient String countryId;
     final private transient String regionId;
     final private transient String townId;
+    final private transient String productId;
 
-    public MajorSellInCity(final String countryId, final String regionId, final String townId, final String unitUrl, final long shopSize, final String townDistrict, final double sellVolume, final double price, final double quality, final double brand) {
+    public MajorSellInCity(final String productId, final String countryId, final String regionId, final String townId, final String unitUrl, final long shopSize, final String townDistrict, final double sellVolume, final double price, final double quality, final double brand) {
+        this.productId = productId;
         this.countryId = countryId;
         this.regionId = regionId;
         this.townId = townId;
@@ -37,6 +39,10 @@ public final class MajorSellInCity {
         this.price = price;
         this.quality = quality;
         this.brand = brand;
+    }
+
+    public String getProductId() {
+        return productId;
     }
 
     public String getCountryId() {

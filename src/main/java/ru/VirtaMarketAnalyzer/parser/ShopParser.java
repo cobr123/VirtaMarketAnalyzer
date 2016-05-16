@@ -38,12 +38,11 @@ public final class ShopParser {
         final List<Product> products = new ArrayList<>();
         products.add(new Product("категория", "/img/products/bourbon.gif", "123", "Бурбон"));
         products.add(new Product("категория", "/img/products/gps.gif", "123", "GPS-навигаторы"));
-        System.out.println(Utils.getPrettyGson(parse(url, cities, products, "")));
+        System.out.println(Utils.getPrettyGson(parse("mary",url, cities, products, "")));
     }
 
-    public static Shop parse(final String url, final List<City> cities, final List<Product> products, final String cityCaption) throws Exception {
+    public static Shop parse(final String realm, final String url, final List<City> cities, final List<Product> products, final String cityCaption) throws Exception {
         final Document doc = Downloader.getDoc(url);
-        final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
 
         final String countryId = Utils.getLastFromUrl(doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)").attr("href"));
         final String regionId = Utils.getLastFromUrl(doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(2)").attr("href"));
@@ -209,15 +208,17 @@ public final class ShopParser {
                 throw e;
             }
         }
-        return parse(countryId, regionId, townId, url, products);
+        return parse(realm, "", countryId, regionId, townId, url, products);
     }
 
-    public static Shop parse(final String countryId, final String regionId, final String townId, final String url, final List<Product> products) throws Exception {
+    public static Shop parse(final String realm, final String productId, final String countryId, final String regionId, final String townId, final String url, final List<Product> products) throws Exception {
         Document doc = null;
         try {
             final int maxTriesCnt = 1;
             doc = Downloader.getDoc(url, maxTriesCnt);
         } catch (final Exception e) {
+
+            logger.error("url = http://virtonomica.ru/{}/main/globalreport/marketing/by_trade_at_cities/{}/{}/{}/{}", realm, productId, countryId, regionId, townId);
             logger.error(e.getLocalizedMessage());
             return null;
         }
@@ -234,14 +235,14 @@ public final class ShopParser {
                     if (row.select("> td:nth-child(1) > img").first().attr("src").contains("/brand/")) {
                         continue;
                     }
-                    final String productId = productsByImgSrc.get(row.select("> td:eq(0) > img").first().attr("src")).get(0).getId();
+                    final String prodId = productsByImgSrc.get(row.select("> td:eq(0) > img").first().attr("src")).get(0).getId();
                     final String sellVolume = row.select("> td").eq(1).text().trim();
                     final double quality = Utils.toDouble(row.select("> td").eq(2).text());
                     final double brand = Utils.toDouble(row.select("> td").eq(3).text());
                     final double price = Utils.toDouble(row.select("> td").eq(4).text());
                     final double marketShare = Utils.toDouble(row.select("> td").eq(5).text());
 
-                    final ShopProduct shopProduct = new ShopProduct(productId, sellVolume, price, quality, brand, marketShare);
+                    final ShopProduct shopProduct = new ShopProduct(prodId, sellVolume, price, quality, brand, marketShare);
                     shopProducts.add(shopProduct);
                 } catch (final Exception e) {
                     logger.info("url = {}", url);
@@ -257,15 +258,15 @@ public final class ShopParser {
                 int shopSize = 0;
                 final String size = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text().trim();
 
-                if ("Малая городская АЗС".equals(size)) {
+                if ("Малая городская АЗС".equals(size) || "Small gas station".equals(size)) {
                     shopSize = 1;
-                } else if ("Средняя городская АЗС".equals(size)) {
+                } else if ("Средняя городская АЗС".equals(size) || "Medium gas station".equals(size)) {
                     shopSize = 2;
-                } else if ("Большая городская АЗС".equals(size)) {
+                } else if ("Большая городская АЗС".equals(size) || "Large gas station".equals(size)) {
                     shopSize = 3;
-                } else if ("Пригородная сеть АЗС".equals(size)) {
+                } else if ("Пригородная сеть АЗС".equals(size) || "Suburban network of gas stations".equals(size)) {
                     shopSize = 4;
-                } else if ("Областная сеть АЗС".equals(size)) {
+                } else if ("Областная сеть АЗС".equals(size) || "Regional network of gas stations".equals(size)) {
                     shopSize = 5;
                 } else {
                     throw new Exception("Неизвестный размер юнита: " + size);

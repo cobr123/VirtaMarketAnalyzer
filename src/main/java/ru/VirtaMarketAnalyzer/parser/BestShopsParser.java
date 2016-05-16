@@ -41,7 +41,7 @@ public final class BestShopsParser {
             final Elements shopLinks = doc.select("table.list > tbody > tr > td:nth-child(3) > div:nth-child(1) > a:nth-child(2)");
             logger.trace("shopLinks.size() = {}", shopLinks.size());
             for (final Element link : shopLinks) {
-                final Shop shop = ShopParser.parse(link.attr("href"), cities, products, "");
+                final Shop shop = ShopParser.parse(realm, link.attr("href"), cities, products, "");
                 if (shop.getShopProducts().size() > 0 && !"Не известен".equals(shop.getTownDistrict()) && !"Не известен".equals(shop.getServiceLevel())) {
                     shops.add(shop);
                 }

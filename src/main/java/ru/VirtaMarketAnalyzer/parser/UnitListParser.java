@@ -47,7 +47,7 @@ public final class UnitListParser {
                                 Shop shop = null;
                                 final String cityCaption = sl.parent().previousElementSibling().text();
                                 try {
-                                    shop = ShopParser.parse(sl.attr("href"), cities, products, cityCaption);
+                                    shop = ShopParser.parse(realm, sl.attr("href"), cities, products, cityCaption);
                                 } catch (final Exception e) {
                                     logger.error(e.getLocalizedMessage(), e);
                                 }

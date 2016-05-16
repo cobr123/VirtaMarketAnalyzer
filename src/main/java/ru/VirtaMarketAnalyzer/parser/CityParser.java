@@ -132,6 +132,7 @@ public final class CityParser {
 
                 majorSellInCityList.add(
                         new MajorSellInCity(
+                                product.getId(),
                                 city.getCountryId(),
                                 city.getRegionId(),
                                 city.getId(),

@@ -33,7 +33,7 @@ public final class TopRetailParser {
         System.out.println("list.size() = " + list.size());
     }
 
-    public static List<Shop> getShopList(final Map<String, List<TradeAtCity>> stats, final List<Product> products) throws IOException {
+    public static List<Shop> getShopList(final String realm, final Map<String, List<TradeAtCity>> stats, final List<Product> products) throws IOException {
         return stats.values().parallelStream()
                 .flatMap(Collection::stream)
                 .map(TradeAtCity::getMajorSellInCityList)
@@ -41,7 +41,7 @@ public final class TopRetailParser {
                 .map(msic -> {
                             Shop shop = null;
                             try {
-                                shop = ShopParser.parse(msic.getCountryId(), msic.getRegionId(), msic.getTownId(), msic.getUnitUrl(), products);
+                                shop = ShopParser.parse(realm, msic.getProductId(), msic.getCountryId(), msic.getRegionId(), msic.getTownId(), msic.getUnitUrl(), products);
                             } catch (final Exception e) {
                                 logger.error(e.getLocalizedMessage(), e);
                             }

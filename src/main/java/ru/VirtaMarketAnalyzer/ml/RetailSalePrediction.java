@@ -112,7 +112,7 @@ public final class RetailSalePrediction {
         final Git git = GitHubPublisher.getRepo();
         final List<Product> products = getAllProducts(dir);
         logger.trace("dir = {}", dir.getAbsoluteFile());
-        final Set<String> productCategories = products.stream().map(Product::getProductCategory).collect(Collectors.toSet());
+//        final Set<String> productCategories = products.stream().map(Product::getProductCategory).collect(Collectors.toSet());
         for (final File realmDir : dir.listFiles()) {
             if (realmDir.isDirectory()) {
                 for (final File file : realmDir.listFiles()) {
