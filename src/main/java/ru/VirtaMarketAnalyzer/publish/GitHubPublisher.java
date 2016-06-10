@@ -51,6 +51,7 @@ final public class GitHubPublisher {
         git.commit().setMessage("data update").call();
         logger.info("git push");
         git.push().setCredentialsProvider(getCredentialsProvider()).call();
+        logger.info("git close");
         git.close();
     }
 
@@ -63,6 +64,7 @@ final public class GitHubPublisher {
         git.commit().setMessage("data update").call();
         logger.info("git push");
         git.push().setCredentialsProvider(getCredentialsProvider()).call();
+        logger.info("git close");
         git.close();
     }
 
@@ -144,6 +146,7 @@ final public class GitHubPublisher {
             final Git git = Git.open(localPathFile);
             logger.info("git pull");
             git.pull().setStrategy(MergeStrategy.THEIRS).call();
+            logger.info("git pull finished");
             return git;
         } else {
             //"https://github.com/user/repo.git"
@@ -156,7 +159,9 @@ final public class GitHubPublisher {
             cloneCommand.setURI(remotePath);
             cloneCommand.setDirectory(localPathFile);
             cloneCommand.setCredentialsProvider(getCredentialsProvider());
-            return cloneCommand.call();
+            final Git git = cloneCommand.call();
+            logger.info("git clone finished");
+            return git;
         }
     }
 
@@ -167,6 +172,7 @@ final public class GitHubPublisher {
         git.commit().setMessage("test").call();
         logger.info("git push");
         git.push().setCredentialsProvider(getCredentialsProvider()).call();
+        logger.info("git close");
         git.close();
     }
 
