@@ -15,6 +15,7 @@ import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -75,6 +76,31 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
+    public static void saveImg(final String imgUrl) {
+        try {
+            final URL imgFullUrl = new URL(host + imgUrl);
+            final File imgFile = new File(Utils.getDir() + imgUrl.replace("/", File.separator));
+            FileUtils.copyURLToFile(imgFullUrl, imgFile);
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+    }
+
+    public static void saveProductImg(final List<Product> products) {
+        products.parallelStream()
+                .forEach(product -> {
+                    saveImg(product.getImgUrl());
+                    saveImg(product.getImgUrl().replace("/img/products/", "/img/products/16/"));
+                });
+    }
+
+    public static void saveUnitTypeImg(final List<UnitType> unitTypes) {
+        unitTypes.parallelStream()
+                .forEach(unitType -> {
+                    saveImg(unitType.getImgUrl());
+                });
+    }
+
     public static void collectToJsonTradeAtCities(final String realm) throws IOException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
@@ -115,6 +141,8 @@ public final class Wizard {
         final List<Product> products_en = ProductInitParser.getProducts(host_en + realm + "/main/common/main_page/game_info/trading/");
         Utils.writeToGson(baseDir + "products_en.json", products_en);
         logger.info("products.size() = {}", products.size());
+        saveProductImg(products);
+        logger.info("products img saved");
         //получаем список доступных розничных категорий товаров
         final List<ProductCategory> product_categories = ProductInitParser.getProductCategories(products);
         Utils.writeToGson(baseDir + "product_categories.json", product_categories);
@@ -147,6 +175,9 @@ public final class Wizard {
         Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
         final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
         Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
+        logger.info("service_unit_types.size() = {}", unitTypes.size());
+        saveUnitTypeImg(unitTypes);
+        logger.info("service_unit_types img saved");
         //данные о сервисах по городам
         for (final UnitType ut : unitTypes) {
             final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut.getId(), regions);
@@ -183,6 +214,8 @@ public final class Wizard {
         final List<Product> materials_en = ProductInitParser.getProducts(host_en + realm + "/main/common/main_page/game_info/products/");
         Utils.writeToGson(baseDir + "materials_en.json", materials_en);
         logger.info("materials.size() = {}", materials.size());
+        saveProductImg(materials);
+        logger.info("materials img saved");
         //страны
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
         //регионы

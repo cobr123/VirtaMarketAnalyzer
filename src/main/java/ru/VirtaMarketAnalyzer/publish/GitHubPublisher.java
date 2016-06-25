@@ -39,6 +39,7 @@ final public class GitHubPublisher {
     public static final String localPath = Utils.getDir() + "remote_repository" + File.separator;
 
     public static void publishRetail(final List<String> realms) throws IOException, GitAPIException {
+        FileUtils.copyDirectory(new File(Utils.getDir() + "img" + File.separator), new File(localPath + "img" + File.separator));
         final Git git = getRepo();
         copyToLocalRepo(Wizard.by_trade_at_cities, realms);
         copyToLocalRepo(Wizard.by_service, realms);
