@@ -54,9 +54,9 @@ public final class Wizard {
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
         //собираем данные со всех реалмов и продуктов
-        RetailSalePrediction.createCommonPrediction();
+//        RetailSalePrediction.createCommonPrediction();
         //публикуем на сайте
-        GitHubPublisher.publishPredictions();
+//        GitHubPublisher.publishPredictions();
     }
 
     private static void collectToJsonTech(final String realm) throws IOException {
