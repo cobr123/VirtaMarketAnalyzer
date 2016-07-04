@@ -80,7 +80,7 @@ public final class Utils {
     }
 
     public static String clearNumber(final String text) {
-        return text.replace("$", "").replace("+", "").replace("%", "").replaceAll("\\p{L}+\\.?", "").replaceAll("\\p{InCyrillic}+\\.?", "").replaceAll("\\s+", "").trim();
+        return text.replace("$", "").replace("+", "").replace("%", "").replace("©", "").replaceAll("\\p{L}+\\.?", "").replaceAll("\\p{InCyrillic}+\\.?", "").replaceAll("\\s+", "").trim();
     }
 
     public static int doubleToInt(final double num) {

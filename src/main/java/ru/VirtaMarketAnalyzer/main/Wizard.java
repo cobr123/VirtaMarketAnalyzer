@@ -43,6 +43,7 @@ public final class Wizard {
         realms.add("anna");
         realms.add("mary");
         realms.add("lien");
+        realms.add("fast");
         for (final String realm : realms) {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
@@ -112,6 +113,7 @@ public final class Wizard {
         } else if ("mary".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
         } else if ("lien".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
         } else if ("vera".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)) {
+        } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
             if (baseDirFile.exists()) {
                 logger.info("удаляем {}", baseDirFile.getAbsolutePath());
