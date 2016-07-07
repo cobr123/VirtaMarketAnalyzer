@@ -20,13 +20,19 @@ import java.util.stream.Collectors;
  */
 public final class ProductInitParser {
     public static void main(final String[] args) throws IOException {
-        final String url = "http://virtonomica.ru/olga/main/common/main_page/game_info/trading";
-
-        System.out.println(Utils.getPrettyGson(getProducts(url)));
+        System.out.println(Utils.getPrettyGson(getTradingProducts("http://virtonomica.ru/", "olga")));
     }
 
-    public static List<Product> getProducts(final String url) throws IOException {
-        final Document doc = Downloader.getDoc(url);
+    public static List<Product> getTradingProducts(final String host, final String realm) throws IOException {
+        return get(host, realm, "/main/common/main_page/game_info/trading/");
+    }
+
+    public static List<Product> getProducts(final String host, final String realm) throws IOException {
+        return get(host, realm, "/main/common/main_page/game_info/products/");
+    }
+
+    public static List<Product> get(final String host, final String realm, final String path) throws IOException {
+        final Document doc = Downloader.getDoc(host + realm + path);
         final List<Product> list = new ArrayList<>();
 
         final Elements rows = doc.select("table[class=\"list\"] > tbody > tr");

@@ -67,4 +67,8 @@ public final class RawMaterial {
     public String getProductCategory() {
         return productCategory;
     }
+
+    public int getQuantity() {
+        return quantity;
+    }
 }

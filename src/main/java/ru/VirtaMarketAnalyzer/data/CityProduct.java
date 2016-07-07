@@ -15,17 +15,15 @@ import java.util.Map;
 final public class CityProduct {
     private final City city;
     private final Product product;
-    private final String url;
+    private final String host;
+    private final String realm;
     private static final Logger logger = LoggerFactory.getLogger(CityProduct.class);
 
-    public CityProduct(final City city, final Product product, final String url) {
+    public CityProduct(final City city, final Product product, final String host, final String realm) {
         this.city = city;
         this.product = product;
-        this.url = url;
-    }
-
-    public String getUrl() {
-        return url;
+        this.host = host;
+        this.realm = realm;
     }
 
     public City getCity() {
@@ -40,9 +38,9 @@ final public class CityProduct {
         final int maxTriesCnt = 3;
         for (int tries = 1; tries <= maxTriesCnt; ++tries) {
             try {
-                return CityParser.get(getUrl(), getCity(), getProduct(), countriesDutyList, regions);
+                return CityParser.get(host, realm, getCity(), getProduct(), countriesDutyList, regions);
             } catch (final Exception e) {
-                logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
+                logger.error("Ошибка при запросе, попытка #{} из {}", tries, maxTriesCnt);
                 logger.error("Ошибка: ", e);
                 if (tries < maxTriesCnt) {
                     Downloader.waitSecond(3);

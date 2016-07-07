@@ -30,7 +30,7 @@ final public class RegionCTIEParser {
         final String url = "http://virtonomics.com/olga/main/geo/regionENVD/";
         final List<Region> regions = new ArrayList<>();
         regions.add(new Region("2931", "2961", "Far East", 30));
-        final List<Product> materials = ProductInitParser.getProducts(Wizard.host + "olga" + "/main/common/main_page/game_info/products/");
+        final List<Product> materials = ProductInitParser.getProducts(Wizard.host, "olga");
         logger.info(Utils.getPrettyGson(materials));
         final Map<String, List<RegionCTIE>> allRegionsCTIEList = getAllRegionsCTIEList(url, regions, materials);
         logger.info(Utils.getPrettyGson(allRegionsCTIEList));

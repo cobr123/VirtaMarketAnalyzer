@@ -16,10 +16,7 @@ import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +24,7 @@ import java.util.stream.Collectors;
  */
 public final class ShopParser {
     private static final Logger logger = LoggerFactory.getLogger(ShopParser.class);
+    private static final Set<String> oneTryErrorUrl = new HashSet<>();
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
@@ -213,11 +211,14 @@ public final class ShopParser {
 
     public static Shop parse(final String realm, final String productId, final String countryId, final String regionId, final String townId, final String url, final List<Product> products) throws Exception {
         Document doc = null;
+        if (oneTryErrorUrl.contains(url)){
+            return null;
+        }
         try {
             final int maxTriesCnt = 1;
             doc = Downloader.getDoc(url, maxTriesCnt);
         } catch (final Exception e) {
-
+            oneTryErrorUrl.add(url);
             logger.error("url = http://virtonomica.ru/{}/main/globalreport/marketing/by_trade_at_cities/{}/{}/{}/{}", realm, productId, countryId, regionId, townId);
             logger.error(e.getLocalizedMessage());
             return null;

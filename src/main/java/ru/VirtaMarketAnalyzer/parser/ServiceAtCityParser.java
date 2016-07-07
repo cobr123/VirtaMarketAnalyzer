@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import com.google.gson.annotations.SerializedName;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -13,9 +14,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,16 +25,105 @@ public final class ServiceAtCityParser {
 
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
-//http://virtonomica.ru/olga/main/globalreport/marketing/by_service/422825/422607/422609/422626
-        final String realm = "olga";
+        final String realm = "vera";
+        final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0);
+        final List<City> cities = new ArrayList<City>();
+        cities.add(city);
         final List<Country> countries = CityInitParser.getCountries(Wizard.host + realm + "/main/common/main_page/game_info/world/");
         final List<Region> regions = CityInitParser.getRegions(Wizard.host + realm + "/main/geo/regionlist/", countries);
-        final ServiceAtCity city = get(Wizard.host, realm, new City("422607", "422609", "422626", "Агуаскальентес", 10, 0, 0), "422825", regions);
-        logger.info(Utils.getPrettyGson(city));
+        final List<UnitTypeSpec> specializations = new ArrayList<>();
+        final List<RawMaterial> rawMaterials = new ArrayList<>();
+        rawMaterials.add(new RawMaterial("", "", "15742", "Картофель", 1));
+        rawMaterials.add(new RawMaterial("", "", "15747", "Масло", 1));
+        rawMaterials.add(new RawMaterial("", "", "1506", "Хлеб", 1));
+        rawMaterials.add(new RawMaterial("", "", "1490", "Мясо", 1));
+        rawMaterials.add(new RawMaterial("", "", "1503", "Прохладительные напитки", 1));
+        specializations.add(new UnitTypeSpec("Фастфуд", new Product("","","373198","Ресторанное оборудование"), rawMaterials));
+        final UnitType service = new UnitType("373265", "Ресторан", "", specializations);
+        final List<ServiceAtCity> serviceAtCity = get(Wizard.host, realm, cities, service, regions);
+        logger.info(Utils.getPrettyGson(serviceAtCity));
     }
 
-    public static ServiceAtCity get(final String host, final String realm, final City city, final String serviceId, final List<Region> regions) throws IOException {
-        final String fullUrl = host + realm + "/main/globalreport/marketing/by_service/" + serviceId + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId();
+    private static ServiceSpecRetail addRetailStatByProduct(final String host, final String realm, final String productID, final City city) {
+        try {
+            final TradeAtCity tac = CityParser.get(Wizard.host, realm, city, new Product("", "", productID, productID), null, null);
+            return new ServiceSpecRetail(tac.getLocalPrice(), tac.getLocalQuality(), tac.getShopPrice(), tac.getShopQuality());
+        } catch (final Exception e) {
+            logger.error("Ошибка: ", e);
+        }
+        return null;
+    }
+
+    private static Map<String, ServiceSpecRetail> getRetailStat(final String host, final String realm
+            , final UnitTypeSpec spec
+            , final City city
+            , final Set<String> tradingProductsId
+    ) {
+        final Map<String, ServiceSpecRetail> stat = new HashMap<>();
+        if (tradingProductsId.contains(spec.getEquipment().getId())) {
+            stat.put(spec.getEquipment().getId(), addRetailStatByProduct(host, realm, spec.getEquipment().getId(), city));
+        }
+
+        spec.getRawMaterials()
+                .stream()
+                .forEach(mat -> {
+                    if (tradingProductsId.contains(mat.getId())) {
+                        stat.put(mat.getId(), addRetailStatByProduct(host, realm, mat.getId(), city));
+                    } else {
+                        //на реалме fast в рознице нет товара 'Прохладительные напитки', а в расходниках сервиса есть
+                        stat.put(mat.getId(), new ServiceSpecRetail(0, 0, 0, 0));
+//                        logger.error("tradingProductsId не содержит id '" + mat.getId() + "', realm = " + realm);
+                    }
+                });
+        return stat;
+    }
+
+    private static ServiceSpecRetail calcBySpec(final String realm, final UnitTypeSpec spec, final Map<String, ServiceSpecRetail> stat) {
+        try {
+            if(spec.getRawMaterials().size() > 0){
+                final double localPrice = spec.getRawMaterials()
+                        .stream()
+                        .mapToDouble(mat -> stat.get(mat.getId()).getLocalPrice() * mat.getQuantity())
+                        .sum();
+                final double localQuality = spec.getRawMaterials()
+                        .stream()
+                        .mapToDouble(mat -> stat.get(mat.getId()).getLocalQuality())
+                        .average().orElse(0);
+                final double shopPrice = spec.getRawMaterials()
+                        .stream()
+                        .mapToDouble(mat -> stat.get(mat.getId()).getShopPrice() * mat.getQuantity())
+                        .sum();
+                final double shopQuality = spec.getRawMaterials()
+                        .stream()
+                        .mapToDouble(mat -> stat.get(mat.getId()).getShopQuality())
+                        .average().orElse(0);
+                return new ServiceSpecRetail(localPrice, localQuality, shopPrice, shopQuality);
+            } else if(stat.containsKey(spec.getEquipment())){
+                final double localPrice = stat.get(spec.getEquipment()).getLocalPrice();
+                final double localQuality = stat.get(spec.getEquipment()).getLocalQuality();
+                final double shopPrice = stat.get(spec.getEquipment()).getShopPrice();
+                final double shopQuality = stat.get(spec.getEquipment()).getShopQuality();
+                return new ServiceSpecRetail(localPrice, localQuality, shopPrice, shopQuality);
+            }
+        } catch (final Exception e) {
+            logger.error("stat.size() = " + stat.size());
+            for (final RawMaterial mat : spec.getRawMaterials()) {
+                logger.error("('" + mat.getCaption() + "', stat.containsKey('" + mat.getId() + "') = " + stat.containsKey(mat.getId()));
+            }
+            logger.error("spec.getCaption() = " + spec.getCaption() + ", spec.getRawMaterials().size() = " + spec.getRawMaterials().size() + ", realm = " + realm, e);
+        }
+        return new ServiceSpecRetail(0, 0, 0, 0);
+    }
+
+    public static ServiceAtCity get(
+            final String host
+            , final String realm
+            , final City city
+            , final UnitType service
+            , final List<Region> regions
+            , final Set<String> tradingProductsId
+    ) throws IOException {
+        final String fullUrl = host + realm + "/main/globalreport/marketing/by_service/" + service.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId();
         final Document doc = Downloader.getDoc(fullUrl);
         final Element table = doc.select("table.grid").first();
 
@@ -58,6 +146,14 @@ public final class ServiceAtCityParser {
                 });
         final double incomeTaxRate = regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
 
+        final Map<String, Map<String, ServiceSpecRetail>> retailBySpec = new HashMap<>();
+        final Map<String, ServiceSpecRetail> retailCalcBySpec = new HashMap<>();
+        service.getSpecializations().forEach(spec -> {
+            final Map<String, ServiceSpecRetail> stat = getRetailStat(host, realm, spec, city, tradingProductsId);
+            retailBySpec.put(spec.getCaption(), stat);
+            retailCalcBySpec.put(spec.getCaption(), calcBySpec(realm, spec, stat));
+        });
+
         return new ServiceAtCity(city.getCountryId()
                 , city.getRegionId()
                 , city.getId()
@@ -69,13 +165,24 @@ public final class ServiceAtCityParser {
                 , percentBySpec
                 , city.getWealthIndex()
                 , incomeTaxRate
+                , retailBySpec
+                , retailCalcBySpec
         );
     }
 
-    public static List<ServiceAtCity> get(final String host, final String realm, final List<City> cities, final String serviceId, final List<Region> regions) {
+    public static List<ServiceAtCity> get(
+            final String host
+            , final String realm
+            , final List<City> cities
+            , final UnitType service
+            , final List<Region> regions
+    ) throws IOException {
+        //получаем список доступных розничных товаров
+        final Set<String> tradingProductsId = ProductInitParser.getTradingProducts(host, realm).stream().map(Product::getId).collect(Collectors.toSet());
+
         return cities.parallelStream().map(city -> {
             try {
-                return get(host, realm, city, serviceId, regions);
+                return get(host, realm, city, service, regions, tradingProductsId);
             } catch (final IOException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
