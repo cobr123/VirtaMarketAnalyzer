@@ -16,10 +16,11 @@ public final class ServiceSpecRetail {
     final private double shopQuality;
 
     public ServiceSpecRetail(final double localPrice, final double localQuality, final double shopPrice, final double shopQuality) {
-        this.localPrice = localPrice;
-        this.localQuality = localQuality;
-        this.shopPrice = shopPrice;
-        this.shopQuality = shopQuality;
+        //round up to two decimal points
+        this.localPrice = Math.round(localPrice * 100.0) / 100.0;
+        this.localQuality = Math.round(localQuality * 100.0) / 100.0;
+        this.shopPrice = Math.round(shopPrice * 100.0) / 100.0;
+        this.shopQuality = Math.round(shopQuality * 100.0) / 100.0;
     }
 
     public double getLocalPrice() {
