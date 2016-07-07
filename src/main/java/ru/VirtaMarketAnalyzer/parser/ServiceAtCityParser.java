@@ -150,8 +150,10 @@ public final class ServiceAtCityParser {
         final Map<String, ServiceSpecRetail> retailCalcBySpec = new HashMap<>();
         service.getSpecializations().forEach(spec -> {
             final Map<String, ServiceSpecRetail> stat = getRetailStat(host, realm, spec, city, tradingProductsId);
-            retailBySpec.put(spec.getCaption(), stat);
             retailCalcBySpec.put(spec.getCaption(), calcBySpec(realm, spec, stat));
+            //в retailBySpec только расходники, оборудование не включаем
+            stat.remove(spec.getEquipment().getId());
+            retailBySpec.put(spec.getCaption(), stat);
         });
 
         return new ServiceAtCity(city.getCountryId()
