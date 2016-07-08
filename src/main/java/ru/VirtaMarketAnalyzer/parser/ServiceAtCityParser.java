@@ -27,21 +27,27 @@ public final class ServiceAtCityParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
         final String realm = "vera";
         final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0);
-        final List<City> cities = new ArrayList<City>();
+        final List<City> cities = new ArrayList<>();
         cities.add(city);
-        final List<Country> countries = CityInitParser.getCountries(Wizard.host + realm + "/main/common/main_page/game_info/world/");
-        final List<Region> regions = CityInitParser.getRegions(Wizard.host + realm + "/main/geo/regionlist/", countries);
+
         final List<UnitTypeSpec> specializations = new ArrayList<>();
         final List<RawMaterial> rawMaterials = new ArrayList<>();
-        rawMaterials.add(new RawMaterial("", "", "15742", "Картофель", 1));
-        rawMaterials.add(new RawMaterial("", "", "15747", "Масло", 1));
-        rawMaterials.add(new RawMaterial("", "", "1506", "Хлеб", 1));
-        rawMaterials.add(new RawMaterial("", "", "1490", "Мясо", 1));
-        rawMaterials.add(new RawMaterial("", "", "1503", "Прохладительные напитки", 1));
-        specializations.add(new UnitTypeSpec("Фастфуд", new Product("","","373198","Ресторанное оборудование"), rawMaterials));
-        final UnitType service = new UnitType("373265", "Ресторан", "", specializations);
-        final List<ServiceAtCity> serviceAtCity = get(Wizard.host, realm, cities, service, regions);
+        specializations.add(new UnitTypeSpec("Фитнес", new Product("","","15337","Тренажер"), rawMaterials));
+        final UnitType service = new UnitType("348207", "Фитнес-центр", "", specializations);
+        final List<ServiceAtCity> serviceAtCity = get(Wizard.host, realm, cities, service, null);
         logger.info(Utils.getPrettyGson(serviceAtCity));
+
+//        final List<UnitTypeSpec> specializations = new ArrayList<>();
+//        final List<RawMaterial> rawMaterials = new ArrayList<>();
+//        rawMaterials.add(new RawMaterial("", "", "15742", "Картофель", 1));
+//        rawMaterials.add(new RawMaterial("", "", "15747", "Масло", 1));
+//        rawMaterials.add(new RawMaterial("", "", "1506", "Хлеб", 1));
+//        rawMaterials.add(new RawMaterial("", "", "1490", "Мясо", 1));
+//        rawMaterials.add(new RawMaterial("", "", "1503", "Прохладительные напитки", 1));
+//        specializations.add(new UnitTypeSpec("Фастфуд", new Product("","","373198","Ресторанное оборудование"), rawMaterials));
+//        final UnitType service = new UnitType("373265", "Ресторан", "", specializations);
+//        final List<ServiceAtCity> serviceAtCity = get(Wizard.host, realm, cities, service, null);
+//        logger.info(Utils.getPrettyGson(serviceAtCity));
     }
 
     private static ServiceSpecRetail addRetailStatByProduct(final String host, final String realm, final String productID, final City city) {
@@ -80,6 +86,8 @@ public final class ServiceAtCityParser {
 
     private static ServiceSpecRetail calcBySpec(final String realm, final UnitTypeSpec spec, final Map<String, ServiceSpecRetail> stat) {
         try {
+//            logger.info("spec.getRawMaterials().size() = {}", spec.getRawMaterials().size());
+//            logger.info("stat.containsKey(spec.getEquipment()) = {}", stat.containsKey(spec.getEquipment().getId()));
             if(spec.getRawMaterials().size() > 0){
                 final double localPrice = spec.getRawMaterials()
                         .stream()
@@ -98,11 +106,12 @@ public final class ServiceAtCityParser {
                         .mapToDouble(mat -> stat.get(mat.getId()).getShopQuality())
                         .average().orElse(0);
                 return new ServiceSpecRetail(localPrice, localQuality, shopPrice, shopQuality);
-            } else if(stat.containsKey(spec.getEquipment())){
-                final double localPrice = stat.get(spec.getEquipment()).getLocalPrice();
-                final double localQuality = stat.get(spec.getEquipment()).getLocalQuality();
-                final double shopPrice = stat.get(spec.getEquipment()).getShopPrice();
-                final double shopQuality = stat.get(spec.getEquipment()).getShopQuality();
+            } else if(stat.containsKey(spec.getEquipment().getId())){
+                final ServiceSpecRetail serviceSpecRetail = stat.get(spec.getEquipment().getId());
+                final double localPrice = serviceSpecRetail.getLocalPrice();
+                final double localQuality = serviceSpecRetail.getLocalQuality();
+                final double shopPrice = serviceSpecRetail.getShopPrice();
+                final double shopQuality = serviceSpecRetail.getShopQuality();
                 return new ServiceSpecRetail(localPrice, localQuality, shopPrice, shopQuality);
             }
         } catch (final Exception e) {
@@ -144,7 +153,8 @@ public final class ServiceAtCityParser {
                     final Double val = Utils.toDouble(element.nextElementSibling().nextElementSibling().text());
                     percentBySpec.put(key, val);
                 });
-        final double incomeTaxRate = regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
+
+        final double incomeTaxRate = (regions == null) ? 0 : regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
 
         final Map<String, Map<String, ServiceSpecRetail>> retailBySpec = new HashMap<>();
         final Map<String, ServiceSpecRetail> retailCalcBySpec = new HashMap<>();
