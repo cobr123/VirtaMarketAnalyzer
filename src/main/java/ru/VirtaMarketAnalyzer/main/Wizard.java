@@ -170,7 +170,7 @@ public final class Wizard {
         //группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой
         final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, products);
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
-            Utils.writeToGson(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
+            Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
         }
         //сервисы
         final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(host, realm);

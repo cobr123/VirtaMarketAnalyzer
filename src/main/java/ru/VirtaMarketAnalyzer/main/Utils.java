@@ -10,13 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Created by cobr123 on 25.04.2015.
@@ -36,6 +36,24 @@ public final class Utils {
     public static void writeToGson(final String path, final Object obj) throws IOException {
         logger.trace(path);
         Utils.writeFile(path, getGson(obj));
+    }
+
+    public static void writeToGsonZip(final String path, final Object obj) throws IOException {
+        logger.trace(path);
+        Utils.writeToGson(path, obj);
+        Utils.writeToZip(path, obj);
+    }
+
+    public static void writeToZip(final String path, final Object obj) throws IOException {
+        try(final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(path + ".zip")))) {
+            final ZipEntry e = new ZipEntry(new File(path).getName());
+            out.putNextEntry(e);
+
+            final byte[] data = getGson(obj).getBytes();
+            out.write(data, 0, data.length);
+            out.closeEntry();
+            out.close();
+        }
     }
 
     public static void writeToGson(final String path, final Object obj, final ExclusionStrategy es) throws IOException {
