@@ -42,6 +42,8 @@ public final class Utils {
         logger.trace(path);
         Utils.writeToGson(path, obj);
         Utils.writeToZip(path, obj);
+        final File file = new File(path);
+        file.deleteOnExit();
     }
 
     public static void writeToZip(final String path, final Object obj) throws IOException {
