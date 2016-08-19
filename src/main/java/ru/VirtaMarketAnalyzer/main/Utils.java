@@ -40,10 +40,11 @@ public final class Utils {
 
     public static void writeToGsonZip(final String path, final Object obj) throws IOException {
         logger.trace(path);
-        Utils.writeToGson(path, obj);
         Utils.writeToZip(path, obj);
         final File file = new File(path);
-        file.deleteOnExit();
+        if(file.exists()){
+            file.deleteOnExit();
+        }
     }
 
     public static void writeToZip(final String path, final Object obj) throws IOException {
