@@ -136,13 +136,13 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "cities.json", cities);
         final List<City> cities_en = CityListParser.fillWealthIndex(host_en + realm + "/main/geo/citylist/", regions);
         Utils.writeToGson(baseDir + "cities_en.json", cities_en);
-        logger.info("cities.size() = {}", cities.size());
+        logger.info("cities.size() = {}, realm = {}", cities.size(), realm);
         //получаем список доступных розничных товаров
         final List<Product> products = ProductInitParser.getTradingProducts(host, realm);
         Utils.writeToGson(baseDir + "products.json", products);
         final List<Product> products_en = ProductInitParser.getTradingProducts(host_en, realm);
         Utils.writeToGson(baseDir + "products_en.json", products_en);
-        logger.info("products.size() = {}", products.size());
+        logger.info("products.size() = {}, realm = {}", products.size(), realm);
         saveProductImg(products);
         logger.info("products img saved");
         //получаем список доступных розничных категорий товаров
@@ -177,7 +177,7 @@ public final class Wizard {
         Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
         final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
         Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
-        logger.info("service_unit_types.size() = {}", unitTypes.size());
+        logger.info("service_unit_types.size() = {}, realm = {}", unitTypes.size(), realm);
         saveUnitTypeImg(unitTypes);
         logger.info("service_unit_types img saved");
         //данные о сервисах по городам
@@ -217,7 +217,7 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "materials.json", materials);
         final List<Product> materials_en = ProductInitParser.getProducts(host_en, realm);
         Utils.writeToGson(baseDir + "materials_en.json", materials_en);
-        logger.info("materials.size() = {}", materials.size());
+        logger.info("materials.size() = {}, realm = {}", materials.size(), realm);
         saveProductImg(materials);
         logger.info("materials img saved");
         //страны
