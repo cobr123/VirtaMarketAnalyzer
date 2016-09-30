@@ -35,9 +35,9 @@ public final class TopRetailParser {
 
     public static List<Shop> getShopList(final String realm, final Map<String, List<TradeAtCity>> stats, final List<Product> products) throws IOException {
         return stats.values().parallelStream()
-                .flatMap(Collection::stream)
+                .flatMap(Collection::parallelStream)
                 .map(TradeAtCity::getMajorSellInCityList)
-                .flatMap(Collection::stream)
+                .flatMap(Collection::parallelStream)
                 .map(msic -> {
                             Shop shop = null;
                             try {
@@ -76,7 +76,7 @@ public final class TopRetailParser {
                                 return null;
                             }
                         })
-                        .flatMap(Collection::stream)
+                        .flatMap(Collection::parallelStream)
                         .collect(toList());
                 shops.addAll(tmp);
 
