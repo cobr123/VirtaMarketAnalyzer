@@ -15,7 +15,6 @@ import ru.VirtaMarketAnalyzer.data.ShopProduct;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,10 +35,11 @@ public final class ShopParser {
         final List<Product> products = new ArrayList<>();
         products.add(new Product("категория", "/img/products/bourbon.gif", "123", "Бурбон"));
         products.add(new Product("категория", "/img/products/gps.gif", "123", "GPS-навигаторы"));
-        System.out.println(Utils.getPrettyGson(parse("mary",url, cities, products, "")));
+        final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
+        System.out.println(Utils.getPrettyGson(parse("mary",url, cities, productsByImgSrc, "")));
     }
 
-    public static Shop parse(final String realm, final String url, final List<City> cities, final List<Product> products, final String cityCaption) throws Exception {
+    public static Shop parse(final String realm, final String url, final List<City> cities, final Map<String, List<Product>> productsByImgSrc, final String cityCaption) throws Exception {
         final Document doc = Downloader.getDoc(url);
 
         final String countryId = Utils.getLastFromUrl(doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)").attr("href"));
@@ -206,10 +206,10 @@ public final class ShopParser {
                 throw e;
             }
         }
-        return parse(realm, "", countryId, regionId, townId, url, products);
+        return parse(realm, "", countryId, regionId, townId, url, productsByImgSrc);
     }
 
-    public static Shop parse(final String realm, final String productId, final String countryId, final String regionId, final String townId, final String url, final List<Product> products) throws Exception {
+    public static Shop parse(final String realm, final String productId, final String countryId, final String regionId, final String townId, final String url, final Map<String, List<Product>> productsByImgSrc) throws Exception {
         Document doc = null;
         if (oneTryErrorUrl.contains(url)){
             return null;
@@ -224,8 +224,6 @@ public final class ShopParser {
             return null;
         }
         try {
-            final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
-
             final List<ShopProduct> shopProducts = new ArrayList<>();
             final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr[class]");
             for (final Element row : rows) {

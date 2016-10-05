@@ -4,7 +4,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +33,7 @@ public final class TopRetailParser {
     }
 
     public static List<Shop> getShopList(final String realm, final Map<String, List<TradeAtCity>> stats, final List<Product> products) throws IOException {
+        final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
         return stats.values().parallelStream()
                 .flatMap(Collection::parallelStream)
                 .map(TradeAtCity::getMajorSellInCityList)
@@ -41,7 +41,7 @@ public final class TopRetailParser {
                 .map(msic -> {
                             Shop shop = null;
                             try {
-                                shop = ShopParser.parse(realm, msic.getProductId(), msic.getCountryId(), msic.getRegionId(), msic.getTownId(), msic.getUnitUrl(), products);
+                                shop = ShopParser.parse(realm, msic.getProductId(), msic.getCountryId(), msic.getRegionId(), msic.getTownId(), msic.getUnitUrl(), productsByImgSrc);
                             } catch (final Exception e) {
                                 logger.error(e.getLocalizedMessage(), e);
                             }

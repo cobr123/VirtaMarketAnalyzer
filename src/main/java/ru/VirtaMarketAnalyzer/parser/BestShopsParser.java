@@ -14,9 +14,10 @@ import ru.VirtaMarketAnalyzer.data.Shop;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 17.01.16.
@@ -36,12 +37,13 @@ public final class BestShopsParser {
         final String newRef = baseUrl + realm + "/main/globalreport/marketing/best_shops";
         String nextPageUrl = newRef;
         String ref = "";
+        final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
         for (int page = 1; page <= 5; ++page) {
             final Document doc = Downloader.getDoc(nextPageUrl, ref);
             final Elements shopLinks = doc.select("table.list > tbody > tr > td:nth-child(3) > div:nth-child(1) > a:nth-child(2)");
             logger.trace("shopLinks.size() = {}", shopLinks.size());
             for (final Element link : shopLinks) {
-                final Shop shop = ShopParser.parse(realm, link.attr("href"), cities, products, "");
+                final Shop shop = ShopParser.parse(realm, link.attr("href"), cities, productsByImgSrc, "");
                 if (shop.getShopProducts().size() > 0 && !"Не известен".equals(shop.getTownDistrict()) && !"Не известен".equals(shop.getServiceLevel())) {
                     shops.add(shop);
                 }

@@ -16,6 +16,7 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +36,7 @@ public final class UnitListParser {
         final String newRef = baseUrl + realm + "/main/company/view/" + companyId + "/unit_list";
         String nextPageUrl = newRef;
         String ref = "";
+        final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
         for (int i = 0; i < 50; ++i) {
             try {
                 final Document doc = Downloader.getDoc(nextPageUrl, ref);
@@ -47,7 +49,7 @@ public final class UnitListParser {
                                 Shop shop = null;
                                 final String cityCaption = sl.parent().previousElementSibling().text();
                                 try {
-                                    shop = ShopParser.parse(realm, sl.attr("href"), cities, products, cityCaption);
+                                    shop = ShopParser.parse(realm, sl.attr("href"), cities, productsByImgSrc, cityCaption);
                                 } catch (final Exception e) {
                                     logger.error(e.getLocalizedMessage(), e);
                                 }
