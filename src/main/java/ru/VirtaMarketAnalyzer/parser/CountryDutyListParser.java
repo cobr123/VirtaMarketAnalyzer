@@ -31,7 +31,7 @@ final public class CountryDutyListParser {
 
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final String url = "http://virtonomica.ru/olga/main/geo/countrydutylist/";
+        final String url = Wizard.host + "olga/main/geo/countrydutylist/";
         final List<Country> countries = new ArrayList<>();
         countries.add(new Country("2931", "Россия"));
         final List<Product> materials = ProductInitParser.getProducts(Wizard.host, "olga");

@@ -42,15 +42,15 @@ final public class TechMarketAskParser {
         final List<TechLvl> askWoBidTechLvl = getLicenseAskWoBid(Wizard.host, realm);
 //        logger.info(Utils.getPrettyGson(askWoBidTechLvl));
         for (final TechLvl tl : askWoBidTechLvl) {
-            //http://virtonomica.ru/olga/main/globalreport/technology/2423/10/target_market_summary/21-03-2016/ask
+            //https://virtonomica.ru/olga/main/globalreport/technology/2423/10/target_market_summary/21-03-2016/ask
             if (tl.getTechId().equals("2423") && tl.getLvl() == 10) {
                 logger.info(Utils.getPrettyGson(tl));
             }
-            //http://virtonomica.ru/olga/main/globalreport/technology/423140/2/target_market_summary/21-03-2016/ask
+            //https://virtonomica.ru/olga/main/globalreport/technology/423140/2/target_market_summary/21-03-2016/ask
             if (tl.getTechId().equals("423140") && tl.getLvl() == 2) {
                 logger.info(Utils.getPrettyGson(tl));
             }
-            //http://virtonomica.ru/olga/main/globalreport/technology/1906/7/target_market_summary/21-03-2016/ask
+            //https://virtonomica.ru/olga/main/globalreport/technology/1906/7/target_market_summary/21-03-2016/ask
             if (tl.getTechId().equals("1906") && tl.getLvl() == 7) {
                 logger.info(Utils.getPrettyGson(tl));
             }
@@ -70,14 +70,14 @@ final public class TechMarketAskParser {
 
         final List<TechLvl> licenseAskWoBid = new ArrayList<>();
         for (final TechLvl techIdAsk : techIdAsks) {
-            //http://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
+            //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
             final String url2 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
 //            logger.info("url2 = {}", url2);
             final List<TechAskBid> techAsks = getTechAskBids(url2);
 //            logger.info(Utils.getPrettyGson(techAsks));
 //            logger.info("techAsks.size() = {}", techAsks.size());
 
-            //http://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/bid
+            //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/bid
             final String url3 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid";
 //            logger.info("url3 = {}", url3);
             final List<TechAskBid> techBids = getTechAskBids(url3);
@@ -161,7 +161,7 @@ final public class TechMarketAskParser {
             }
             final Elements asks = doc.select("table.list > tbody > tr > td > a:not(:contains(--))");
 
-            //http://virtonomica.ru/olga/main/globalreport/technology/2423/16/target_market_summary/21-03-2016/ask
+            //https://virtonomica.ru/olga/main/globalreport/technology/2423/16/target_market_summary/21-03-2016/ask
             return asks.stream().map(ask -> {
                 final Matcher matcher = tech_lvl_pattern.matcher(ask.attr("href"));
                 if (matcher.find()) {

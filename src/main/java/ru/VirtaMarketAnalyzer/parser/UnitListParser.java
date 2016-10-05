@@ -11,6 +11,7 @@ import ru.VirtaMarketAnalyzer.data.City;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.Shop;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public final class UnitListParser {
 
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", "2085506", new ArrayList<>(), new ArrayList<>());
+        final List<Shop> list = getShopList(Wizard.host, "olga", "2085506", new ArrayList<>(), new ArrayList<>());
         System.out.println("list.size() = " + list.size());
     }
 

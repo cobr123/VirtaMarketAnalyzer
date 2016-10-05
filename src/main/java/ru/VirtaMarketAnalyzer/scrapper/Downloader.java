@@ -6,6 +6,7 @@ import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,9 +23,9 @@ public final class Downloader {
         if (referrer != null && !referrer.isEmpty()) {
             final String[] parts = url.split("/");
             final String page = File.separator + parts[parts.length - 2] + File.separator + parts[parts.length - 1];
-            clearedUrl = referrer.replace("http://", "").replace("/", File.separator) + page;
+            clearedUrl = referrer.replace("http://", "").replace("https://", "").replace("/", File.separator) + page;
         } else {
-            clearedUrl = url.replace("http://", "").replace("/", File.separator);
+            clearedUrl = url.replace("http://", "").replace("https://", "").replace("/", File.separator);
         }
         return clearedUrl;
     }
@@ -60,7 +61,7 @@ public final class Downloader {
         final File file = new File(fileToSave);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
             logger.trace("Взят из кэша: {}", file.getAbsolutePath());
-            return Jsoup.parse(file, "UTF-8", "http://virtonomica.ru/");
+            return Jsoup.parse(file, "UTF-8", Wizard.host);
         } else {
             logger.trace("Запрошен адрес: {}", url);
 
@@ -102,7 +103,7 @@ public final class Downloader {
     }
 
     public static void main(final String[] args) throws IOException {
-        final Document doc = Jsoup.connect("http://virtonomica.ru/olga/main/geo/citylist/331858").get();
+        final Document doc = Jsoup.connect(Wizard.host + "olga/main/geo/citylist/331858").get();
         Utils.writeFile(Utils.getDir() + "citylist.html", doc.outerHtml());
     }
 }

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Country;
 import ru.VirtaMarketAnalyzer.data.Region;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -25,7 +26,7 @@ public final class CityInitParser {
 
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/");
+        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/globalreport/marketing/by_trade_at_cities/");
 
         final Elements options = doc.select("option");
         //System.out.println(list.outerHtml());

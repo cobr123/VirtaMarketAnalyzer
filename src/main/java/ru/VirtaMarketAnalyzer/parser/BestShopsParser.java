@@ -12,6 +12,7 @@ import ru.VirtaMarketAnalyzer.data.City;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.Shop;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public final class BestShopsParser {
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", new ArrayList<>(), new ArrayList<>());
+        final List<Shop> list = getShopList(Wizard.host, "olga", new ArrayList<>(), new ArrayList<>());
         System.out.println("list.size() = " + list.size());
     }
 

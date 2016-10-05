@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Manufacture;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ final public class ManufactureListParser {
     private static final Logger logger = LoggerFactory.getLogger(ManufactureListParser.class);
 
     public static void main(final String[] args) throws IOException {
-        final String url = "http://virtonomica.ru/olga/main/common/main_page/game_info/industry/";
+        final String url = Wizard.host + "olga/main/common/main_page/game_info/industry/";
 
         logger.info(Utils.getPrettyGson(getManufactures(url)));
     }

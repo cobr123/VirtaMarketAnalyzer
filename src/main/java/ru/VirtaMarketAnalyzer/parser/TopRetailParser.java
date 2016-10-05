@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -28,7 +29,7 @@ public final class TopRetailParser {
 
     public static void main(String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final List<Shop> list = getShopList("http://virtonomica.ru/", "olga", new ArrayList<>(), new ArrayList<>());
+        final List<Shop> list = getShopList(Wizard.host, "olga", new ArrayList<>(), new ArrayList<>());
         System.out.println("list.size() = " + list.size());
     }
 

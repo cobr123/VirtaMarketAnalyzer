@@ -13,6 +13,7 @@ import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.Shop;
 import ru.VirtaMarketAnalyzer.data.ShopProduct;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.util.*;
@@ -27,8 +28,8 @@ public final class ShopParser {
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-//        final String url = "http://virtonomica.ru/olga/main/unit/view/5788675";
-        final String url = "http://virtonomica.ru/mary/main/unit/view/3943258";
+//        final String url = Wizard.host + "olga/main/unit/view/5788675";
+        final String url = Wizard.host + "mary/main/unit/view/3943258";
 //        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
         cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0));
@@ -219,7 +220,7 @@ public final class ShopParser {
             doc = Downloader.getDoc(url, maxTriesCnt);
         } catch (final Exception e) {
             oneTryErrorUrl.add(url);
-            logger.error("url = http://virtonomica.ru/{}/main/globalreport/marketing/by_trade_at_cities/{}/{}/{}/{}", realm, productId, countryId, regionId, townId);
+            logger.error("url = https://virtonomica.ru/{}/main/globalreport/marketing/by_trade_at_cities/{}/{}/{}/{}", realm, productId, countryId, regionId, townId);
             logger.error(e.getLocalizedMessage());
             return null;
         }

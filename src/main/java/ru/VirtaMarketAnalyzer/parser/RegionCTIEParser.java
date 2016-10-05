@@ -27,7 +27,7 @@ final public class RegionCTIEParser {
 
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final String url = "http://virtonomics.com/olga/main/geo/regionENVD/";
+        final String url = Wizard.host + "olga/main/geo/regionENVD/";
         final List<Region> regions = new ArrayList<>();
         regions.add(new Region("2931", "2961", "Far East", 30));
         final List<Product> materials = ProductInitParser.getProducts(Wizard.host, "olga");

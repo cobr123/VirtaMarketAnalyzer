@@ -6,6 +6,7 @@ import org.jsoup.select.Elements;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.ProductCategory;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  */
 public final class ProductInitParser {
     public static void main(final String[] args) throws IOException {
-        System.out.println(Utils.getPrettyGson(getTradingProducts("http://virtonomica.ru/", "olga")));
+        System.out.println(Utils.getPrettyGson(getTradingProducts(Wizard.host, "olga")));
     }
 
     public static List<Product> getTradingProducts(final String host, final String realm) throws IOException {

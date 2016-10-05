@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -26,11 +27,11 @@ final public class ProductRecipeParser {
 
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-//        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/15751");
-//        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/422209");
-//        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/2425");
-//        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/industry/unit_type/info/2417");
-        final String url = "http://virtonomica.ru/olga/main/industry/unit_type/info/";
+//        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/15751");
+//        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/422209");
+//        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/2425");
+//        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/2417");
+        final String url = Wizard.host + "olga/main/industry/unit_type/info/";
         final List<Manufacture> manufactures = new ArrayList<>();
 //        manufactures.add(new Manufacture("423140", "manufactureCategory", "caption"));
 //        manufactures.add(new Manufacture("2425", "manufactureCategory", "caption"));

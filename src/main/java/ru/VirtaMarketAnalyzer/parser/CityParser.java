@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -23,8 +24,8 @@ public final class CityParser {
     private static final Logger logger = LoggerFactory.getLogger(CityParser.class);
 
     public static void main(final String[] args) throws IOException {
-        //final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
-        final Document doc = Downloader.getDoc("http://virtonomica.ru/olga/main/globalreport/marketing/by_trade_at_cities/422549/3054/3055/3056");
+        //final Document doc = Downloader.getDoc(Wizard.host + "olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
+        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/globalreport/marketing/by_trade_at_cities/422549/3054/3055/3056");
         final Element table = doc.select("table[class=\"grid\"]").first();
         final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
 
