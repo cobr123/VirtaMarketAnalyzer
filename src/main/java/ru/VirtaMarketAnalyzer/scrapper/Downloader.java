@@ -22,42 +22,42 @@ import java.util.Date;
 public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
-//    static {
-//        TrustManager[] trustAllCertificates = new TrustManager[] {
-//                new X509TrustManager() {
-//                    @Override
-//                    public X509Certificate[] getAcceptedIssuers() {
-//                        return null; // Not relevant.
-//                    }
-//                    @Override
-//                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-//                        // Do nothing. Just allow them all.
-//                    }
-//                    @Override
-//                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-//                        // Do nothing. Just allow them all.
-//                    }
-//                }
-//        };
-//
-//        HostnameVerifier trustAllHostnames = new HostnameVerifier() {
-//            @Override
-//            public boolean verify(String hostname, SSLSession session) {
-//                return true; // Just allow them all.
-//            }
-//        };
-//
-//        try {
-//            System.setProperty("jsse.enableSNIExtension", "false");
-//            SSLContext sc = SSLContext.getInstance("SSL");
-//            sc.init(null, trustAllCertificates, new SecureRandom());
-//            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-//            HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
-//        }
-//        catch (GeneralSecurityException e) {
-//            throw new ExceptionInInitializerError(e);
-//        }
-//    }
+    static {
+        TrustManager[] trustAllCertificates = new TrustManager[] {
+                new X509TrustManager() {
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return null; // Not relevant.
+                    }
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+                        // Do nothing. Just allow them all.
+                    }
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+                        // Do nothing. Just allow them all.
+                    }
+                }
+        };
+
+        HostnameVerifier trustAllHostnames = new HostnameVerifier() {
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                return true; // Just allow them all.
+            }
+        };
+
+        try {
+            System.setProperty("jsse.enableSNIExtension", "false");
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCertificates, new SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
+        }
+        catch (GeneralSecurityException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
 
     public static String getCrearedUrl(final String url, final String referrer) {
         String clearedUrl;
