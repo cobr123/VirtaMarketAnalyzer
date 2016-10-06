@@ -25,8 +25,8 @@ import java.util.*;
  */
 public final class Wizard {
     private static final Logger logger = LoggerFactory.getLogger(Wizard.class);
-    public static final String host = "https://virtonomica.ru/";
-    public static final String host_en = "https://virtonomica.com/";
+    public static final String host = "http://virtonomica.ru/";
+    public static final String host_en = "http://virtonomica.com/";
     public static final String industry = "industry";
     public static final String by_trade_at_cities = "by_trade_at_cities";
     public static final String by_service = "by_service";

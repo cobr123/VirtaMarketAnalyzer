@@ -8,8 +8,12 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 
+import javax.net.ssl.*;
 import java.io.File;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.Date;
 
 /**
@@ -17,6 +21,43 @@ import java.util.Date;
  */
 public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
+
+//    static {
+//        TrustManager[] trustAllCertificates = new TrustManager[] {
+//                new X509TrustManager() {
+//                    @Override
+//                    public X509Certificate[] getAcceptedIssuers() {
+//                        return null; // Not relevant.
+//                    }
+//                    @Override
+//                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
+//                        // Do nothing. Just allow them all.
+//                    }
+//                    @Override
+//                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
+//                        // Do nothing. Just allow them all.
+//                    }
+//                }
+//        };
+//
+//        HostnameVerifier trustAllHostnames = new HostnameVerifier() {
+//            @Override
+//            public boolean verify(String hostname, SSLSession session) {
+//                return true; // Just allow them all.
+//            }
+//        };
+//
+//        try {
+//            System.setProperty("jsse.enableSNIExtension", "false");
+//            SSLContext sc = SSLContext.getInstance("SSL");
+//            sc.init(null, trustAllCertificates, new SecureRandom());
+//            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//            HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
+//        }
+//        catch (GeneralSecurityException e) {
+//            throw new ExceptionInInitializerError(e);
+//        }
+//    }
 
     public static String getCrearedUrl(final String url, final String referrer) {
         String clearedUrl;
@@ -82,7 +123,7 @@ public final class Downloader {
                     return doc;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
-                    logger.trace("Ошибка: ", e);
+                    logger.error("Ошибка: ", e);
                     if (maxTriesCnt == tries) {
                         throw new IOException(e);
                     } else {
