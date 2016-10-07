@@ -123,7 +123,7 @@ public final class Downloader {
                     return doc;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
-                    logger.error("Ошибка: ", e);
+                    logger.error("Ошибка: ", e.getMessage());
                     if (maxTriesCnt == tries) {
                         throw new IOException(e);
                     } else {

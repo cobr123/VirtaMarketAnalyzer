@@ -38,12 +38,12 @@ public final class Wizard {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
         final List<String> realms = new ArrayList<>();
+        realms.add("lien");
+        realms.add("mary");
+        realms.add("anna");
+        realms.add("fast");
         realms.add("olga");
         realms.add("vera");
-        realms.add("anna");
-        realms.add("mary");
-        realms.add("lien");
-        realms.add("fast");
         for (final String realm : realms) {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
@@ -106,20 +106,15 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
 
-        final Calendar today = Calendar.getInstance();
         final File baseDirFile = new File(baseDir);
-        if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
-        } else if ("anna".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
-        } else if ("mary".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-        } else if ("lien".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-        } else if ("vera".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)) {
-        } else if ("fast".equalsIgnoreCase(realm)) {
-        } else {
-            if (baseDirFile.exists()) {
-                logger.info("удаляем {}", baseDirFile.getAbsolutePath());
-                FileUtils.deleteDirectory(baseDirFile);
-            }
-            return;
+        if (baseDirFile.exists()) {
+            logger.info("удаляем {}", baseDirFile.getAbsolutePath());
+            FileUtils.deleteDirectory(baseDirFile);
+        }
+        final File serviceBaseDirFile = new File(serviceBaseDir);
+        if (serviceBaseDirFile.exists()) {
+            logger.info("удаляем {}", serviceBaseDirFile.getAbsolutePath());
+            FileUtils.deleteDirectory(serviceBaseDirFile);
         }
         //страны
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
@@ -137,50 +132,62 @@ public final class Wizard {
         final List<City> cities_en = CityListParser.fillWealthIndex(host_en + realm + "/main/geo/citylist/", regions);
         Utils.writeToGson(baseDir + "cities_en.json", cities_en);
         logger.info("cities.size() = {}, realm = {}", cities.size(), realm);
-        //получаем список доступных розничных товаров
+
+        final Calendar today = Calendar.getInstance();
+        if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
+        } else if ("anna".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
+        } else if ("mary".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+        } else if ("lien".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+        } else if ("vera".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)) {
+        } else if ("fast".equalsIgnoreCase(realm)) {
+        } else {
+            return;
+        }
+        logger.info("получаем список доступных розничных товаров");
         final List<Product> products = ProductInitParser.getTradingProducts(host, realm);
         Utils.writeToGson(baseDir + "products.json", products);
         final List<Product> products_en = ProductInitParser.getTradingProducts(host_en, realm);
         Utils.writeToGson(baseDir + "products_en.json", products_en);
         logger.info("products.size() = {}, realm = {}", products.size(), realm);
         saveProductImg(products);
-        logger.info("products img saved");
-        //получаем список доступных розничных категорий товаров
+
+        logger.info("получаем список доступных розничных категорий товаров");
         final List<ProductCategory> product_categories = ProductInitParser.getProductCategories(products);
         Utils.writeToGson(baseDir + "product_categories.json", product_categories);
         final List<ProductCategory> product_categories_en = ProductInitParser.getProductCategories(products_en);
         Utils.writeToGson(baseDir + "product_categories_en.json", product_categories_en);
-        //группируем таможенные пошлины по странам
+
+        logger.info("группируем таможенные пошлины по странам");
         final List<Product> materials = ProductInitParser.getProducts(host, realm);
         final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(host + realm + "/main/geo/countrydutylist/", countries, materials);
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-        //собираем данные продаж товаров в городах
+        logger.info("собираем данные продаж товаров в городах");
         final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host, realm, cities, products, countriesDutyList, regions);
         //сохраняем их в json
         for (final Map.Entry<String, List<TradeAtCity>> entry : stats.entrySet()) {
             Utils.writeToGson(baseDir + "tradeAtCity_" + entry.getKey() + ".json", entry.getValue());
         }
-        //запоминаем дату обновления данных
+        logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
-        //собираем данные из магазинов
+
+        logger.info("собираем данные из магазинов");
         final List<Shop> shops = TopRetailParser.getShopList(realm, stats, products);
-        //группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой
+        logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
         final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, products);
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
         }
-        //сервисы
+        logger.info("получаем список доступных сервисов");
         final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(host, realm);
         Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
         final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
         Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
         logger.info("service_unit_types.size() = {}, realm = {}", unitTypes.size(), realm);
         saveUnitTypeImg(unitTypes);
-        logger.info("service_unit_types img saved");
-        //данные о сервисах по городам
+        logger.info("группируем данные о сервисах по городам");
         for (final UnitType ut : unitTypes) {
             final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut, regions);
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + ".json", serviceAtCity);
@@ -189,6 +196,7 @@ public final class Wizard {
             final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities_en, ut, regions_en);
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
         }
+        logger.info("запоминаем дату обновления данных");
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
 
         //ищем формулу для объема продаж в рознице
@@ -197,7 +205,8 @@ public final class Wizard {
 
     public static void collectToJsonIndustries(final String realm) throws IOException {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
-        //собираем рецепты производства товаров и материалов
+
+        logger.info("собираем рецепты производства товаров и материалов");
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
         Utils.writeToGson(baseDir + "manufactures.json", manufactures);
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host + realm + "/main/industry/unit_type/info/", manufactures);
@@ -212,7 +221,7 @@ public final class Wizard {
         for (final Map.Entry<String, List<ProductRecipe>> entry : productRecipes_en.entrySet()) {
             Utils.writeToGson(baseDir + "recipe_" + entry.getKey() + "_en.json", entry.getValue());
         }
-        //получаем список всех доступных товаров и материалов
+        logger.info("получаем список всех доступных товаров и материалов");
         final List<Product> materials = ProductInitParser.getProducts(host, realm);
         Utils.writeToGson(baseDir + "materials.json", materials);
         final List<Product> materials_en = ProductInitParser.getProducts(host_en, realm);
@@ -224,18 +233,18 @@ public final class Wizard {
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
-        //группируем ставки енвд по регионам
+        logger.info("группируем ставки енвд по регионам");
         final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/regionENVD/", regions, materials);
         for (final Map.Entry<String, List<RegionCTIE>> entry : allRegionsCTIEList.entrySet()) {
             Utils.writeToGson(baseDir + "region_ctie" + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-        //собираем данные о доступных товарах на оптовом рынке
+        logger.info("собираем данные о доступных товарах на оптовом рынке");
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", materials);
         //сохраняем их в json
         for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
             Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
         }
-        //запоминаем дату обновления данных
+        logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
