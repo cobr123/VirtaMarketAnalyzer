@@ -25,8 +25,8 @@ import java.util.*;
  */
 public final class Wizard {
     private static final Logger logger = LoggerFactory.getLogger(Wizard.class);
-    public static final String host = "http://virtonomica.ru/";
-    public static final String host_en = "http://virtonomica.com/";
+    public static final String host = "https://virtonomica.ru/";
+    public static final String host_en = "https://virtonomics.com/";
     public static final String industry = "industry";
     public static final String by_trade_at_cities = "by_trade_at_cities";
     public static final String by_service = "by_service";
@@ -133,6 +133,22 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "cities_en.json", cities_en);
         logger.info("cities.size() = {}, realm = {}", cities.size(), realm);
 
+        logger.info("получаем список доступных розничных товаров");
+        final List<Product> products = ProductInitParser.getTradingProducts(host, realm);
+        Utils.writeToGson(baseDir + "products.json", products);
+        final List<Product> products_en = ProductInitParser.getTradingProducts(host_en, realm);
+        Utils.writeToGson(baseDir + "products_en.json", products_en);
+        logger.info("products.size() = {}, realm = {}", products.size(), realm);
+        saveProductImg(products);
+
+        logger.info("получаем список доступных сервисов");
+        final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(host, realm);
+        Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
+        final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
+        Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
+        logger.info("service_unit_types.size() = {}, realm = {}", unitTypes.size(), realm);
+        saveUnitTypeImg(unitTypes);
+
         final Calendar today = Calendar.getInstance();
         if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
         } else if ("anna".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
@@ -143,13 +159,6 @@ public final class Wizard {
         } else {
             return;
         }
-        logger.info("получаем список доступных розничных товаров");
-        final List<Product> products = ProductInitParser.getTradingProducts(host, realm);
-        Utils.writeToGson(baseDir + "products.json", products);
-        final List<Product> products_en = ProductInitParser.getTradingProducts(host_en, realm);
-        Utils.writeToGson(baseDir + "products_en.json", products_en);
-        logger.info("products.size() = {}, realm = {}", products.size(), realm);
-        saveProductImg(products);
 
         logger.info("получаем список доступных розничных категорий товаров");
         final List<ProductCategory> product_categories = ProductInitParser.getProductCategories(products);
@@ -180,13 +189,6 @@ public final class Wizard {
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
         }
-        logger.info("получаем список доступных сервисов");
-        final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(host, realm);
-        Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
-        final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
-        Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
-        logger.info("service_unit_types.size() = {}, realm = {}", unitTypes.size(), realm);
-        saveUnitTypeImg(unitTypes);
         logger.info("группируем данные о сервисах по городам");
         for (final UnitType ut : unitTypes) {
             final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut, regions);
@@ -199,7 +201,7 @@ public final class Wizard {
         logger.info("запоминаем дату обновления данных");
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
 
-        //ищем формулу для объема продаж в рознице
+//        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
     }
 
