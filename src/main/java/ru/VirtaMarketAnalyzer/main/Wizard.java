@@ -246,6 +246,9 @@ public final class Wizard {
         for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
             Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
         }
+        logger.info("собираем данные о среднем качестве товаров");
+        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", materials);
+        Utils.writeToGson(baseDir + "product_history.json", productHistory);
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
