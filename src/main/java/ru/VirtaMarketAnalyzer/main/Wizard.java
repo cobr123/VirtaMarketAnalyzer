@@ -251,8 +251,10 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "product_history.json", productHistory);
         logger.info("собираем товары которые можно произвести с качеством выше среднего");
         final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes);
+        final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en);
         logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
         Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
+        Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
