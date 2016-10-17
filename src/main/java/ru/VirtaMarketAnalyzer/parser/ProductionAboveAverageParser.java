@@ -24,15 +24,19 @@ public final class ProductionAboveAverageParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
         final String realm = "olga";
-        final List<Product> products = new ArrayList<>();
-        //продукт
-        products.add(new Product("", "", "1482", ""));
+//        final List<Product> products = new ArrayList<>();
+//        //продукт
+//        products.add(new Product("", "", "1482", ""));
+//        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
+//        //ингридиенты для поиска остатков
+//        products.add(new Product("", "", "1493", ""));
+//        products.add(new Product("", "", "1484", ""));
+        final List<Product> products = ProductInitParser.getProducts(Wizard.host, realm);
         final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
-        //ингридиенты для поиска остатков
-        products.add(new Product("", "", "1493", ""));
-        products.add(new Product("", "", "1484", ""));
+
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(Wizard.host + realm + "/main/globalreport/marketing/by_products/", products);
         //System.out.println(Utils.getPrettyGson(productRemains));
+
 
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(Wizard.host + realm + "/main/common/main_page/game_info/industry/");
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(Wizard.host + realm + "/main/industry/unit_type/info/", manufactures);
@@ -49,9 +53,11 @@ public final class ProductionAboveAverageParser {
     ) {
         return productHistory.parallelStream()
                 .map(ph -> calc(host, realm, ph, productRemains, productRecipes.get(ph.getProductID())))
+                .filter(paa -> paa != null)
                 .flatMap(Collection::parallelStream)
                 .filter(paa -> paa != null)
                 .collect(Collectors.toList());
+
     }
 
     public static List<ProductionAboveAverage> calc(
@@ -61,8 +67,12 @@ public final class ProductionAboveAverageParser {
             , final Map<String, List<ProductRemain>> productRemains
             , final List<ProductRecipe> productRecipes
     ) {
+        if (productRecipes == null){
+            return null;
+        }
         return productRecipes.stream()
                 .map(pr -> calc(host, realm, productHistory, productRemains, pr))
+                .filter(paa -> paa != null)
                 .flatMap(Collection::stream)
                 .filter(paa -> paa != null)
                 .collect(Collectors.toList());
@@ -257,7 +267,7 @@ public final class ProductionAboveAverageParser {
                 productRecipe.getResultProducts().get(0).getProductID()
                 ,Math.round(prodQuantity)
                 ,Math.round(prodQual * 100.0) / 100.0
-                ,exps / prodQuantity
+                ,Math.round(exps / prodQuantity * 100.0) / 100.0
                 ));
 
         //прибыль
