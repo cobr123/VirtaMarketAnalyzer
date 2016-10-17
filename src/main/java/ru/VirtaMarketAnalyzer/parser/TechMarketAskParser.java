@@ -9,7 +9,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.TechAskBid;
-import ru.VirtaMarketAnalyzer.data.TechLvl;
+import ru.VirtaMarketAnalyzer.data.TechLicenseLvl;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
@@ -25,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.summarizingDouble;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -39,9 +38,9 @@ final public class TechMarketAskParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 
         final String realm = "olga";
-        final List<TechLvl> askWoBidTechLvl = getLicenseAskWoBid(Wizard.host, realm);
+        final List<TechLicenseLvl> askWoBidTechLvl = getLicenseAskWoBid(Wizard.host, realm);
 //        logger.info(Utils.getPrettyGson(askWoBidTechLvl));
-        for (final TechLvl tl : askWoBidTechLvl) {
+        for (final TechLicenseLvl tl : askWoBidTechLvl) {
             //https://virtonomica.ru/olga/main/globalreport/technology/2423/10/target_market_summary/21-03-2016/ask
             if (tl.getTechId().equals("2423") && tl.getLvl() == 10) {
                 logger.info(Utils.getPrettyGson(tl));
@@ -59,17 +58,17 @@ final public class TechMarketAskParser {
         logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
     }
 
-    public static List<TechLvl> getLicenseAskWoBid(final String host, final String realm) throws IOException {
+    public static List<TechLicenseLvl> getLicenseAskWoBid(final String host, final String realm) throws IOException {
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String dateStr = df.format(new Date());
 
         final String url1 = host + realm + "/main/globalreport/technology_target_market/total";
-        final List<TechLvl> techIdAsks = getAskTech(url1);
+        final List<TechLicenseLvl> techIdAsks = getAskTech(url1);
 //        logger.info(Utils.getPrettyGson(techIdAsks));
         logger.info("techIdAsks.size() = {}, realm = {}", techIdAsks.size(), realm);
 
-        final List<TechLvl> licenseAskWoBid = new ArrayList<>();
-        for (final TechLvl techIdAsk : techIdAsks) {
+        final List<TechLicenseLvl> licenseAskWoBid = new ArrayList<>();
+        for (final TechLicenseLvl techIdAsk : techIdAsks) {
             //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
             final String url2 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
 //            logger.info("url2 = {}", url2);
@@ -84,11 +83,11 @@ final public class TechMarketAskParser {
 //            logger.info(Utils.getPrettyGson(techBids));
 //            logger.info("techBids.size() = {}", techBids.size());
             if (techAsks.size() > 0 && techBids.size() == 0) {
-                licenseAskWoBid.add(new TechLvl(techIdAsk, Collections.emptyList()));
+                licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, Collections.emptyList()));
             } else {
                 final List<TechAskBid> tmp = getAskWoBid(techAsks, techBids);
                 if (tmp.size() > 0) {
-                    licenseAskWoBid.add(new TechLvl(techIdAsk, tmp));
+                    licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, tmp));
                 }
             }
 //            throw new IOException("test");
@@ -139,7 +138,7 @@ final public class TechMarketAskParser {
         return null;
     }
 
-    private static List<TechLvl> getAskTech(final String url) throws IOException {
+    private static List<TechLicenseLvl> getAskTech(final String url) throws IOException {
         final int maxTryCnt = 3;
 //        logger.info(url);
 //        Downloader.invalidateCache(url);
@@ -167,7 +166,7 @@ final public class TechMarketAskParser {
                 if (matcher.find()) {
                     final String techID = matcher.group(1);
                     final int lvl = Utils.toInt(matcher.group(2));
-                    return new TechLvl(techID, lvl);
+                    return new TechLicenseLvl(techID, lvl);
                 }
                 return null;
             }).collect(toList());
