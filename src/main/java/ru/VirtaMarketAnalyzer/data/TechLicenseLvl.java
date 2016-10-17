@@ -13,7 +13,7 @@ final public class TechLicenseLvl {
     @SerializedName("l")
     final private int lvl;
     @SerializedName("awb")
-    final private List<TechAskBid> askWoBid;
+    final private List<TechLicenseAskBid> askWoBid;
 
     public TechLicenseLvl(final String techId, final int lvl) {
         this.techId = techId;
@@ -21,7 +21,7 @@ final public class TechLicenseLvl {
         this.askWoBid = null;
     }
 
-    public TechLicenseLvl(final TechLicenseLvl techLvl, final List<TechAskBid> askWoBid) {
+    public TechLicenseLvl(final TechLicenseLvl techLvl, final List<TechLicenseAskBid> askWoBid) {
         this.techId = techLvl.getTechId();
         this.lvl = techLvl.getLvl();
         this.askWoBid = askWoBid;
@@ -35,7 +35,7 @@ final public class TechLicenseLvl {
         return lvl;
     }
 
-    public List<TechAskBid> getAskWoBid() {
+    public List<TechLicenseAskBid> getAskWoBid() {
         return askWoBid;
     }
 }

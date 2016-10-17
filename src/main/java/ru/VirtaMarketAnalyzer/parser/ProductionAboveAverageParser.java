@@ -50,9 +50,10 @@ public final class ProductionAboveAverageParser {
             , final List<ProductHistory> productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final Map<String, List<ProductRecipe>> productRecipes
-    ) {
+    ) throws IOException {
+        final List<TechLvl> techLvl = TechMarketAskParser.getTech(host, realm);
         return productHistory.parallelStream()
-                .map(ph -> calc(host, realm, ph, productRemains, productRecipes.get(ph.getProductID())))
+                .map(ph -> calc(techLvl, ph, productRemains, productRecipes.get(ph.getProductID())))
                 .filter(paa -> paa != null)
                 .flatMap(Collection::parallelStream)
                 .filter(paa -> paa != null)
@@ -61,17 +62,16 @@ public final class ProductionAboveAverageParser {
     }
 
     public static List<ProductionAboveAverage> calc(
-            final String host
-            , final String realm
+            final List<TechLvl> techLvl
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final List<ProductRecipe> productRecipes
     ) {
-        if (productRecipes == null){
+        if (productRecipes == null) {
             return null;
         }
         return productRecipes.stream()
-                .map(pr -> calc(host, realm, productHistory, productRemains, pr))
+                .map(pr -> calc(techLvl, productHistory, productRemains, pr))
                 .filter(paa -> paa != null)
                 .flatMap(Collection::stream)
                 .filter(paa -> paa != null)
@@ -79,24 +79,27 @@ public final class ProductionAboveAverageParser {
     }
 
     public static List<ProductionAboveAverage> calc(
-            final String host
-            , final String realm
+            final List<TechLvl> techLvl
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final ProductRecipe productRecipe
     ) {
         final List<ProductionAboveAverage> list = new ArrayList<>();
-        for (int lvl = 1; lvl <= 30; ++lvl) {
-            final List<ProductionAboveAverage> paa = calc(host, realm, productHistory, productRemains, productRecipe, lvl);
+        final int maxTechLvl = techLvl.stream()
+                .filter(tl -> productRecipe.getManufactureID().equals(tl.getTechId()))
+                .filter(tl -> tl.getPrice() > 0)
+                .max((o1, o2) -> (o1.getLvl() > o2.getLvl()) ? 1 : -1)
+                .orElse(new TechLvl("", 2, 0.0))
+                .getLvl();
+        for (int lvl = 1; lvl <= maxTechLvl; ++lvl) {
+            final List<ProductionAboveAverage> paa = calc(productHistory, productRemains, productRecipe, lvl);
             list.addAll(paa);
         }
         return list;
     }
 
     public static List<ProductionAboveAverage> calc(
-            final String host
-            , final String realm
-            , final ProductHistory productHistory
+            final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final ProductRecipe productRecipe
             , final int techLvl
@@ -106,7 +109,7 @@ public final class ProductionAboveAverageParser {
             return list;
         }
         //пробуем 10 лучших по соотношению цена/качество
-        for(int idx = 0; idx < 5; ++ idx) {
+        for (int idx = 0; idx < 5; ++idx) {
             final List<ProductRemain> materials = new ArrayList<>();
             for (final ManufactureIngredient inputProduct : productRecipe.getInputProducts()) {
                 //logger.info("inputProduct.getProductID() == {}", inputProduct.getProductID());
@@ -126,15 +129,13 @@ public final class ProductionAboveAverageParser {
                 //logger.info("remains.get(0).getQuality() = {}, .getPrice() = {}", remains.get(0).getQuality(), remains.get(0).getPrice());
                 //logger.info("remains.get({}).getQuality() = {}, .getPrice() = {}", remains.size()-1, remains.get(remains.size()-1).getQuality(), remains.get(remains.size()-1).getPrice());
             }
-            list.add(calc(host, realm, productHistory, materials, productRecipe, techLvl));
+            list.add(calc(productHistory, materials, productRecipe, techLvl));
         }
         return list;
     }
 
     public static ProductionAboveAverage calc(
-            final String host
-            , final String realm
-            , final ProductHistory productHistory
+            final ProductHistory productHistory
             , final List<ProductRemain> materials
             , final ProductRecipe productRecipe
             , final int techLvl
@@ -147,13 +148,13 @@ public final class ProductionAboveAverageParser {
             if (manufactureCalcResult.getQuality() >= productHistory.getQuality()) {
                 return new ProductionAboveAverage(
                         productRecipe.getManufactureID()
-                        ,productRecipe.getSpecialization()
-                        ,manufactureCalcResult.getProductID()
-                        ,manufactureCalcResult.getVolume()
-                        ,manufactureCalcResult.getQuality()
-                        ,manufactureCalcResult.getCost()
-                        ,materials
-                        ,techLvl
+                        , productRecipe.getSpecialization()
+                        , manufactureCalcResult.getProductID()
+                        , manufactureCalcResult.getVolume()
+                        , manufactureCalcResult.getQuality()
+                        , manufactureCalcResult.getCost()
+                        , materials
+                        , techLvl
                 );
             }
         }
@@ -265,10 +266,10 @@ public final class ProductionAboveAverageParser {
 //        result.cost = (exps / prodQuantity).toFixed(2);
         result.add(new ManufactureCalcResult(
                 productRecipe.getResultProducts().get(0).getProductID()
-                ,Math.round(prodQuantity)
-                ,Math.round(prodQual * 100.0) / 100.0
-                ,Math.round(exps / prodQuantity * 100.0) / 100.0
-                ));
+                , Math.round(prodQuantity)
+                , Math.round(prodQual * 100.0) / 100.0
+                , Math.round(exps / prodQuantity * 100.0) / 100.0
+        ));
 
         //прибыль
 //        final double profit = (Sale_Price * prodQuantity) - exps;

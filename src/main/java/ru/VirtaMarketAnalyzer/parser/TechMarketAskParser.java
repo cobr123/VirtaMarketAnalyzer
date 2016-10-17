@@ -8,8 +8,9 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.TechAskBid;
+import ru.VirtaMarketAnalyzer.data.TechLicenseAskBid;
 import ru.VirtaMarketAnalyzer.data.TechLicenseLvl;
+import ru.VirtaMarketAnalyzer.data.TechLvl;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
@@ -17,10 +18,7 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -53,9 +51,10 @@ final public class TechMarketAskParser {
             if (tl.getTechId().equals("1906") && tl.getLvl() == 7) {
                 logger.info(Utils.getPrettyGson(tl));
             }
-
+            break;
         }
         logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
+        System.out.println(Utils.getPrettyGson(getTech(Wizard.host, realm)));
     }
 
     public static List<TechLicenseLvl> getLicenseAskWoBid(final String host, final String realm) throws IOException {
@@ -63,7 +62,7 @@ final public class TechMarketAskParser {
         final String dateStr = df.format(new Date());
 
         final String url1 = host + realm + "/main/globalreport/technology_target_market/total";
-        final List<TechLicenseLvl> techIdAsks = getAskTech(url1);
+        final List<TechLicenseLvl> techIdAsks = getAskTechLicense(url1);
 //        logger.info(Utils.getPrettyGson(techIdAsks));
         logger.info("techIdAsks.size() = {}, realm = {}", techIdAsks.size(), realm);
 
@@ -72,20 +71,20 @@ final public class TechMarketAskParser {
             //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
             final String url2 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
 //            logger.info("url2 = {}", url2);
-            final List<TechAskBid> techAsks = getTechAskBids(url2);
+            final List<TechLicenseAskBid> techAsks = getTechLicenseAskBids(url2);
 //            logger.info(Utils.getPrettyGson(techAsks));
 //            logger.info("techAsks.size() = {}", techAsks.size());
 
             //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/bid
             final String url3 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid";
 //            logger.info("url3 = {}", url3);
-            final List<TechAskBid> techBids = getTechAskBids(url3);
+            final List<TechLicenseAskBid> techBids = getTechLicenseAskBids(url3);
 //            logger.info(Utils.getPrettyGson(techBids));
 //            logger.info("techBids.size() = {}", techBids.size());
             if (techAsks.size() > 0 && techBids.size() == 0) {
                 licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, Collections.emptyList()));
             } else {
-                final List<TechAskBid> tmp = getAskWoBid(techAsks, techBids);
+                final List<TechLicenseAskBid> tmp = getAskWoBid(techAsks, techBids);
                 if (tmp.size() > 0) {
                     licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, tmp));
                 }
@@ -96,15 +95,15 @@ final public class TechMarketAskParser {
         return licenseAskWoBid;
     }
 
-    private static List<TechAskBid> getAskWoBid(final List<TechAskBid> asks, final List<TechAskBid> bids) {
+    private static List<TechLicenseAskBid> getAskWoBid(final List<TechLicenseAskBid> asks, final List<TechLicenseAskBid> bids) {
         //найти спрос без предложения (для цены спроса нет такой же или меньше цены предложения )
         //найти спрос без достаточного предложения (для количества спроса нет такого же или больше количества предложения с такой же или меньшей ценой)
         return asks.stream()
                 .map(ask -> {
-                    final int bidQtySum = bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).mapToInt(TechAskBid::getQuantity).sum();
+                    final int bidQtySum = bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).mapToInt(TechLicenseAskBid::getQuantity).sum();
                     final boolean bidWithGreaterPriceExist = bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).findAny().isPresent();
                     if (ask.getQuantity() > bidQtySum) {
-                        return new TechAskBid(ask.getPrice(), ask.getQuantity() - bidQtySum);
+                        return new TechLicenseAskBid(ask.getPrice(), ask.getQuantity() - bidQtySum);
                     } else if (!bidWithGreaterPriceExist) {
                         return ask;
                     }
@@ -114,7 +113,7 @@ final public class TechMarketAskParser {
                 .collect(Collectors.toList());
     }
 
-    private static List<TechAskBid> getTechAskBids(final String url) throws IOException {
+    private static List<TechLicenseAskBid> getTechLicenseAskBids(final String url) throws IOException {
         final int maxTryCnt = 3;
         for (int tryCnt = 1; tryCnt <= maxTryCnt; ++tryCnt) {
             final Document doc = Downloader.getDoc(url);
@@ -132,13 +131,13 @@ final public class TechMarketAskParser {
             return priceAndQty.stream().map(paq -> {
                 final double price = Utils.toDouble(paq.select("> td:eq(0)").text());
                 final int quantity = Utils.toInt(paq.select("> td:eq(1)").text());
-                return new TechAskBid(price, quantity);
+                return new TechLicenseAskBid(price, quantity);
             }).collect(toList());
         }
         return null;
     }
 
-    private static List<TechLicenseLvl> getAskTech(final String url) throws IOException {
+    private static List<TechLicenseLvl> getAskTechLicense(final String url) throws IOException {
         final int maxTryCnt = 3;
 //        logger.info(url);
 //        Downloader.invalidateCache(url);
@@ -170,6 +169,50 @@ final public class TechMarketAskParser {
                 }
                 return null;
             }).collect(toList());
+        }
+        return null;
+    }
+
+    public static List<TechLvl> getTech(final String host, final String realm) throws IOException {
+        final String url = host + realm + "/main/globalreport/technology_market/total";
+        final int maxTryCnt = 3;
+//        logger.info(url);
+//        Downloader.invalidateCache(url);
+        for (int tryCnt = 1; tryCnt <= maxTryCnt; ++tryCnt) {
+            final Document doc = Downloader.getDoc(url);
+            final Element table = doc.select("table.list").first();
+            if (table == null) {
+                Downloader.invalidateCache(url);
+                logger.error("На странице '" + url + "' не найдена таблица с классом list");
+                Downloader.waitSecond(3);
+                continue;
+            }
+            final Element footer = doc.select("div#footer").first();
+            if (footer == null) {
+                Downloader.invalidateCache(url);
+                logger.error("На странице '" + url + "' не найден footer");
+                Downloader.waitSecond(3);
+                continue;
+            }
+            final Elements rows = doc.select("table.list > tbody > tr[class]");
+            final Elements headers = doc.select("table.list > tbody > tr:nth-child(2) > th");
+
+            return rows.stream()
+                    .map(row -> {
+                        final List<TechLvl> list = new ArrayList<>();
+                        final String techID = Utils.getLastFromUrl(row.select("> th > a").first().attr("href"));
+                        row.select("> td").stream()
+                                .forEachOrdered(cell -> {
+                                    if (!cell.attr("title").equals("--")) {
+                                        final int lvl = Utils.toInt(headers.eq(cell.elementSiblingIndex()).text());
+                                        final double price = Utils.toDouble(cell.attr("title"));
+                                        list.add(new TechLvl(techID, lvl, price));
+                                    }
+                                });
+                        return list;
+                    })
+                    .flatMap(Collection::stream)
+                    .collect(toList());
         }
         return null;
     }
