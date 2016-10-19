@@ -25,16 +25,18 @@ public final class ProductionAboveAverageParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
         final String realm = "olga";
-        final List<Product> products = new ArrayList<>();
-        //продукт
-        products.add(new Product("", "", "1485", ""));
-        products.add(new Product("", "", "1481", ""));
-        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
-        //ингридиенты для поиска остатков
-        products.add(new Product("", "", "1466", ""));
-        products.add(new Product("", "", "1465", ""));
-//        final List<Product> products = ProductInitParser.getProducts(Wizard.host, realm);
+
+//        final List<Product> products = new ArrayList<>();
+//        //продукт
+//        products.add(new Product("", "", "1485", ""));
+//        products.add(new Product("", "", "1481", ""));
 //        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
+//        //ингридиенты для поиска остатков
+//        products.add(new Product("", "", "1466", ""));
+//        products.add(new Product("", "", "1465", ""));
+
+        final List<Product> products = ProductInitParser.getProducts(Wizard.host, realm);
+        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
 
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(Wizard.host + realm + "/main/globalreport/marketing/by_products/", products);
         //System.out.println(Utils.getPrettyGson(productRemains));
@@ -43,7 +45,7 @@ public final class ProductionAboveAverageParser {
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(Wizard.host + realm + "/main/common/main_page/game_info/industry/");
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(Wizard.host + realm + "/main/industry/unit_type/info/", manufactures);
 
-        logger.info(Utils.getPrettyGson(calc(Wizard.host, realm, productHistory, productRemains, productRecipes)));
+        logger.info(Utils.getPrettyGson(calc(Wizard.host, realm, productHistory, productRemains, productRecipes).size()));
     }
 
     public static List<ProductionAboveAverage> calc(
@@ -53,32 +55,17 @@ public final class ProductionAboveAverageParser {
             , final Map<String, List<ProductRemain>> productRemains
             , final Map<String, List<ProductRecipe>> productRecipes
     ) throws IOException {
-        final List<TechLvl> techLvl = TechMarketAskParser.getTech(host, realm);
-        final Map<String, Map<Integer, List<ProductionAboveAverage>>> resultsByTechLvlOfProduct = productHistory.parallelStream()
-                .map(ph -> calc(techLvl, ph, productRemains, productRecipes.get(ph.getProductID())))
+        final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm);
+        return productHistory.parallelStream()
+                .map(ph -> calc(techLvls, ph, productRemains, productRecipes.get(ph.getProductID())))
                 .filter(paa -> paa != null)
                 .flatMap(Collection::parallelStream)
                 .filter(paa -> paa != null)
-                .collect(Collectors.groupingBy(ProductionAboveAverage::getProductID, Collectors.groupingBy(ProductionAboveAverage::getTechLvl)));
-        //оставляем по 5 лучших для каждого уровня технологии для каждого товара
-        return resultsByTechLvlOfProduct.values()
-                .stream()
-                .map(techLvlOfProduct -> techLvlOfProduct.values()
-                        .stream()
-                        .map(results -> results.stream()
-                                .sorted((o1, o2) -> (o1.getCost() / o1.getQuality() > o2.getCost() / o2.getQuality()) ? 1 : -1)
-                                .limit(5)
-                                .collect(toList())
-                        )
-                        .flatMap(Collection::stream)
-                        .collect(toList())
-                )
-                .flatMap(Collection::stream)
                 .collect(toList());
     }
 
     public static List<ProductionAboveAverage> calc(
-            final List<TechLvl> techLvl
+            final List<TechLvl> techLvls
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final List<ProductRecipe> productRecipes
@@ -87,7 +74,7 @@ public final class ProductionAboveAverageParser {
             return null;
         }
         return productRecipes.stream()
-                .map(pr -> calc(techLvl, productHistory, productRemains, pr))
+                .map(pr -> calc(techLvls, productHistory, productRemains, pr))
                 .filter(paa -> paa != null)
                 .flatMap(Collection::stream)
                 .filter(paa -> paa != null)
@@ -95,36 +82,16 @@ public final class ProductionAboveAverageParser {
     }
 
     public static List<ProductionAboveAverage> calc(
-            final List<TechLvl> techLvl
+            final List<TechLvl> techLvls
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final ProductRecipe productRecipe
-    ) {
-        final List<ProductionAboveAverage> list = new ArrayList<>();
-        final int maxTechLvl = techLvl.stream()
-                .filter(tl -> productRecipe.getManufactureID().equals(tl.getTechId()))
-                .filter(tl -> tl.getPrice() > 0)
-                .max((o1, o2) -> (o1.getLvl() > o2.getLvl()) ? 1 : -1)
-                .orElse(new TechLvl("", 2, 0.0))
-                .getLvl();
-        for (int lvl = 1; lvl <= maxTechLvl; ++lvl) {
-            final List<ProductionAboveAverage> paa = calc(productHistory, productRemains, productRecipe, lvl);
-            list.addAll(paa);
-        }
-        return list;
-    }
-
-    public static List<ProductionAboveAverage> calc(
-            final ProductHistory productHistory
-            , final Map<String, List<ProductRemain>> productRemains
-            , final ProductRecipe productRecipe
-            , final int techLvl
     ) {
         if (productRecipe.getInputProducts() == null || productRecipe.getInputProducts().size() == 0) {
             return null;
         }
         //пробуем 50 лучших по соотношению цена/качество
-        final List<Collection<ProductRemain>> materials = new ArrayList<>();
+        final List<List<ProductRemain>> materials = new ArrayList<>();
         for (final ManufactureIngredient inputProduct : productRecipe.getInputProducts()) {
             //logger.info("inputProduct.getProductID() == {}", inputProduct.getProductID());
             final List<ProductRemain> remains = productRemains.getOrDefault(inputProduct.getProductID(), new ArrayList<>())
@@ -133,42 +100,63 @@ public final class ProductionAboveAverageParser {
                     .filter(r -> r.getRemain() >= inputProduct.getQty())
                     .filter(r -> r.getQuality() >= inputProduct.getMinQuality())
                     .sorted((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1)
-                    .limit(50)
+                    .limit((productRecipe.getInputProducts().size() <= 3) ? 50 : 3)
                     .collect(Collectors.toList());
 
             materials.add(remains);
         }
-
-        return Utils.ofCombinations(materials, ArrayList::new)
-                .map(mats -> calc(productHistory, mats, productRecipe, techLvl))
+        final int maxTechLvl = techLvls.stream()
+                .filter(tl -> productRecipe.getManufactureID().equals(tl.getTechId()))
+                .filter(tl -> tl.getPrice() > 0)
+                .max((o1, o2) -> (o1.getLvl() > o2.getLvl()) ? 1 : -1)
+                .orElse(new TechLvl("", 2, 0.0))
+                .getLvl();
+//        logger.info("materials.size() = {}", materials.size());
+//        logger.info("Utils.ofCombinations = {}", Utils.ofCombinations(materials, ArrayList::new).count());
+        final Map<Integer, List<ProductionAboveAverage>> groupedByTechLvl = Utils.ofCombinations(materials, ArrayList::new)
+                .map(mats -> calc(maxTechLvl, productHistory, mats, productRecipe))
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(ProductionAboveAverage::getTechLvl));
+        //оставляем по 5 лучших для каждого уровня технологии для каждого товара
+        return groupedByTechLvl.keySet().stream()
+                .map(i -> groupedByTechLvl.get(i).stream()
+                        .sorted((o1, o2) -> (o1.getCost() / o1.getQuality() > o2.getCost() / o2.getQuality()) ? 1 : -1)
+                        .limit(5)
+                        .collect(toList())
+                )
+                .flatMap(Collection::stream)
                 .collect(toList());
     }
 
-    public static ProductionAboveAverage calc(
-            final ProductHistory productHistory
+    public static List<ProductionAboveAverage> calc(
+            final int maxTechLvl
+            , final ProductHistory productHistory
             , final List<ProductRemain> materials
             , final ProductRecipe productRecipe
-            , final int techLvl
     ) {
-        final List<ManufactureCalcResult> manufactureCalcResults = calcResult(productRecipe, materials, techLvl);
+        final List<ProductionAboveAverage> list = new ArrayList<>();
 
-        for (final ManufactureCalcResult manufactureCalcResult : manufactureCalcResults) {
-            //logger.info("productHistory.getQuality() = {}", productHistory.getQuality());
-            //logger.info("manufactureCalcResult.getQuality() = {}", manufactureCalcResult.getQuality());
-            if (manufactureCalcResult.getQuality() >= productHistory.getQuality()) {
-                return new ProductionAboveAverage(
-                        productRecipe.getManufactureID()
-                        , productRecipe.getSpecialization()
-                        , manufactureCalcResult.getProductID()
-                        , manufactureCalcResult.getVolume()
-                        , manufactureCalcResult.getQuality()
-                        , manufactureCalcResult.getCost()
-                        , materials
-                        , techLvl
-                );
+        for (int lvl = 1; lvl <= maxTechLvl; ++lvl) {
+            final List<ManufactureCalcResult> manufactureCalcResults = calcResult(productRecipe, materials, lvl);
+
+            for (final ManufactureCalcResult manufactureCalcResult : manufactureCalcResults) {
+                //logger.info("productHistory.getQuality() = {}", productHistory.getQuality());
+                //logger.info("manufactureCalcResult.getQuality() = {}", manufactureCalcResult.getQuality());
+                if (manufactureCalcResult.getQuality() >= productHistory.getQuality()) {
+                    list.add(new ProductionAboveAverage(
+                            productRecipe.getManufactureID()
+                            , productRecipe.getSpecialization()
+                            , manufactureCalcResult.getProductID()
+                            , manufactureCalcResult.getVolume()
+                            , manufactureCalcResult.getQuality()
+                            , manufactureCalcResult.getCost()
+                            , materials
+                            , lvl
+                    ));
+                }
             }
         }
-        return null;
+        return list;
     }
 
     public static List<ManufactureCalcResult> calcResult(final ProductRecipe productRecipe, final List<ProductRemain> materials, final double techLvl) {
