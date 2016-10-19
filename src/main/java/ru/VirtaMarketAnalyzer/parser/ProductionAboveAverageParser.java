@@ -24,15 +24,15 @@ public final class ProductionAboveAverageParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
         final String realm = "olga";
-//        final List<Product> products = new ArrayList<>();
-//        //продукт
-//        products.add(new Product("", "", "1482", ""));
-//        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
-//        //ингридиенты для поиска остатков
-//        products.add(new Product("", "", "1493", ""));
-//        products.add(new Product("", "", "1484", ""));
-        final List<Product> products = ProductInitParser.getProducts(Wizard.host, realm);
+        final List<Product> products = new ArrayList<>();
+        //продукт
+        products.add(new Product("", "", "1485", ""));
         final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
+        //ингридиенты для поиска остатков
+        products.add(new Product("", "", "1466", ""));
+        products.add(new Product("", "", "1465", ""));
+//        final List<Product> products = ProductInitParser.getProducts(Wizard.host, realm);
+//        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
 
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(Wizard.host + realm + "/main/globalreport/marketing/by_products/", products);
         //System.out.println(Utils.getPrettyGson(productRemains));
@@ -108,8 +108,8 @@ public final class ProductionAboveAverageParser {
         if (productRecipe.getInputProducts() == null || productRecipe.getInputProducts().size() == 0) {
             return list;
         }
-        //пробуем 10 лучших по соотношению цена/качество
-        for (int idx = 0; idx < 5; ++idx) {
+        //пробуем 50 лучших по соотношению цена/качество
+        for (int idx = 0; idx < 50; ++idx) {
             final List<ProductRemain> materials = new ArrayList<>();
             for (final ManufactureIngredient inputProduct : productRecipe.getInputProducts()) {
                 //logger.info("inputProduct.getProductID() == {}", inputProduct.getProductID());
