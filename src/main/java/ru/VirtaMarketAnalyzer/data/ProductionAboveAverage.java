@@ -20,10 +20,10 @@ public final class ProductionAboveAverage {
     final private double quality;
     @SerializedName("c")
     final private double cost;
-    @SerializedName("ir")
-    final private List<ProductRemain> ingredientsRemain;
     @SerializedName("tl")
     final private int techLvl;
+    @SerializedName("ir")
+    final private List<ProductRemain> ingredientsRemain;
 
     public ProductionAboveAverage(final String manufactureID
             , final String specialization
@@ -42,5 +42,37 @@ public final class ProductionAboveAverage {
         this.cost = cost;
         this.ingredientsRemain = ingredientsRemain;
         this.techLvl = techLvl;
+    }
+
+    public String getManufactureID() {
+        return manufactureID;
+    }
+
+    public String getSpecialization() {
+        return specialization;
+    }
+
+    public String getProductID() {
+        return productID;
+    }
+
+    public long getVolume() {
+        return volume;
+    }
+
+    public double getQuality() {
+        return quality;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public int getTechLvl() {
+        return techLvl;
+    }
+
+    public List<ProductRemain> getIngredientsRemain() {
+        return ingredientsRemain;
     }
 }

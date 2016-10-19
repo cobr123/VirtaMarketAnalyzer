@@ -12,7 +12,8 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by cobr123 on 16.10.2016.
@@ -27,6 +28,7 @@ public final class ProductionAboveAverageParser {
         final List<Product> products = new ArrayList<>();
         //продукт
         products.add(new Product("", "", "1485", ""));
+        products.add(new Product("", "", "1481", ""));
         final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
         //ингридиенты для поиска остатков
         products.add(new Product("", "", "1466", ""));
@@ -41,7 +43,7 @@ public final class ProductionAboveAverageParser {
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(Wizard.host + realm + "/main/common/main_page/game_info/industry/");
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(Wizard.host + realm + "/main/industry/unit_type/info/", manufactures);
 
-        System.out.println(Utils.getPrettyGson(calc(Wizard.host, realm, productHistory, productRemains, productRecipes)));
+        logger.info(Utils.getPrettyGson(calc(Wizard.host, realm, productHistory, productRemains, productRecipes)));
     }
 
     public static List<ProductionAboveAverage> calc(
@@ -52,13 +54,27 @@ public final class ProductionAboveAverageParser {
             , final Map<String, List<ProductRecipe>> productRecipes
     ) throws IOException {
         final List<TechLvl> techLvl = TechMarketAskParser.getTech(host, realm);
-        return productHistory.parallelStream()
+        final Map<String, Map<Integer, List<ProductionAboveAverage>>> resultsByTechLvlOfProduct = productHistory.parallelStream()
                 .map(ph -> calc(techLvl, ph, productRemains, productRecipes.get(ph.getProductID())))
                 .filter(paa -> paa != null)
                 .flatMap(Collection::parallelStream)
                 .filter(paa -> paa != null)
-                .collect(Collectors.toList());
-
+                .collect(Collectors.groupingBy(ProductionAboveAverage::getProductID, Collectors.groupingBy(ProductionAboveAverage::getTechLvl)));
+        //оставляем по 5 лучших для каждого уровня технологии для каждого товара
+        return resultsByTechLvlOfProduct.values()
+                .stream()
+                .map(techLvlOfProduct -> techLvlOfProduct.values()
+                        .stream()
+                        .map(results -> results.stream()
+                                .sorted((o1, o2) -> (o1.getCost() / o1.getQuality() > o2.getCost() / o2.getQuality()) ? 1 : -1)
+                                .limit(5)
+                                .collect(toList())
+                        )
+                        .flatMap(Collection::stream)
+                        .collect(toList())
+                )
+                .flatMap(Collection::stream)
+                .collect(toList());
     }
 
     public static List<ProductionAboveAverage> calc(
@@ -75,7 +91,7 @@ public final class ProductionAboveAverageParser {
                 .filter(paa -> paa != null)
                 .flatMap(Collection::stream)
                 .filter(paa -> paa != null)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     public static List<ProductionAboveAverage> calc(
@@ -104,34 +120,28 @@ public final class ProductionAboveAverageParser {
             , final ProductRecipe productRecipe
             , final int techLvl
     ) {
-        final List<ProductionAboveAverage> list = new ArrayList<>();
         if (productRecipe.getInputProducts() == null || productRecipe.getInputProducts().size() == 0) {
-            return list;
+            return null;
         }
         //пробуем 50 лучших по соотношению цена/качество
-        for (int idx = 0; idx < 50; ++idx) {
-            final List<ProductRemain> materials = new ArrayList<>();
-            for (final ManufactureIngredient inputProduct : productRecipe.getInputProducts()) {
-                //logger.info("inputProduct.getProductID() == {}", inputProduct.getProductID());
-                final List<ProductRemain> remains = productRemains.getOrDefault(inputProduct.getProductID(), new ArrayList<>())
-                        .stream()
-                        .filter(r -> r.getMaxOrderType() == ProductRemain.MaxOrderType.U || r.getMaxOrder() >= inputProduct.getQty())
-                        .filter(r -> r.getRemain() >= inputProduct.getQty())
-                        .filter(r -> r.getQuality() >= inputProduct.getMinQuality())
-                        .collect(Collectors.toList());
+        final List<Collection<ProductRemain>> materials = new ArrayList<>();
+        for (final ManufactureIngredient inputProduct : productRecipe.getInputProducts()) {
+            //logger.info("inputProduct.getProductID() == {}", inputProduct.getProductID());
+            final List<ProductRemain> remains = productRemains.getOrDefault(inputProduct.getProductID(), new ArrayList<>())
+                    .stream()
+                    .filter(r -> r.getMaxOrderType() == ProductRemain.MaxOrderType.U || r.getMaxOrder() >= inputProduct.getQty())
+                    .filter(r -> r.getRemain() >= inputProduct.getQty())
+                    .filter(r -> r.getQuality() >= inputProduct.getMinQuality())
+                    .sorted((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1)
+                    .limit(50)
+                    .collect(Collectors.toList());
 
-                if (remains.size() <= idx) {
-                    //logger.info("remains.size() <= {}", idx);
-                    return list;
-                }
-                remains.sort((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1);
-                materials.add(remains.get(idx));
-                //logger.info("remains.get(0).getQuality() = {}, .getPrice() = {}", remains.get(0).getQuality(), remains.get(0).getPrice());
-                //logger.info("remains.get({}).getQuality() = {}, .getPrice() = {}", remains.size()-1, remains.get(remains.size()-1).getQuality(), remains.get(remains.size()-1).getPrice());
-            }
-            list.add(calc(productHistory, materials, productRecipe, techLvl));
+            materials.add(remains);
         }
-        return list;
+
+        return Utils.ofCombinations(materials, ArrayList::new)
+                .map(mats -> calc(productHistory, mats, productRecipe, techLvl))
+                .collect(toList());
     }
 
     public static ProductionAboveAverage calc(
