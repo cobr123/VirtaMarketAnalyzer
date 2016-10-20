@@ -90,14 +90,16 @@ public final class ProductionAboveAverageParser {
         if (productRecipe.getInputProducts() == null || productRecipe.getInputProducts().size() == 0) {
             return null;
         }
+        final double work_quant = 1000.0;
+        final double koef = (productRecipe.getResultProducts().get(0).getProdBaseQty() * work_quant) / productRecipe.getResultProducts().get(0).getResultQty();
         //пробуем 50 лучших по соотношению цена/качество
         final List<List<ProductRemain>> materials = new ArrayList<>();
         for (final ManufactureIngredient inputProduct : productRecipe.getInputProducts()) {
             //logger.info("inputProduct.getProductID() == {}", inputProduct.getProductID());
             final List<ProductRemain> remains = productRemains.getOrDefault(inputProduct.getProductID(), new ArrayList<>())
                     .stream()
-                    .filter(r -> r.getMaxOrderType() == ProductRemain.MaxOrderType.U || r.getMaxOrder() >= inputProduct.getQty())
-                    .filter(r -> r.getRemain() >= inputProduct.getQty())
+                    .filter(r -> r.getMaxOrderType() == ProductRemain.MaxOrderType.U || r.getMaxOrder() >= inputProduct.getQty() * koef)
+                    .filter(r -> r.getRemain() >= inputProduct.getQty() * koef)
                     .filter(r -> r.getQuality() >= inputProduct.getMinQuality())
                     .sorted((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1)
                     .limit((productRecipe.getInputProducts().size() <= 3) ? 50 : 3)
