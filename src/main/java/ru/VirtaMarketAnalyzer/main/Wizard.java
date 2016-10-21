@@ -161,13 +161,13 @@ public final class Wizard {
         }
 
         logger.info("получаем список доступных розничных категорий товаров");
-        final List<ProductCategory> product_categories = ProductInitParser.getProductCategories(products);
+        final List<ProductCategory> product_categories = ProductInitParser.getTradeProductCategories(host, realm);
         Utils.writeToGson(baseDir + "product_categories.json", product_categories);
-        final List<ProductCategory> product_categories_en = ProductInitParser.getProductCategories(products_en);
+        final List<ProductCategory> product_categories_en = ProductInitParser.getTradeProductCategories(host_en, realm);
         Utils.writeToGson(baseDir + "product_categories_en.json", product_categories_en);
 
         logger.info("группируем таможенные пошлины по странам");
-        final List<Product> materials = ProductInitParser.getProducts(host, realm);
+        final List<Product> materials = ProductInitParser.getManufactureProducts(host, realm);
         final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(host + realm + "/main/geo/countrydutylist/", countries, materials);
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
@@ -211,22 +211,22 @@ public final class Wizard {
         logger.info("собираем рецепты производства товаров и материалов");
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
         Utils.writeToGson(baseDir + "manufactures.json", manufactures);
-        final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host + realm + "/main/industry/unit_type/info/", manufactures);
+        final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
         //сохраняем их в json
         for (final Map.Entry<String, List<ProductRecipe>> entry : productRecipes.entrySet()) {
             Utils.writeToGson(baseDir + "recipe_" + entry.getKey() + ".json", entry.getValue());
         }
         final List<Manufacture> manufactures_en = ManufactureListParser.getManufactures(host_en + realm + "/main/common/main_page/game_info/industry/");
         Utils.writeToGson(baseDir + "manufactures_en.json", manufactures_en);
-        final Map<String, List<ProductRecipe>> productRecipes_en = ProductRecipeParser.getProductRecipes(host_en + realm + "/main/industry/unit_type/info/", manufactures_en);
+        final Map<String, List<ProductRecipe>> productRecipes_en = ProductRecipeParser.getProductRecipes(host_en, realm, manufactures_en);
         //сохраняем их в json
         for (final Map.Entry<String, List<ProductRecipe>> entry : productRecipes_en.entrySet()) {
             Utils.writeToGson(baseDir + "recipe_" + entry.getKey() + "_en.json", entry.getValue());
         }
         logger.info("получаем список всех доступных товаров и материалов");
-        final List<Product> materials = ProductInitParser.getProducts(host, realm);
+        final List<Product> materials = ProductInitParser.getManufactureProducts(host, realm);
         Utils.writeToGson(baseDir + "materials.json", materials);
-        final List<Product> materials_en = ProductInitParser.getProducts(host_en, realm);
+        final List<Product> materials_en = ProductInitParser.getManufactureProducts(host_en, realm);
         Utils.writeToGson(baseDir + "materials_en.json", materials_en);
         logger.info("materials.size() = {}, realm = {}", materials.size(), realm);
         saveProductImg(materials);

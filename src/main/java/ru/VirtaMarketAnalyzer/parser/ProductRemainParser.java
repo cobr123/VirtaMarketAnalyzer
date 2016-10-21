@@ -25,9 +25,11 @@ public final class ProductRemainParser {
     private static final Logger logger = LoggerFactory.getLogger(ProductRemainParser.class);
 
     public static void main(final String[] args) throws IOException {
-        final String url = Wizard.host + "olga/main/globalreport/marketing/by_products/";
+        final String host = Wizard.host;
+        final String realm = "olga";
+        final String url = host + realm + "/main/globalreport/marketing/by_products/";
         final List<Product> products = new ArrayList<>();
-        products.add(new Product("", "", "1482", ""));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "1482"));
         System.out.println(Utils.getPrettyGson(getRemains(url, products)));
     }
 

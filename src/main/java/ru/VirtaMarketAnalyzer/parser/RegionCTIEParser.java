@@ -30,7 +30,7 @@ final public class RegionCTIEParser {
         final String url = Wizard.host + "olga/main/geo/regionENVD/";
         final List<Region> regions = new ArrayList<>();
         regions.add(new Region("2931", "2961", "Far East", 30));
-        final List<Product> materials = ProductInitParser.getProducts(Wizard.host, "olga");
+        final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, "olga");
         logger.info(Utils.getPrettyGson(materials));
         final Map<String, List<RegionCTIE>> allRegionsCTIEList = getAllRegionsCTIEList(url, regions, materials);
         logger.info(Utils.getPrettyGson(allRegionsCTIEList));

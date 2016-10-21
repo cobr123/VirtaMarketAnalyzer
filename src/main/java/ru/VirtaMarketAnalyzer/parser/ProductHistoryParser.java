@@ -27,9 +27,11 @@ public final class ProductHistoryParser {
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
-        final String url = Wizard.host + "olga/main/globalreport/product_history/";
+        final String host = Wizard.host;
+        final String realm = "olga";
+        final String url = host + realm + "/main/globalreport/product_history/";
         final List<Product> products = new ArrayList<>();
-        products.add(new Product("", "", "1482", ""));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "1482"));
         System.out.println(Utils.getPrettyGson(getHistory(url, products)));
     }
 
@@ -58,11 +60,11 @@ public final class ProductHistoryParser {
                 logger.error("Не найдена первая строка в обзорном отчете {}{}", url, material.getId());
             } else {
                 if (!firstRow.select("> td:nth-child(2)").isEmpty()) {
-                     final long volumeProd = Utils.toLong(firstRow.select("> td:nth-child(2)").text());
-                     final long volumeCons = Utils.toLong(firstRow.select("> td:nth-child(3)").text());
-                     final double quality = Utils.toDouble(firstRow.select("> td:nth-child(4)").text());
-                     final double cost = Utils.toDouble(firstRow.select("> td:nth-child(5)").text());
-                     final double assessedValue = Utils.toDouble(firstRow.select("> td:nth-child(6)").text());
+                    final long volumeProd = Utils.toLong(firstRow.select("> td:nth-child(2)").text());
+                    final long volumeCons = Utils.toLong(firstRow.select("> td:nth-child(3)").text());
+                    final double quality = Utils.toDouble(firstRow.select("> td:nth-child(4)").text());
+                    final double cost = Utils.toDouble(firstRow.select("> td:nth-child(5)").text());
+                    final double assessedValue = Utils.toDouble(firstRow.select("> td:nth-child(6)").text());
                     productsHistory.add(new ProductHistory(material.getId(), volumeProd, volumeCons, quality, cost, assessedValue));
                 }
             }

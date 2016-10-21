@@ -25,6 +25,7 @@ public final class ServiceAtCityParser {
 
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
+        final String host = Wizard.host;
         final String realm = "vera";
         final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0);
         final List<City> cities = new ArrayList<>();
@@ -32,9 +33,9 @@ public final class ServiceAtCityParser {
 
         final List<UnitTypeSpec> specializations = new ArrayList<>();
         final List<RawMaterial> rawMaterials = new ArrayList<>();
-        specializations.add(new UnitTypeSpec("Фитнес", new Product("","","15337","Тренажер"), rawMaterials));
+        specializations.add(new UnitTypeSpec("Фитнес", ProductInitParser.getTradingProduct(host, realm, "15337"), rawMaterials));
         final UnitType service = new UnitType("348207", "Фитнес-центр", "", specializations);
-        final List<ServiceAtCity> serviceAtCity = get(Wizard.host, realm, cities, service, null);
+        final List<ServiceAtCity> serviceAtCity = get(host, realm, cities, service, null);
         logger.info(Utils.getPrettyGson(serviceAtCity));
 
 //        final List<UnitTypeSpec> specializations = new ArrayList<>();
@@ -52,7 +53,7 @@ public final class ServiceAtCityParser {
 
     private static ServiceSpecRetail addRetailStatByProduct(final String host, final String realm, final String productID, final City city) {
         try {
-            final TradeAtCity tac = CityParser.get(Wizard.host, realm, city, new Product("", "", productID, productID), null, null);
+            final TradeAtCity tac = CityParser.get(Wizard.host, realm, city, ProductInitParser.getTradingProduct(host, realm, productID), null, null);
             return new ServiceSpecRetail(tac.getLocalPrice(), tac.getLocalQuality(), tac.getShopPrice(), tac.getShopQuality());
         } catch (final Exception e) {
             logger.error("Ошибка: ", e);
@@ -88,7 +89,7 @@ public final class ServiceAtCityParser {
         try {
 //            logger.info("spec.getRawMaterials().size() = {}", spec.getRawMaterials().size());
 //            logger.info("stat.containsKey(spec.getEquipment()) = {}", stat.containsKey(spec.getEquipment().getId()));
-            if(spec.getRawMaterials().size() > 0){
+            if (spec.getRawMaterials().size() > 0) {
                 final double localPrice = spec.getRawMaterials()
                         .stream()
                         .mapToDouble(mat -> stat.get(mat.getId()).getLocalPrice() * mat.getQuantity())
@@ -106,7 +107,7 @@ public final class ServiceAtCityParser {
                         .mapToDouble(mat -> stat.get(mat.getId()).getShopQuality())
                         .average().orElse(0);
                 return new ServiceSpecRetail(localPrice, localQuality, shopPrice, shopQuality);
-            } else if(stat.containsKey(spec.getEquipment().getId())){
+            } else if (stat.containsKey(spec.getEquipment().getId())) {
                 final ServiceSpecRetail serviceSpecRetail = stat.get(spec.getEquipment().getId());
                 final double localPrice = serviceSpecRetail.getLocalPrice();
                 final double localQuality = serviceSpecRetail.getLocalQuality();

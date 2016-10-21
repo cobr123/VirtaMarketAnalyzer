@@ -31,18 +31,20 @@ final public class ProductRecipeParser {
 //        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/422209");
 //        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/2425");
 //        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/2417");
-        final String url = Wizard.host + "olga/main/industry/unit_type/info/";
+        final String host = Wizard.host;
+        final String realm = "olga";
+        final String url = host + realm + "/main/industry/unit_type/info/";
         final List<Manufacture> manufactures = new ArrayList<>();
 //        manufactures.add(new Manufacture("423140", "manufactureCategory", "caption"));
 //        manufactures.add(new Manufacture("2425", "manufactureCategory", "caption"));
         manufactures.add(new Manufacture("2438", "manufactureCategory", "caption"));
 
-        final Map<String, List<ProductRecipe>> result = getProductRecipes(url, manufactures);
-//        logger.info(Utils.getPrettyGson(result));
+        final Map<String, List<ProductRecipe>> result = getProductRecipes(host, realm, manufactures);
+        logger.info(Utils.getPrettyGson(result));
     }
 
-    public static Map<String, List<ProductRecipe>> getProductRecipes(final String url, final List<Manufacture> manufactures) throws IOException {
-        final List<ProductRecipe> recipes = getRecipes(url, manufactures);
+    public static Map<String, List<ProductRecipe>> getProductRecipes(final String host, final String realm, final List<Manufacture> manufactures) throws IOException {
+        final List<ProductRecipe> recipes = getRecipes(host, realm, manufactures);
         //иногда один продукт можно получить разными способами
         final Map<String, List<ProductRecipe>> productRecipes = new HashMap<>();
         for (final ProductRecipe recipe : recipes) {
@@ -56,12 +58,12 @@ final public class ProductRecipeParser {
         return productRecipes;
     }
 
-    public static List<ProductRecipe> getRecipes(final String url, final List<Manufacture> manufactures) throws IOException {
+    public static List<ProductRecipe> getRecipes(final String host, final String realm, final List<Manufacture> manufactures) throws IOException {
         final List<ProductRecipe> recipes = new ArrayList<>();
 
         for (final Manufacture manufacture : manufactures) {
             try {
-                final Document doc = Downloader.getDoc(url + manufacture.getId());
+                final Document doc = Downloader.getDoc(host + realm + "/main/industry/unit_type/info/" + manufacture.getId());
 
                 final String manufactureCategory = doc.select("table.infoblock > tbody > tr > td:nth-child(2) > a").text();
                 manufacture.setManufactureCategory(manufactureCategory);
@@ -122,7 +124,7 @@ final public class ProductRecipeParser {
                             Product equipment = null;
                             //если не "склад"
                             if (!"2011".equals(manufacture.getId())) {
-                                equipment = getProduct(equipElem);
+                                equipment = getProduct(host, realm, equipElem);
                             }
 
                             final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, equipmentPerWorker, inputProducts, resultProducts);
@@ -131,18 +133,15 @@ final public class ProductRecipeParser {
                     }
                 }
             } catch (final Exception e) {
-                logger.error(url + manufacture.getId());
+                logger.error(host + realm + "/main/industry/unit_type/info/" + manufacture.getId());
                 throw e;
             }
         }
         return recipes;
     }
 
-    private static Product getProduct(final Element equipElem) {
-        final String productCategory = "";
-        final String imgUrl = equipElem.attr("src");
+    private static Product getProduct(final String host, final String realm, final Element equipElem) throws IOException {
         final String id = Utils.getLastBySep(equipElem.parent().attr("href"), "/");
-        final String caption = equipElem.attr("title");
-        return new Product(productCategory, imgUrl, id, caption);
+        return ProductInitParser.getManufactureProduct(host, realm, id);
     }
 }

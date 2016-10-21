@@ -24,34 +24,35 @@ public final class ProductionAboveAverageParser {
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
+        final String host = Wizard.host;
         final String realm = "olga";
 
         final List<Product> products = new ArrayList<>();
         //продукт
-        products.add(new Product("", "", "422703", ""));
-        products.add(new Product("", "", "422704", ""));
-        products.add(new Product("", "", "422705", ""));
-        products.add(new Product("", "", "422706", ""));
-        products.add(new Product("", "", "422707", ""));
-        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "422703"));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "422704"));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "422705"));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "422706"));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "422707"));
+        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", products);
         //ингридиенты для поиска остатков
-        products.add(new Product("", "", "1467", ""));
-        products.add(new Product("", "", "1466", ""));
-        products.add(new Product("", "", "1471", ""));
-        products.add(new Product("", "", "1483", ""));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "1467"));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "1466"));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "1471"));
+        products.add(ProductInitParser.getManufactureProduct(host, realm, "1483"));
 
-//        final List<Product> products = ProductInitParser.getProducts(Wizard.host, realm);
-//        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(Wizard.host + realm + "/main/globalreport/product_history/", products);
+//        final List<Product> products = ProductInitParser.getProducts(host, realm);
+//        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", products);
 
-        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(Wizard.host + realm + "/main/globalreport/marketing/by_products/", products);
+        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", products);
         //System.out.println(Utils.getPrettyGson(productRemains));
 
 
-        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(Wizard.host + realm + "/main/common/main_page/game_info/industry/");
-        final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(Wizard.host + realm + "/main/industry/unit_type/info/", manufactures);
+        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
+        final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
 
-        logger.info(Utils.getPrettyGson(calc(Wizard.host, realm, productHistory, productRemains, productRecipes)));
-        logger.info(Utils.getPrettyGson(calc(Wizard.host, realm, productHistory, productRemains, productRecipes).size()));
+        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes)));
+        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes).size()));
     }
 
     public static List<ProductionAboveAverage> calc(
@@ -203,13 +204,13 @@ public final class ProductionAboveAverageParser {
         final double eff = 1.0;
         //количество товаров производимых 1 человеком
         final double[] prodBaseQuan = new double[productRecipe.getResultProducts().size()];
-        for(int i = 0; i < productRecipe.getResultProducts().size(); ++i) {
+        for (int i = 0; i < productRecipe.getResultProducts().size(); ++i) {
             prodBaseQuan[i] = productRecipe.getResultProducts().get(i).getProdBaseQty();
         }
         //var prodbase_quan2  = recipe.rp[1].pbq || 0;
         //итоговое количество товара за единицу производства
         final double[] resultQty = new double[productRecipe.getResultProducts().size()];
-        for(int i = 0; i < productRecipe.getResultProducts().size(); ++i) {
+        for (int i = 0; i < productRecipe.getResultProducts().size(); ++i) {
             resultQty[i] = productRecipe.getResultProducts().get(i).getResultQty();
         }
 
@@ -246,7 +247,7 @@ public final class ProductionAboveAverageParser {
         }
         //объем выпускаемой продукции
         final double[] prodQuantity = new double[productRecipe.getResultProducts().size()];
-        for(int i = 0; i < productRecipe.getResultProducts().size(); ++i) {
+        for (int i = 0; i < productRecipe.getResultProducts().size(); ++i) {
             prodQuantity[i] = work_quant * prodBaseQuan[i] * Math.pow(1.05, techLvl - 1.0) * eff;
         }
 //        result.quantity = Math.round(prodQuantity);
@@ -275,7 +276,7 @@ public final class ProductionAboveAverageParser {
         //бонус к качеству
         prodQual[0] = prodQual[0] * (1.0 + productRecipe.getResultProducts().get(0).getQualityBonusPercent() / 100.0);
 
-        for(int i = 1; i < productRecipe.getResultProducts().size(); ++i) {
+        for (int i = 1; i < productRecipe.getResultProducts().size(); ++i) {
             prodQual[i] = Math.pow(ingTotalQual, 0.5) * Math.pow(techLvl, 0.65) * (1.0 + productRecipe.getResultProducts().get(i).getQualityBonusPercent() / 100.0);
 
             //ограничение качества (по технологии)
@@ -388,7 +389,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[4] * 0.01 * 100.0) / 100.0
             ));
         } else {
-            for(int i = 1; i < productRecipe.getResultProducts().size(); ++i) {
+            for (int i = 1; i < productRecipe.getResultProducts().size(); ++i) {
                 result.add(new ManufactureCalcResult(
                         productRecipe.getResultProducts().get(i).getProductID()
                         , Math.round(prodQuantity[i])

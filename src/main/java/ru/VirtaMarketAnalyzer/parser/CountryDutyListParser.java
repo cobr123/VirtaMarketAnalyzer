@@ -34,7 +34,7 @@ final public class CountryDutyListParser {
         final String url = Wizard.host + "olga/main/geo/countrydutylist/";
         final List<Country> countries = new ArrayList<>();
         countries.add(new Country("2931", "Россия"));
-        final List<Product> materials = ProductInitParser.getProducts(Wizard.host, "olga");
+        final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, "olga");
         logger.info(Utils.getPrettyGson(materials));
         final Map<String, List<CountryDutyList>> allCountryDutyList = getAllCountryDutyList(url, countries, materials);
         logger.info(Utils.getPrettyGson(allCountryDutyList));

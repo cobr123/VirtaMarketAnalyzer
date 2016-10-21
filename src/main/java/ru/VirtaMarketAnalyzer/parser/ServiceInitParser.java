@@ -69,24 +69,30 @@ public final class ServiceInitParser {
     public static List<UnitTypeSpec> getServiceSpecs(final String host, final String realm, final String id) throws IOException {
         final Document doc = Downloader.getDoc(host + realm + "/main/industry/unit_type/info/" + id);
         final Elements specElems = doc.select("#mainContent > table:nth-child(4) > tbody > tr > td:nth-child(1) > b");
-        return specElems.stream().map(ServiceInitParser::getUnitTypeSpec).collect(Collectors.toList());
+        return specElems.stream().map(se -> {
+            try {
+                return ServiceInitParser.getUnitTypeSpec(host, realm, se);
+            } catch (final Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
+            return null;
+        })
+                .filter(uts -> uts != null)
+                .collect(Collectors.toList());
     }
 
-    private static UnitTypeSpec getUnitTypeSpec(final Element elem) {
+    private static UnitTypeSpec getUnitTypeSpec(final String host, final String realm, final Element elem) throws IOException {
         final String caption = elem.text();
         final Element equipElem = elem.parent().parent().select(" > td:nth-child(2) > a:nth-child(1) > img").first();
-        final Product equipment = getProduct(equipElem);
+        final Product equipment = getProduct(host, realm, equipElem);
         final Elements rawMaterialElems = elem.parent().parent().select(" > td:nth-child(3) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img");
         final List<RawMaterial> rawMaterials = getRawMaterials(rawMaterialElems);
         return new UnitTypeSpec(caption, equipment, rawMaterials);
     }
 
-    private static Product getProduct(final Element equipElem) {
-        final String productCategory = "";
-        final String imgUrl = equipElem.attr("src");
+    private static Product getProduct(final String host, final String realm, final Element equipElem) throws IOException {
         final String id = Utils.getLastBySep(equipElem.parent().attr("href"), "/");
-        final String caption = equipElem.attr("title");
-        return new Product(productCategory, imgUrl, id, caption);
+        return ProductInitParser.getManufactureProduct(host, realm, id);
     }
 
     private static RawMaterial getRawMaterial(final Element equipElem) {

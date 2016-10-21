@@ -29,15 +29,17 @@ public final class ShopParser {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        final String url = Wizard.host + "olga/main/unit/view/5788675";
-        final String url = Wizard.host + "mary/main/unit/view/3943258";
+        final String host = Wizard.host;
+        final String realm = "mary";
+        final String url = host + realm + "/main/unit/view/3943258";
 //        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
         cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0));
         final List<Product> products = new ArrayList<>();
-        products.add(new Product("категория", "/img/products/bourbon.gif", "123", "Бурбон"));
-        products.add(new Product("категория", "/img/products/gps.gif", "123", "GPS-навигаторы"));
+        products.add(ProductInitParser.getTradingProduct(host, realm, "422547"));
+        products.add(ProductInitParser.getTradingProduct(host, realm, "3838"));
         final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
-        System.out.println(Utils.getPrettyGson(parse("mary",url, cities, productsByImgSrc, "")));
+        System.out.println(Utils.getPrettyGson(parse(realm, url, cities, productsByImgSrc, "")));
     }
 
     public static Shop parse(final String realm, final String url, final List<City> cities, final Map<String, List<Product>> productsByImgSrc, final String cityCaption) throws Exception {
@@ -212,7 +214,7 @@ public final class ShopParser {
 
     public static Shop parse(final String realm, final String productId, final String countryId, final String regionId, final String townId, final String url, final Map<String, List<Product>> productsByImgSrc) throws Exception {
         Document doc = null;
-        if (oneTryErrorUrl.contains(url)){
+        if (oneTryErrorUrl.contains(url)) {
             return null;
         }
         try {

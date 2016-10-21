@@ -10,18 +10,24 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 public final class Product {
     @SerializedName("pc")
     final private String productCategory;
+    @SerializedName("pci")
+    final private String productCategoryID;
     @SerializedName("s")
     final private String imgUrl;
     @SerializedName("i")
     final private String id;
     @SerializedName("c")
     final private String caption;
+    @SerializedName("sym")
+    final private String symbol;
 
-    public Product(final String productCategory, final String imgUrl, final String id, final String caption) {
+    public Product(final String productCategory, final String id, final String caption, final String productCategoryID, final String symbol) {
         this.productCategory = productCategory;
-        this.imgUrl = imgUrl;
+        this.imgUrl = "/img/products/" + symbol + ".gif";
         this.id = id;
         this.caption = caption;
+        this.productCategoryID = productCategoryID;
+        this.symbol = symbol;
     }
 
     @Override
@@ -31,6 +37,8 @@ public final class Product {
                 .append(imgUrl)
                 .append(id)
                 .append(caption)
+                .append(productCategoryID)
+                .append(symbol)
                 .toHashCode();
     }
 
@@ -43,6 +51,8 @@ public final class Product {
                     .append(imgUrl, other.imgUrl)
                     .append(id, other.id)
                     .append(caption, other.caption)
+                    .append(productCategoryID, other.productCategoryID)
+                    .append(symbol, other.symbol)
                     .isEquals();
         } else {
             return false;
@@ -63,5 +73,13 @@ public final class Product {
 
     public String getProductCategory() {
         return productCategory;
+    }
+
+    public String getProductCategoryID() {
+        return productCategoryID;
+    }
+
+    public String getSymbol() {
+        return symbol;
     }
 }
