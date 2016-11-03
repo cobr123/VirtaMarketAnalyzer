@@ -53,7 +53,7 @@ public final class ServiceAtCityParser {
 
     private static ServiceSpecRetail addRetailStatByProduct(final String host, final String realm, final String productID, final City city) {
         try {
-            final TradeAtCity tac = CityParser.get(Wizard.host, realm, city, ProductInitParser.getTradingProduct(host, realm, productID), null, null);
+            final TradeAtCity tac = CityParser.get(Wizard.host, realm, city, ProductInitParser.getTradingProduct(host, realm, productID), null, null).build();
             return new ServiceSpecRetail(tac.getLocalPrice(), tac.getLocalQuality(), tac.getShopPrice(), tac.getShopQuality());
         } catch (final Exception e) {
             logger.error("Ошибка: ", e);

@@ -11,11 +11,10 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by cobr123 on 24.04.2015.
@@ -58,14 +57,35 @@ public final class CityParser {
             , final List<Region> regions
     ) throws IOException {
         logger.info("парсим данные: {}", cities.size() * products.size());
-        return cities
+        final Map<String, Map<String, List<TradeAtCityBuilder>>> grpByCityByCatId = cities
                 .parallelStream()
                 .flatMap(city -> products.stream().map(product -> new CityProduct(city, product, host, realm)))
                 .map(city -> city.getTradeAtCity(countriesDutyList, regions))
+                .collect(Collectors.groupingBy(TradeAtCityBuilder::getCityId, Collectors.groupingBy(TradeAtCityBuilder::getProductCategoryId)));
+
+        return grpByCityByCatId.keySet().stream()
+                .map(cityId -> {
+                    final Map<String, List<TradeAtCityBuilder>> grpByCatId = grpByCityByCatId.get(cityId);
+                    return grpByCatId.keySet().stream()
+                            .map(catId -> {
+                                final double localMarketVolumeSumTotal = grpByCatId.get(catId).stream().mapToDouble(TradeAtCityBuilder::getLocalMarketVolumeSum).sum();
+                                final double shopMarketVolumeSumTotal = grpByCatId.get(catId).stream().mapToDouble(TradeAtCityBuilder::getShopMarketVolumeSum).sum();
+                                return grpByCatId.get(catId).stream()
+                                        .map(tacb -> {
+                                            tacb.setLocalMarketVolumeSumTotal(localMarketVolumeSumTotal);
+                                            tacb.setShopMarketVolumeSumTotal(shopMarketVolumeSumTotal);
+                                            return tacb.build();
+                                        })
+                                        .collect(toList());
+                            })
+                            .flatMap(Collection::stream)
+                            .collect(toList());
+                })
+                .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(TradeAtCity::getProductId));
     }
 
-    public static TradeAtCity get(final String host, final String realm, final City city, final Product product
+    public static TradeAtCityBuilder get(final String host, final String realm, final City city, final Product product
             , final Map<String, List<CountryDutyList>> countriesDutyList
             , final List<Region> regions
     ) throws Exception {
@@ -87,6 +107,7 @@ public final class CityParser {
         builder.setCompaniesCnt(Utils.toLong(table.select("table > tbody > tr > td").eq(8).text()));
 
         builder.setProductId(product.getId());
+        builder.setProductCategoryId(product.getProductCategoryID());
         builder.setCountryId(city.getCountryId());
         builder.setRegionId(city.getRegionId());
         builder.setCityId(city.getId());
@@ -159,6 +180,6 @@ public final class CityParser {
             }
         }
         builder.setMajorSellInCityList(majorSellInCityList);
-        return builder.build();
+        return builder;
     }
 }

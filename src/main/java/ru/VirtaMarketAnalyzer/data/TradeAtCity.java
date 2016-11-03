@@ -24,6 +24,8 @@ public final class TradeAtCity {
     final private double averageSalary;
     @SerializedName("pi")
     final private String productId;
+    @SerializedName("pci")
+    final private String productCategoryId;
     @SerializedName("mi")
     final private String marketIdx;
     @SerializedName("v")
@@ -48,6 +50,18 @@ public final class TradeAtCity {
     final private double incomeTaxRate;
     @SerializedName("itp")
     final private int importTaxPercent;
+    //Емкость рынка (по этому товару в городе)
+    @SerializedName("lmvs")
+    final private double localMarketVolumeSum;
+    //Емкость игроков (по этому товару в городе)
+    @SerializedName("smvs")
+    final private double shopMarketVolumeSum;
+    //Емкость рынка (по всем товарам в городе)
+    @SerializedName("lmvst")
+    final private double localMarketVolumeSumTotal;
+    //Емкость игроков (по всем товарам в городе)
+    @SerializedName("smvst")
+    final private double shopMarketVolumeSumTotal;
 
     final private transient List<MajorSellInCity> majorSellInCityList;
 
@@ -57,6 +71,7 @@ public final class TradeAtCity {
             , final String townId
             , final String townCaption
             , final String productId
+            , final String productCategoryId
             , final String marketIdx
             , final long volume
             , final double wealthIndex
@@ -73,12 +88,17 @@ public final class TradeAtCity {
             , final List<MajorSellInCity> majorSellInCityList
             , final double incomeTaxRate
             , final int importTaxPercent
+            , final double localMarketVolumeSum
+            , final double shopMarketVolumeSum
+            , final double localMarketVolumeSumTotal
+            , final double shopMarketVolumeSumTotal
     ) {
         this.countryId = countryId;
         this.regionId = regionId;
         this.townId = townId;
         this.townCaption = townCaption;
         this.productId = productId;
+        this.productCategoryId = productCategoryId;
         this.marketIdx = marketIdx;
         this.volume = volume;
         this.wealthIndex = wealthIndex;
@@ -95,6 +115,10 @@ public final class TradeAtCity {
         this.majorSellInCityList = majorSellInCityList;
         this.incomeTaxRate = incomeTaxRate;
         this.importTaxPercent = importTaxPercent;
+        this.localMarketVolumeSum = localMarketVolumeSum;
+        this.shopMarketVolumeSum = shopMarketVolumeSum;
+        this.localMarketVolumeSumTotal = localMarketVolumeSumTotal;
+        this.shopMarketVolumeSumTotal = shopMarketVolumeSumTotal;
     }
 
     public String getCountryRegionTownIds() {
@@ -183,5 +207,25 @@ public final class TradeAtCity {
 
     public int getImportTaxPercent() {
         return importTaxPercent;
+    }
+
+    public String getProductCategoryId() {
+        return productCategoryId;
+    }
+
+    public double getLocalMarketVolumeSum() {
+        return localMarketVolumeSum;
+    }
+
+    public double getShopMarketVolumeSum() {
+        return shopMarketVolumeSum;
+    }
+
+    public double getLocalMarketVolumeSumTotal() {
+        return localMarketVolumeSumTotal;
+    }
+
+    public double getShopMarketVolumeSumTotal() {
+        return shopMarketVolumeSumTotal;
     }
 }

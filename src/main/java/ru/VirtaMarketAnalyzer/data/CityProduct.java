@@ -34,7 +34,7 @@ final public class CityProduct {
         return product;
     }
 
-    public TradeAtCity getTradeAtCity(final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) {
+    public TradeAtCityBuilder getTradeAtCity(final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) {
         final int maxTriesCnt = 3;
         for (int tries = 1; tries <= maxTriesCnt; ++tries) {
             try {

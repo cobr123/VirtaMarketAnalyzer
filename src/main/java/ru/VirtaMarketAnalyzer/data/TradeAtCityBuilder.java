@@ -14,6 +14,7 @@ public final class TradeAtCityBuilder {
     private double educationIndex;
     private double averageSalary;
     private String productId;
+    private String productCategoryId;
     private String marketIdx;
     private long volume;
     private int sellerCnt;
@@ -27,6 +28,8 @@ public final class TradeAtCityBuilder {
     private List<MajorSellInCity> majorSellInCityList;
     private double incomeTaxRate;
     private int importTaxPercent;
+    private double localMarketVolumeSumTotal;
+    private double shopMarketVolumeSumTotal;
 
     public TradeAtCity build() {
         return new TradeAtCity(
@@ -35,6 +38,7 @@ public final class TradeAtCityBuilder {
                 , cityId
                 , cityCaption
                 , productId
+                , productCategoryId
                 , marketIdx
                 , volume
                 , wealthIndex
@@ -51,6 +55,10 @@ public final class TradeAtCityBuilder {
                 , majorSellInCityList
                 , incomeTaxRate
                 , importTaxPercent
+                , getLocalMarketVolumeSum()
+                , getShopMarketVolumeSum()
+                , localMarketVolumeSumTotal
+                , shopMarketVolumeSumTotal
         );
     }
 
@@ -157,5 +165,37 @@ public final class TradeAtCityBuilder {
     public TradeAtCityBuilder setShopBrand(final double shopBrand) {
         this.shopBrand = shopBrand;
         return this;
+    }
+
+    public TradeAtCityBuilder setLocalMarketVolumeSumTotal(final double localMarketVolumeSumTotal) {
+        this.localMarketVolumeSumTotal = Math.round(localMarketVolumeSumTotal);
+        return this;
+    }
+
+    public TradeAtCityBuilder setShopMarketVolumeSumTotal(final double shopMarketVolumeSumTotal) {
+        this.shopMarketVolumeSumTotal = Math.round(shopMarketVolumeSumTotal);
+        return this;
+    }
+
+    public TradeAtCityBuilder setProductCategoryId(final String productCategoryId) {
+        this.productCategoryId = productCategoryId;
+        return this;
+    }
+
+    public String getProductCategoryId() {
+        return productCategoryId;
+    }
+
+    public double getShopMarketVolumeSum() {
+        final double price = (shopPrice - localPercent * localPrice / 100.0) / (100.0 - localPercent) * 100.0;
+        return Math.round(volume * (100.0 - localPercent) * price / 100.0);
+    }
+
+    public double getLocalMarketVolumeSum() {
+        return Math.round(volume * localPrice);
+    }
+
+    public String getCityId() {
+        return cityId;
     }
 }
