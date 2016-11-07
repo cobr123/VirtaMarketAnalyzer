@@ -1,6 +1,7 @@
 package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
+import ru.VirtaMarketAnalyzer.main.Utils;
 
 import java.util.List;
 
@@ -62,6 +63,12 @@ public final class TradeAtCity {
     //Емкость игроков (по всем товарам в городе)
     @SerializedName("smvst")
     final private double shopMarketVolumeSumTotal;
+    //Емкость, % = (Емкость игроков) / (Емкость рынка) * 100
+    @SerializedName("pmvs")
+    final private double percentMarketVolumeSum;
+    //Емкость всего, % = (Емкость игроков всего) / (Емкость рынка всего) * 100
+    @SerializedName("pmvst")
+    final private double percentMarketVolumeSumTotal;
 
     final private transient List<MajorSellInCity> majorSellInCityList;
 
@@ -119,6 +126,10 @@ public final class TradeAtCity {
         this.shopMarketVolumeSum = shopMarketVolumeSum;
         this.localMarketVolumeSumTotal = localMarketVolumeSumTotal;
         this.shopMarketVolumeSumTotal = shopMarketVolumeSumTotal;
+        //Емкость, % = (Емкость игроков) / (Емкость рынка) * 100
+        this.percentMarketVolumeSum = Utils.round2(shopMarketVolumeSum / localMarketVolumeSum * 100.0);
+        //Емкость всего, % = (Емкость игроков всего) / (Емкость рынка всего) * 100
+        this.percentMarketVolumeSumTotal = Utils.round2(shopMarketVolumeSumTotal / localMarketVolumeSumTotal * 100.0);
     }
 
     public String getCountryRegionTownIds() {

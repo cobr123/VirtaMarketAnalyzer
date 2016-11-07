@@ -212,6 +212,10 @@ public final class Utils {
         return getLastBySep(url, "/");
     }
 
+    public static double round2(double num) {
+        return Math.round(num * 100.0) / 100.0;
+    }
+
     private static class Prefix<T> {
         final T value;
         final Prefix<T> parent;
