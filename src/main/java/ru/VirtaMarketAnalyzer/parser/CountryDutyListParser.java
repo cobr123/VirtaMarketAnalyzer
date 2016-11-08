@@ -31,10 +31,11 @@ final public class CountryDutyListParser {
 
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final String url = Wizard.host + "olga/main/geo/countrydutylist/";
+        final String realm = "fast";
+        final String url = Wizard.host + realm + "/main/geo/countrydutylist/";
         final List<Country> countries = new ArrayList<>();
         countries.add(new Country("2931", "Россия"));
-        final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, "olga");
+        final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, realm);
         logger.info(Utils.getPrettyGson(materials));
         final Map<String, List<CountryDutyList>> allCountryDutyList = getAllCountryDutyList(url, countries, materials);
         logger.info(Utils.getPrettyGson(allCountryDutyList));
@@ -50,6 +51,7 @@ final public class CountryDutyListParser {
             }
             return null;
         })
+                .filter(l -> l != null)
                 .flatMap(Collection::stream)
                 .collect(groupingBy(CountryDutyList::getCountryId));
     }
@@ -60,8 +62,9 @@ final public class CountryDutyListParser {
         return imgElems.stream().map(el -> {
             try {
                 return getCountryDutyList(el, country, materials);
-            } catch (Exception e) {
-                logger.info(url + country.getId());
+            } catch (final Exception e) {
+                logger.info("{}{}", url, country.getId());
+                logger.info("materials.size = {}", materials.size());
                 logger.error(e.getLocalizedMessage(), e);
             }
             return null;
@@ -70,9 +73,10 @@ final public class CountryDutyListParser {
 
     public static CountryDutyList getCountryDutyList(final Element elem, final Country country, final List<Product> materials) throws Exception {
         final String countryId = country.getId();
-        final Optional<Product> product = materials.stream().filter(p -> p.getImgUrl().equalsIgnoreCase(elem.attr("src"))).findFirst();
+        final String symbol = Utils.getFirstBySep(Utils.getLastBySep(elem.attr("src"), "/"), "\\.");
+        final Optional<Product> product = materials.stream().filter(p -> p.getSymbol().equalsIgnoreCase(symbol)).findFirst();
         if (!product.isPresent()) {
-            throw new Exception("Не найден продукт с изображением '" + elem.attr("src") + "'");
+            throw new Exception("Не найден продукт с symbol = '" + symbol + "'");
         }
         final String productId = product.get().getId();
         elem.parent().nextElementSibling().nextElementSibling().children().remove();
