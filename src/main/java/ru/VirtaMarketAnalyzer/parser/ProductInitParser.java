@@ -56,6 +56,17 @@ public final class ProductInitParser {
     }
 
     public static List<Product> get(final String host, final String realm, final String path, final List<ProductCategory> productCategories) throws IOException {
+        List<Product> products = getInternal(host, realm, path, productCategories);
+        if(products.isEmpty()){
+            Downloader.invalidateCache(host + realm + path);
+            products = getInternal(host, realm, path, productCategories);
+        }
+        if(products.isEmpty()){
+            throw new IOException("Не удалось получить список товаров");
+        }
+        return products;
+    }
+    private static List<Product> getInternal(final String host, final String realm, final String path, final List<ProductCategory> productCategories) throws IOException {
         final Document doc = Downloader.getDoc(host + realm + path);
         final List<Product> products = new ArrayList<>();
 
@@ -86,6 +97,17 @@ public final class ProductInitParser {
     }
 
     public static List<ProductCategory> getProductCategories(final String host, final String realm, final String path) throws IOException {
+        List<ProductCategory> productCategories = getProductCategoriesInternal(host, realm, path);
+        if(productCategories.isEmpty()){
+            Downloader.invalidateCache(host + realm + path);
+            productCategories = getProductCategoriesInternal(host, realm, path);
+        }
+        if(productCategories.isEmpty()){
+            throw new IOException("Не удалось получить список категорий товаров");
+        }
+        return productCategories;
+    }
+    private static List<ProductCategory> getProductCategoriesInternal(final String host, final String realm, final String path) throws IOException {
         final Document doc = Downloader.getDoc(host + realm + path);
         final List<ProductCategory> list = new ArrayList<>();
 
