@@ -209,14 +209,14 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
 
         logger.info("собираем рецепты производства товаров и материалов");
-        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
+        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host, realm, "/main/common/main_page/game_info/industry/");
         Utils.writeToGson(baseDir + "manufactures.json", manufactures);
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
         //сохраняем их в json
         for (final Map.Entry<String, List<ProductRecipe>> entry : productRecipes.entrySet()) {
             Utils.writeToGson(baseDir + "recipe_" + entry.getKey() + ".json", entry.getValue());
         }
-        final List<Manufacture> manufactures_en = ManufactureListParser.getManufactures(host_en + realm + "/main/common/main_page/game_info/industry/");
+        final List<Manufacture> manufactures_en = ManufactureListParser.getManufactures(host_en, realm, "/main/common/main_page/game_info/industry/");
         Utils.writeToGson(baseDir + "manufactures_en.json", manufactures_en);
         final Map<String, List<ProductRecipe>> productRecipes_en = ProductRecipeParser.getProductRecipes(host_en, realm, manufactures_en);
         //сохраняем их в json

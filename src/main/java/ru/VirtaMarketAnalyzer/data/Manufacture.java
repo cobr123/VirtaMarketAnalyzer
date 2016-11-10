@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by cobr123 on 18.05.2015.
  */
@@ -12,11 +14,14 @@ final public class Manufacture {
     private String manufactureCategory;
     @SerializedName("c")
     final private String caption;
+    @SerializedName("ms")
+    final private List<ManufactureSize> sizes;
 
-    public Manufacture(final String id,final String manufactureCategory,final String caption) {
+    public Manufacture(final String id,final String manufactureCategory,final String caption, final List<ManufactureSize> sizes) {
         this.id = id;
         this.manufactureCategory = manufactureCategory;
         this.caption = caption;
+        this.sizes = sizes;
     }
 
     public String getId() {

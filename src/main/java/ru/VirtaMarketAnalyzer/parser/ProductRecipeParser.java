@@ -37,7 +37,7 @@ final public class ProductRecipeParser {
         final List<Manufacture> manufactures = new ArrayList<>();
 //        manufactures.add(new Manufacture("423140", "manufactureCategory", "caption"));
 //        manufactures.add(new Manufacture("2425", "manufactureCategory", "caption"));
-        manufactures.add(new Manufacture("2438", "manufactureCategory", "caption"));
+        manufactures.add(new Manufacture("2438", "manufactureCategory", "caption", new ArrayList<>()));
 
         final Map<String, List<ProductRecipe>> result = getProductRecipes(host, realm, manufactures);
         logger.info(Utils.getPrettyGson(result));

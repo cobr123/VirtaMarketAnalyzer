@@ -49,7 +49,7 @@ public final class ProductionAboveAverageParser {
         //System.out.println(Utils.getPrettyGson(productRemains));
 
         logger.info("getManufactures");
-        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host + realm + "/main/common/main_page/game_info/industry/");
+        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host, realm, "/main/common/main_page/game_info/industry/");
         logger.info("getProductRecipes");
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
         logger.info("calc");
@@ -140,7 +140,7 @@ public final class ProductionAboveAverageParser {
                 .collect(toList());
     }
 
-    public static List<List<ProductRemain>> getProductRemain(final ProductRecipe productRecipe, final Map<String, List<ProductRemain>> productRemains){
+    public static List<List<ProductRemain>> getProductRemain(final ProductRecipe productRecipe, final Map<String, List<ProductRemain>> productRemains) {
         final List<List<ProductRemain>> materials = new ArrayList<>();
         final double work_quant = 1000.0;
         final double koef = (productRecipe.getResultProducts().get(0).getProdBaseQty() * work_quant) / productRecipe.getResultProducts().get(0).getResultQty();
