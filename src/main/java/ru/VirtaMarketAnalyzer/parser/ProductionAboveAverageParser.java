@@ -49,12 +49,12 @@ public final class ProductionAboveAverageParser {
         //System.out.println(Utils.getPrettyGson(productRemains));
 
         logger.info("getManufactures");
-        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host, realm, "/main/common/main_page/game_info/industry/");
+        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host, realm);
         logger.info("getProductRecipes");
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
         logger.info("calc");
 //        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes)));
-        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes).size()));
+        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes, manufactures).size()));
 //        final long total = ProductInitParser.getManufactureProductCategories(host, realm)
 //                .stream()
 //                .mapToLong(pc -> {
@@ -84,6 +84,7 @@ public final class ProductionAboveAverageParser {
             , final List<ProductHistory> productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final Map<String, List<ProductRecipe>> productRecipes
+            , final List<Manufacture> manufactures
     ) throws IOException {
         final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm);
 //        productRecipes.values().stream()
@@ -101,7 +102,7 @@ public final class ProductionAboveAverageParser {
         }
         return productHistory.parallelStream()
                 .filter(ph -> productRecipes.containsKey(ph.getProductID()))
-                .map(ph -> calcByProduct(techLvls, ph, productRemains, productRecipes.get(ph.getProductID())))
+                .map(ph -> calcByProduct(techLvls, ph, productRemains, productRecipes.get(ph.getProductID()), manufactures))
                 .flatMap(Collection::stream)
                 .collect(toList());
     }
@@ -111,10 +112,11 @@ public final class ProductionAboveAverageParser {
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final List<ProductRecipe> productRecipes
+            , final List<Manufacture> manufactures
     ) {
         return productRecipes.stream()
                 .filter(pr -> pr.getInputProducts() != null && !pr.getInputProducts().isEmpty())
-                .map(pr -> calcByMaxTech(techLvls, productHistory, productRemains, pr))
+                .map(pr -> calcByMaxTech(techLvls, productHistory, productRemains, pr, manufactures))
                 .flatMap(Collection::stream)
                 .collect(toList());
     }
@@ -124,6 +126,7 @@ public final class ProductionAboveAverageParser {
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final ProductRecipe productRecipe
+            , final List<Manufacture> manufactures
     ) {
         final int maxTechLvl = techLvls.stream()
                 .filter(tl -> productRecipe.getManufactureID().equals(tl.getTechId()))
@@ -135,7 +138,7 @@ public final class ProductionAboveAverageParser {
         final List<List<ProductRemain>> materials = getProductRemain(productRecipe, productRemains);
 
         return IntStream.rangeClosed(1, maxTechLvl)
-                .mapToObj(lvl -> calcByRecipe(productHistory, materials, productRecipe, lvl))
+                .mapToObj(lvl -> calcByRecipe(productHistory, materials, productRecipe, lvl, manufactures))
                 .flatMap(Collection::stream)
                 .collect(toList());
     }
@@ -163,13 +166,22 @@ public final class ProductionAboveAverageParser {
             , final List<List<ProductRemain>> materials
             , final ProductRecipe productRecipe
             , final double techLvl
+            , final List<Manufacture> manufactures
     ) {
+        final double playerQuality = Utils.calcPlayerQualityForTech(techLvl);
+        final double workersQuality = Utils.calcWorkersQualityForTech(techLvl);
+        final double optimalTop1 = Utils.calcMaxTop1(playerQuality, workersQuality) * 0.75;
+        final boolean isOptimalForTop1 = manufactures.stream()
+                .filter(m -> m.getId().equals(productRecipe.getManufactureID()))
+                .filter(m -> m.getSizes().stream().filter(s -> s.getWorkplacesCount() >= optimalTop1).findFirst().isPresent())
+                .findFirst()
+                .isPresent();
 //        logger.info("materials.size() = {}", materials.size());
 //        logger.info("StreamEx.cartesianProduct = {}", StreamEx.cartesianProduct(materials).count());
         //оставляем по 3 лучших для каждого уровня технологии для каждого товара
         return StreamEx.cartesianProduct(materials)
                 .limit(100_000)
-                .map(mats -> calcResult(productRecipe, mats, techLvl))
+                .map(mats -> calcResult(productRecipe, mats, techLvl, isOptimalForTop1))
                 .flatMap(Collection::stream)
                 .filter(paa -> paa.getQuality() > productHistory.getQuality())
                 .filter(paa -> paa.getProductID().equals(productHistory.getProductID()))
@@ -181,7 +193,8 @@ public final class ProductionAboveAverageParser {
     public static List<ProductionAboveAverage> calcResult(
             final ProductRecipe productRecipe,
             final List<ProductRemain> materials,
-            final double techLvl
+            final double techLvl,
+            final boolean isOptimalForTop1
     ) {
         //logger.info("tech = {}", techLvl);
         final List<ProductionAboveAverage> result = new ArrayList<>(productRecipe.getResultProducts().size());
@@ -313,6 +326,7 @@ public final class ProductionAboveAverageParser {
                 , Math.round(exps / prodQuantity[0] * 100.0) / 100.0
                 , materials
                 , techLvl
+                , isOptimalForTop1
         ));
         if (productRecipe.getResultProducts().size() == 3) {
             //Нефтеперегонка
@@ -326,6 +340,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[0] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Дизельное топливо - 30%
             result.add(new ProductionAboveAverage(
@@ -337,6 +352,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[1] * 0.30 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Мазут             - 35%
             result.add(new ProductionAboveAverage(
@@ -348,6 +364,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[2] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
         } else if (productRecipe.getResultProducts().size() == 4) {
             //Ректификация нефти
@@ -361,6 +378,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[0] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Бензин Регуляр-92 - 32%
             result.add(new ProductionAboveAverage(
@@ -372,6 +390,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[1] * 0.32 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Дизельное топливо - 23%
             result.add(new ProductionAboveAverage(
@@ -383,6 +402,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[2] * 0.23 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Мазут             - 10%
             result.add(new ProductionAboveAverage(
@@ -394,6 +414,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[3] * 0.10 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
         } else if (productRecipe.getResultProducts().size() == 5) {
             //Каталитический крекинг нефти
@@ -407,6 +428,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[0] * 0.07 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Бензин Премиум-95 - 35%
             result.add(new ProductionAboveAverage(
@@ -418,6 +440,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[1] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Бензин Регуляр-92 - 51%
             result.add(new ProductionAboveAverage(
@@ -429,6 +452,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[2] * 0.51 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Дизельное топливо - 6%
             result.add(new ProductionAboveAverage(
@@ -440,6 +464,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[3] * 0.06 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
             //Мазут             - 1%
             result.add(new ProductionAboveAverage(
@@ -451,6 +476,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[4] * 0.01 * 100.0) / 100.0
                     , materials
                     , techLvl
+                    , isOptimalForTop1
             ));
         } else {
             for (int i = 1; i < productRecipe.getResultProducts().size(); ++i) {
@@ -463,6 +489,7 @@ public final class ProductionAboveAverageParser {
                         , Math.round(exps / prodQuantity[i] * 100.0) / 100.0
                         , materials
                         , techLvl
+                        , isOptimalForTop1
                 ));
             }
         }

@@ -24,6 +24,8 @@ public final class ProductionAboveAverage {
     final private double techLvl;
     @SerializedName("ir")
     final private List<ProductRemain> ingredientsRemain;
+    @SerializedName("o4t1")
+    final private boolean isOptimalForTop1;
 
     public ProductionAboveAverage(final String manufactureID
             , final String specialization
@@ -33,6 +35,7 @@ public final class ProductionAboveAverage {
             , final double cost
             , final List<ProductRemain> ingredientsRemain
             , final double techLvl
+            , final boolean isOptimalForTop1
     ) {
         this.manufactureID = manufactureID;
         this.specialization = specialization;
@@ -42,6 +45,7 @@ public final class ProductionAboveAverage {
         this.cost = cost;
         this.ingredientsRemain = ingredientsRemain;
         this.techLvl = techLvl;
+        this.isOptimalForTop1 = isOptimalForTop1;
     }
 
     public String getManufactureID() {

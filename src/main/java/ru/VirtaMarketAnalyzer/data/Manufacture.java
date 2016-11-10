@@ -39,4 +39,8 @@ final public class Manufacture {
     public String getCaption() {
         return caption;
     }
+
+    public List<ManufactureSize> getSizes() {
+        return sizes;
+    }
 }

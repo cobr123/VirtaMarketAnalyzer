@@ -252,18 +252,18 @@ public final class Utils {
     }
 
     //максимальное кол-во работающих с заданной квалификацией на предприятиии для заданной квалификации игрока (топ-1)
-    public double calcMaxTop1(final double playerQuality, final double workersQuality) {
+    public static double calcMaxTop1(final double playerQuality, final double workersQuality) {
         final double workshopLoads = 50.0;
         return Math.floor(workshopLoads * 14.0 * playerQuality * playerQuality / Math.pow(1.4, workersQuality) / 5.0);
     }
 
     //квалификация игрока необходимая для данного уровня технологии
-    public double calcPlayerQualityForTech(final double techLvl) {
+    public static double calcPlayerQualityForTech(final double techLvl) {
         return Math.pow(2.72, Math.log(techLvl) / (1.0 / 3.0)) * 0.0064;
     }
 
     //квалификация рабочих необходимая для данного уровня технологии
-    public double calcWorkersQualityForTech(final double techLvl) {
+    public static double calcWorkersQualityForTech(final double techLvl) {
         return Math.pow(techLvl, 0.8);
     }
 }

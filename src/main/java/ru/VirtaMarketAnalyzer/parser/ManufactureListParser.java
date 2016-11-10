@@ -26,13 +26,13 @@ final public class ManufactureListParser {
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
-        logger.info(Utils.getPrettyGson(getManufactures(Wizard.host, "olga", "/main/common/main_page/game_info/industry/")));
+        logger.info(Utils.getPrettyGson(getManufactures(Wizard.host, "olga")));
 //        logger.info(Utils.getPrettyGson(getManufactureSizes(Wizard.host, "olga", "380079")));
     }
 
-    public static List<Manufacture> getManufactures(final String host, final String realm, final String path) throws IOException {
+    public static List<Manufacture> getManufactures(final String host, final String realm) throws IOException {
         final List<Manufacture> list = new ArrayList<>();
-        final Document doc = Downloader.getDoc(host + realm + path);
+        final Document doc = Downloader.getDoc(host + realm + "/main/common/main_page/game_info/industry/");
 
         final Elements rows = doc.select("table[class=\"list\"] > tbody > tr > td > a");
 
