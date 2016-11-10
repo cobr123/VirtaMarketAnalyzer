@@ -43,13 +43,13 @@ public final class Utils {
         logger.trace(path);
         Utils.writeToZip(path, obj);
         final File file = new File(path);
-        if(file.exists()){
+        if (file.exists()) {
             file.deleteOnExit();
         }
     }
 
     public static void writeToZip(final String path, final Object obj) throws IOException {
-        try(final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(path + ".zip")))) {
+        try (final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(path + ".zip")))) {
             final ZipEntry e = new ZipEntry(new File(path).getName());
             out.putNextEntry(e);
 
@@ -233,6 +233,7 @@ public final class Utils {
             return collection;
         }
     }
+
     private static <T, C extends Collection<T>> Stream<C> comb(
             List<? extends Collection<T>> values, int offset, Prefix<T> prefix,
             Supplier<C> supplier) {
@@ -242,10 +243,27 @@ public final class Utils {
         return values.get(offset).stream()
                 .flatMap(e -> comb(values, offset + 1, new Prefix<>(prefix, e), supplier));
     }
+
     public static <T, C extends Collection<T>> Stream<C> ofCombinations(
             Collection<? extends Collection<T>> values, Supplier<C> supplier) {
         if (values.isEmpty())
             return Stream.empty();
         return comb(new ArrayList<>(values), 0, null, supplier);
+    }
+
+    //максимальное кол-во работающих с заданной квалификацией на предприятиии для заданной квалификации игрока (топ-1)
+    public double calcMaxTop1(final double playerQuality, final double workersQuality) {
+        final double workshopLoads = 50.0;
+        return Math.floor(workshopLoads * 14.0 * playerQuality * playerQuality / Math.pow(1.4, workersQuality) / 5.0);
+    }
+
+    //квалификация игрока необходимая для данного уровня технологии
+    public double calcPlayerQualityForTech(final double techLvl) {
+        return Math.pow(2.72, Math.log(techLvl) / (1.0 / 3.0)) * 0.0064;
+    }
+
+    //квалификация рабочих необходимая для данного уровня технологии
+    public double calcWorkersQualityForTech(final double techLvl) {
+        return Math.pow(techLvl, 0.8);
     }
 }
