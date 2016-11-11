@@ -54,7 +54,7 @@ public final class ProductionAboveAverageParser {
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
         logger.info("calc");
 //        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes)));
-        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes, manufactures).size()));
+        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes, manufactures)));
 //        final long total = ProductInitParser.getManufactureProductCategories(host, realm)
 //                .stream()
 //                .mapToLong(pc -> {
@@ -168,20 +168,20 @@ public final class ProductionAboveAverageParser {
             , final double techLvl
             , final List<Manufacture> manufactures
     ) {
-        final double playerQuality = Utils.calcPlayerQualityForTech(techLvl);
-        final double workersQuality = Utils.calcWorkersQualityForTech(techLvl);
-        final double optimalTop1 = Utils.calcMaxTop1(playerQuality, workersQuality) * 0.75;
-        final boolean isOptimalForTop1 = manufactures.stream()
+//        final double playerQuality = Utils.calcPlayerQualityForTech(techLvl);
+//        final double workersQuality = Utils.calcWorkersQualityForTech(techLvl);
+//        final double optimalTop1 = Utils.calcMaxTop1(playerQuality, workersQuality) * 0.75;
+        final long maxWorkplacesCount = manufactures.stream()
                 .filter(m -> m.getId().equals(productRecipe.getManufactureID()))
-                .filter(m -> m.getSizes().stream().filter(s -> s.getWorkplacesCount() >= optimalTop1).findFirst().isPresent())
-                .findFirst()
-                .isPresent();
+                .mapToInt(m -> m.getSizes().stream().mapToInt(ManufactureSize::getWorkplacesCount).max().orElse(0))
+                .max()
+                .orElse(0);
 //        logger.info("materials.size() = {}", materials.size());
 //        logger.info("StreamEx.cartesianProduct = {}", StreamEx.cartesianProduct(materials).count());
         //оставляем по 3 лучших для каждого уровня технологии для каждого товара
         return StreamEx.cartesianProduct(materials)
                 .limit(100_000)
-                .map(mats -> calcResult(productRecipe, mats, techLvl, isOptimalForTop1))
+                .map(mats -> calcResult(productRecipe, mats, techLvl, maxWorkplacesCount))
                 .flatMap(Collection::stream)
                 .filter(paa -> paa.getQuality() > productHistory.getQuality())
                 .filter(paa -> paa.getProductID().equals(productHistory.getProductID()))
@@ -194,7 +194,7 @@ public final class ProductionAboveAverageParser {
             final ProductRecipe productRecipe,
             final List<ProductRemain> materials,
             final double techLvl,
-            final boolean isOptimalForTop1
+            final long maxWorkplacesCount
     ) {
         //logger.info("tech = {}", techLvl);
         final List<ProductionAboveAverage> result = new ArrayList<>(productRecipe.getResultProducts().size());
@@ -326,7 +326,7 @@ public final class ProductionAboveAverageParser {
                 , Math.round(exps / prodQuantity[0] * 100.0) / 100.0
                 , materials
                 , techLvl
-                , isOptimalForTop1
+                , maxWorkplacesCount
         ));
         if (productRecipe.getResultProducts().size() == 3) {
             //Нефтеперегонка
@@ -340,7 +340,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[0] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Дизельное топливо - 30%
             result.add(new ProductionAboveAverage(
@@ -352,7 +352,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[1] * 0.30 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Мазут             - 35%
             result.add(new ProductionAboveAverage(
@@ -364,7 +364,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[2] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
         } else if (productRecipe.getResultProducts().size() == 4) {
             //Ректификация нефти
@@ -378,7 +378,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[0] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Бензин Регуляр-92 - 32%
             result.add(new ProductionAboveAverage(
@@ -390,7 +390,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[1] * 0.32 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Дизельное топливо - 23%
             result.add(new ProductionAboveAverage(
@@ -402,7 +402,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[2] * 0.23 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Мазут             - 10%
             result.add(new ProductionAboveAverage(
@@ -414,7 +414,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[3] * 0.10 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
         } else if (productRecipe.getResultProducts().size() == 5) {
             //Каталитический крекинг нефти
@@ -428,7 +428,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[0] * 0.07 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Бензин Премиум-95 - 35%
             result.add(new ProductionAboveAverage(
@@ -440,7 +440,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[1] * 0.35 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Бензин Регуляр-92 - 51%
             result.add(new ProductionAboveAverage(
@@ -452,7 +452,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[2] * 0.51 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Дизельное топливо - 6%
             result.add(new ProductionAboveAverage(
@@ -464,7 +464,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[3] * 0.06 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
             //Мазут             - 1%
             result.add(new ProductionAboveAverage(
@@ -476,7 +476,7 @@ public final class ProductionAboveAverageParser {
                     , Math.round(exps / prodQuantity[4] * 0.01 * 100.0) / 100.0
                     , materials
                     , techLvl
-                    , isOptimalForTop1
+                    , maxWorkplacesCount
             ));
         } else {
             for (int i = 1; i < productRecipe.getResultProducts().size(); ++i) {
@@ -489,7 +489,7 @@ public final class ProductionAboveAverageParser {
                         , Math.round(exps / prodQuantity[i] * 100.0) / 100.0
                         , materials
                         , techLvl
-                        , isOptimalForTop1
+                        , maxWorkplacesCount
                 ));
             }
         }
