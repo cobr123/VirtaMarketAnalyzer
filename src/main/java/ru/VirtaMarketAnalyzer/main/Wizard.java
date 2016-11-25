@@ -72,6 +72,9 @@ public final class Wizard {
         //спрос на технологии без предложений
         final List<TechLicenseLvl> licenseAskWoBid = TechMarketAskParser.getLicenseAskWoBid(Wizard.host, realm);
         Utils.writeToGson(baseDir + "license_ask_wo_bid.json", licenseAskWoBid);
+        //цены на технологии
+        final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm);
+        Utils.writeToGson(baseDir + "technology_market.json", techLvls);
         //запоминаем дату обновления данных
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
