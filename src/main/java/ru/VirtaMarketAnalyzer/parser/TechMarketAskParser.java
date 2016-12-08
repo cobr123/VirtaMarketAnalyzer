@@ -187,10 +187,10 @@ final public class TechMarketAskParser {
                 Downloader.waitSecond(3);
                 continue;
             }
-            final Element footer = doc.select("div#footer").first();
+            final Element footer = doc.select("div.metro_footer").first();
             if (footer == null) {
                 Downloader.invalidateCache(url);
-                logger.error("На странице '" + url + "' не найден footer");
+                logger.error("На странице '" + url + "' не найден div.metro_footer");
                 Downloader.waitSecond(3);
                 continue;
             }
