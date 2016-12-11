@@ -170,6 +170,7 @@ public final class ServiceAtCityParser {
         });
 
         final double areaRent = rents.stream()
+                .filter(r -> r.getCityId().equalsIgnoreCase(city.getId()))
                 .filter(r -> r.getUnitTypeImgSrc().equalsIgnoreCase(service.getUnitTypeImgSrc()))
                 .findAny()
                 .get()
