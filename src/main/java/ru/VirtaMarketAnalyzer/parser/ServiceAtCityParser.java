@@ -26,7 +26,7 @@ public final class ServiceAtCityParser {
     public static void main(final String[] args) throws IOException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
-        final String realm = "vera";
+        final String realm = "olga";
         final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0);
         final List<City> cities = new ArrayList<>();
         cities.add(city);
@@ -35,7 +35,8 @@ public final class ServiceAtCityParser {
         final List<RawMaterial> rawMaterials = new ArrayList<>();
         specializations.add(new UnitTypeSpec("Фитнес", ProductInitParser.getTradingProduct(host, realm, "15337"), rawMaterials));
         final UnitType service = new UnitType("348207", "Фитнес-центр", "", specializations);
-        final List<ServiceAtCity> serviceAtCity = get(host, realm, cities, service, null);
+        final List<RentAtCity> rentAtCity = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
+        final List<ServiceAtCity> serviceAtCity = get(host, realm, cities, service, null,rentAtCity);
         logger.info(Utils.getPrettyGson(serviceAtCity));
 
 //        final List<UnitTypeSpec> specializations = new ArrayList<>();
@@ -132,6 +133,7 @@ public final class ServiceAtCityParser {
             , final UnitType service
             , final List<Region> regions
             , final Set<String> tradingProductsId
+            ,final List<RentAtCity> rents
     ) throws IOException {
         final String fullUrl = host + realm + "/main/globalreport/marketing/by_service/" + service.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId();
         final Document doc = Downloader.getDoc(fullUrl);
@@ -167,6 +169,12 @@ public final class ServiceAtCityParser {
             retailBySpec.put(spec.getCaption(), stat);
         });
 
+        final double areaRent = rents.stream()
+                .filter(r -> r.getUnitTypeImgSrc().equalsIgnoreCase(service.getUnitTypeImgSrc()))
+                .findAny()
+                .get()
+                .getAreaRent();
+
         return new ServiceAtCity(city.getCountryId()
                 , city.getRegionId()
                 , city.getId()
@@ -180,6 +188,7 @@ public final class ServiceAtCityParser {
                 , incomeTaxRate
                 , retailBySpec
                 , retailCalcBySpec
+                , areaRent
         );
     }
 
@@ -189,13 +198,14 @@ public final class ServiceAtCityParser {
             , final List<City> cities
             , final UnitType service
             , final List<Region> regions
+            ,final List<RentAtCity> rents
     ) throws IOException {
         //получаем список доступных розничных товаров
         final Set<String> tradingProductsId = ProductInitParser.getTradingProducts(host, realm).stream().map(Product::getId).collect(Collectors.toSet());
 
         return cities.parallelStream().map(city -> {
             try {
-                return get(host, realm, city, service, regions, tradingProductsId);
+                return get(host, realm, city, service, regions, tradingProductsId, rents);
             } catch (final IOException e) {
                 logger.error(e.getLocalizedMessage(), e);
             }

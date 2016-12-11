@@ -151,6 +151,9 @@ public final class Wizard {
         Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
         logger.info("service_unit_types.size() = {}, realm = {}", unitTypes.size(), realm);
         saveUnitTypeImg(unitTypes);
+        logger.info("собираем данные о стоимости аренды в городах");
+        final List<RentAtCity> rents = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
+        Utils.writeToGson(baseDir + "rent.json", rents);
 
         final Calendar today = Calendar.getInstance();
         if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
@@ -194,11 +197,11 @@ public final class Wizard {
         }
         logger.info("группируем данные о сервисах по городам");
         for (final UnitType ut : unitTypes) {
-            final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut, regions);
+            final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut, regions, rents);
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + ".json", serviceAtCity);
         }
         for (final UnitType ut : unitTypes_en) {
-            final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities_en, ut, regions_en);
+            final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities_en, ut, regions_en, rents);
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
         }
         logger.info("запоминаем дату обновления данных");

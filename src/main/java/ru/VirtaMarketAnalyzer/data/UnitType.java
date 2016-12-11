@@ -16,8 +16,9 @@ public final class UnitType {
     final private String imgUrl;
     @SerializedName("s")
     final private List<UnitTypeSpec> specializations;
+    private String unitTypeImgSrc;
 
-    public UnitType(final String id,final String caption,final String imgUrl,final List<UnitTypeSpec> specializations) {
+    public UnitType(final String id, final String caption, final String imgUrl, final List<UnitTypeSpec> specializations) {
         this.id = id;
         this.caption = caption;
         this.imgUrl = imgUrl;
@@ -38,5 +39,15 @@ public final class UnitType {
 
     public List<UnitTypeSpec> getSpecializations() {
         return specializations;
+    }
+
+    public String getUnitTypeImgSrc() {
+        if (imgUrl.equalsIgnoreCase("/img/unit_types/restaurant.gif")) {
+            return imgUrl;
+        } else if (imgUrl.equalsIgnoreCase("/img/unit_types/repair.gif")) {
+            return imgUrl;
+        } else {
+            return "/img/unit_types/service_light.gif";
+        }
     }
 }
