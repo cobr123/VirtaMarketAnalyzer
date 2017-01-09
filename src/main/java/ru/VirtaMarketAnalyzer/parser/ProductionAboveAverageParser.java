@@ -329,9 +329,9 @@ public final class ProductionAboveAverageParser {
                 , materials
                 , techLvl
                 , maxWorkplacesCount
-                , productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
+                , !productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[0] / prodQual[0])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[0] / prodQual[0])
         ));
         if (productRecipe.getResultProducts().size() == 3) {
             //Нефтеперегонка
@@ -346,9 +346,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[0] / prodQual[0])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[0] / prodQual[0])
             ));
             //Дизельное топливо - 30%
             result.add(new ProductionAboveAverage(
@@ -361,9 +361,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(1).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(1).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[1] / prodQual[1])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[1] / prodQual[1])
             ));
             //Мазут             - 35%
             result.add(new ProductionAboveAverage(
@@ -376,9 +376,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(2).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(2).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[2] / prodQual[2])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[2] / prodQual[2])
             ));
         } else if (productRecipe.getResultProducts().size() == 4) {
             //Ректификация нефти
@@ -393,9 +393,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[0] / prodQual[0])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[0] / prodQual[0])
             ));
             //Бензин Регуляр-92 - 32%
             result.add(new ProductionAboveAverage(
@@ -408,9 +408,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(1).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(1).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[1] / prodQual[1])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[1] / prodQual[1])
             ));
             //Дизельное топливо - 23%
             result.add(new ProductionAboveAverage(
@@ -423,9 +423,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(2).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(2).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[2] / prodQual[2])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[2] / prodQual[2])
             ));
             //Мазут             - 10%
             result.add(new ProductionAboveAverage(
@@ -438,9 +438,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(3).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(3).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[3] / prodQual[3])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[3] / prodQual[3])
             ));
         } else if (productRecipe.getResultProducts().size() == 5) {
             //Каталитический крекинг нефти
@@ -455,9 +455,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[0] / prodQual[0])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[0] / prodQual[0])
             ));
             //Бензин Премиум-95 - 35%
             result.add(new ProductionAboveAverage(
@@ -470,9 +470,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(1).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(1).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[1] / prodQual[1])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[1] / prodQual[1])
             ));
             //Бензин Регуляр-92 - 51%
             result.add(new ProductionAboveAverage(
@@ -485,9 +485,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(2).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(2).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[2] / prodQual[2])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[2] / prodQual[2])
             ));
             //Дизельное топливо - 6%
             result.add(new ProductionAboveAverage(
@@ -500,9 +500,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(3).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(3).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[3] / prodQual[3])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[3] / prodQual[3])
             ));
             //Мазут             - 1%
             result.add(new ProductionAboveAverage(
@@ -515,9 +515,9 @@ public final class ProductionAboveAverageParser {
                     , materials
                     , techLvl
                     , maxWorkplacesCount
-                    , productRemains.getOrDefault(productRecipe.getResultProducts().get(4).getProductID(), new ArrayList<>())
+                    , !productRemains.getOrDefault(productRecipe.getResultProducts().get(4).getProductID(), new ArrayList<>())
                     .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[4] / prodQual[4])
+                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[4] / prodQual[4])
             ));
         } else {
             for (int i = 1; i < productRecipe.getResultProducts().size(); ++i) {
@@ -532,9 +532,9 @@ public final class ProductionAboveAverageParser {
                         , materials
                         , techLvl
                         , maxWorkplacesCount
-                        , productRemains.getOrDefault(productRecipe.getResultProducts().get(tmpIdx).getProductID(), new ArrayList<>())
+                        , !productRemains.getOrDefault(productRecipe.getResultProducts().get(tmpIdx).getProductID(), new ArrayList<>())
                         .stream()
-                        .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() > exps / prodQuantity[tmpIdx] / prodQual[tmpIdx])
+                        .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[tmpIdx] / prodQual[tmpIdx])
                 ));
             }
         }
