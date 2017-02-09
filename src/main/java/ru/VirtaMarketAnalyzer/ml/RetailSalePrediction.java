@@ -11,10 +11,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.HistAnalytExclStrat;
-import ru.VirtaMarketAnalyzer.data.Product;
-import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
-import ru.VirtaMarketAnalyzer.data.UpdateDate;
+import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
@@ -34,6 +31,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by cobr123 on 15.01.2016.
@@ -55,6 +55,7 @@ public final class RetailSalePrediction {
     };
     public static final String[] words = new String[]{"около", "более"};
     public static final String RETAIL_ANALYTICS_ = "retail_analytics_";
+    public static final String TRADE_AT_CITY_ = "tradeAtCity_";
     public static final String RETAIL_ANALYTICS_HIST = "retail_analytics_hist";
     public static final String WEKA = "weka";
 
@@ -101,10 +102,55 @@ public final class RetailSalePrediction {
                 }
             }
         }
-        return set.stream().collect(Collectors.toList());
+        return set.stream().collect(toList());
     }
 
-    public static void createCommonPrediction() throws IOException, GitAPIException {
+    public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
+        final Set<TradeAtCity> set = new HashSet<>();
+        getAllVersions(fileNameStartWith, realm)
+                .forEach(fileVersion -> {
+                    try {
+                        final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
+                        for (final TradeAtCity ra : arr) {
+                            if(ra.getProductId() != null) {
+                                ra.setDate(fileVersion.getDate());
+                                set.add(ra);
+                            }
+                        }
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                    }
+                });
+        return set;
+    }
+    public static Stream<FileVersion> getAllVersions(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
+        final File dir = new File(GitHubPublisher.localPath + Wizard.by_trade_at_cities + File.separator);
+        final Git git = GitHubPublisher.getRepo();
+        logger.trace("dir = {}", dir.getAbsoluteFile());
+        if (dir.listFiles() == null) {
+            return Stream.empty();
+        }
+
+        return Stream.of(dir.listFiles())
+                .filter(File::isDirectory)
+                .map(File::listFiles)
+                .flatMap(Stream::of)
+                .filter(File::isFile)
+                .filter(f -> f.getName().startsWith(fileNameStartWith))
+                .map(file -> {
+                    try {
+                        return GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realm + "/" + file.getName());
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                ;
+    }
+
+    public static Set<RetailAnalytics> getAllRetailAnalytics() throws IOException, GitAPIException {
         final Set<RetailAnalytics> set = new HashSet<>();
         final File dir = new File(GitHubPublisher.localPath + Wizard.by_trade_at_cities + File.separator);
         final Git git = GitHubPublisher.getRepo();
@@ -115,13 +161,14 @@ public final class RetailSalePrediction {
             if (realmDir.isDirectory()) {
                 for (final File file : realmDir.listFiles()) {
                     if (file.isFile() && file.getName().startsWith(RETAIL_ANALYTICS_)) {
-                        final List<String> list = GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realmDir.getName() + "/" + file.getName());
+                        final List<FileVersion> list = GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realmDir.getName() + "/" + file.getName());
                         final String productId = Utils.getLastBySep(FilenameUtils.removeExtension(file.getName()), "_");
                         final Product product = products.stream().filter(p -> p.getId().equals(productId)).findFirst().get();
-                        for (final String str : list) {
+                        for (final FileVersion fileVersion : list) {
                             try {
-                                final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(str, RetailAnalytics[].class);
+                                final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), RetailAnalytics[].class);
                                 for (final RetailAnalytics ra : arr) {
+                                    ra.setDate(fileVersion.getDate());
                                     //раньше посетители были числом, теперь как объем продаж, например "менее 50"
                                     if (ra.getVisitorsCount().contains(" ")) {
                                         set.add(RetailAnalytics.fillProductId(product.getId(), product.getProductCategory(), ra));
@@ -135,7 +182,11 @@ public final class RetailSalePrediction {
                 }
             }
         }
+        return set;
+    }
 
+    public static void createCommonPrediction() throws IOException, GitAPIException {
+        final Set<RetailAnalytics> set = getAllRetailAnalytics();
         logger.info("set.size() = " + set.size());
 
         if (!set.isEmpty()) {
