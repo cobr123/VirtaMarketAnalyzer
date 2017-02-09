@@ -3,6 +3,7 @@ package ru.VirtaMarketAnalyzer.data;
 import com.google.gson.annotations.SerializedName;
 import ru.VirtaMarketAnalyzer.main.Utils;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -71,6 +72,7 @@ public final class TradeAtCity {
     final private double percentMarketVolumeSumTotal;
 
     final private transient List<MajorSellInCity> majorSellInCityList;
+    transient private Date date;
 
     public TradeAtCity(
             final String countryId
@@ -238,5 +240,21 @@ public final class TradeAtCity {
 
     public double getShopMarketVolumeSumTotal() {
         return shopMarketVolumeSumTotal;
+    }
+
+    public double getPercentMarketVolumeSum() {
+        return percentMarketVolumeSum;
+    }
+
+    public double getPercentMarketVolumeSumTotal() {
+        return percentMarketVolumeSumTotal;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(final Date date) {
+        this.date = date;
     }
 }

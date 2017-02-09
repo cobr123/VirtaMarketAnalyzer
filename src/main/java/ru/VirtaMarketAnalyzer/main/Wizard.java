@@ -19,6 +19,10 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
+import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
 
 /**
  * Created by cobr123 on 25.04.2015.
@@ -32,6 +36,7 @@ public final class Wizard {
     public static final String by_service = "by_service";
     public static final String countrydutylist = "countrydutylist";
     public static final String tech = "tech";
+    public static final String retail_trends = "retail_trends";
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
@@ -105,7 +110,7 @@ public final class Wizard {
                 });
     }
 
-    public static void collectToJsonTradeAtCities(final String realm) throws IOException {
+    public static void collectToJsonTradeAtCities(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
 
@@ -209,6 +214,30 @@ public final class Wizard {
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
+        //logger.info("обновляем тренды");
+        //updateAllRetailTrends(realm);
+    }
+
+    public static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
+        final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
+        final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
+        logger.info("updateAllRetailAnalytics.size() = {}", set.size());
+
+        //группируем аналитику по товарам и сохраняем
+        final Map<String, List<TradeAtCity>> tradeAtCityByProduct = set.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(TradeAtCity::getProductId));
+
+        for (final Map.Entry<String, List<TradeAtCity>> entry : tradeAtCityByProduct.entrySet()) {
+            final String fileNamePath = baseDir + retail_trends + File.separator + entry.getKey() + ".json";
+            Utils.writeToGsonZip(fileNamePath, getRetailTrends(entry.getValue()));
+        }
+    }
+
+    private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
+        return list.stream()
+                .map(RetailTrend::new)
+                .collect(toList());
     }
 
     public static void collectToJsonIndustries(final String realm) throws IOException {

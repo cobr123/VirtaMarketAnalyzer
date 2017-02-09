@@ -5,6 +5,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import ru.VirtaMarketAnalyzer.main.Utils;
 
+import java.util.Date;
+
 /**
  * Created by cobr123 on 16.01.16.
  */
@@ -52,6 +54,7 @@ public final class RetailAnalytics {
     @SerializedName("lq")
     final private double localQuality;
     transient final private long sellVolumeAsNumber;
+    transient private Date date;
 
     public RetailAnalytics(final String productId, final String productCategory, final int shopSize, final String townDistrict, final int departmentCount,
                            final double notoriety, final String visitorsCount, final String serviceLevel,
@@ -120,6 +123,7 @@ public final class RetailAnalytics {
         this.localPrice = ra.localPrice;
         this.localQuality = ra.localQuality;
         this.sellVolumeAsNumber = calcSellVolumeAsNumber();
+        this.date = ra.date;
     }
 
     public static RetailAnalytics fillProductId(final String productId, final String productCategory, final RetailAnalytics ra) {
@@ -128,6 +132,10 @@ public final class RetailAnalytics {
         } else {
             return ra;
         }
+    }
+
+    public void setDate(final Date date) {
+        this.date = date;
     }
 
     @Override
