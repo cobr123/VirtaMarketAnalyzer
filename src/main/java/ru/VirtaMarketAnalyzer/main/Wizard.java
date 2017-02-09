@@ -214,8 +214,8 @@ public final class Wizard {
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
-        //logger.info("обновляем тренды");
-        //updateAllRetailTrends(realm);
+        logger.info("обновляем тренды");
+        updateAllRetailTrends(realm);
     }
 
     public static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
