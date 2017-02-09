@@ -49,7 +49,8 @@ public final class Utils {
     }
 
     public static void writeToZip(final String path, final Object obj) throws IOException {
-        try (final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(new File(path + ".zip")))) {
+        final File file = Utils.mkdirs(path+ ".zip");
+        try (final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file))) {
             final ZipEntry e = new ZipEntry(new File(path).getName());
             out.putNextEntry(e);
 
