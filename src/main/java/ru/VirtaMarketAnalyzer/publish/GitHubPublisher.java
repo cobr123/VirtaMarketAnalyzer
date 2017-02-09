@@ -23,6 +23,7 @@ import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.data.FileVersion;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
@@ -69,18 +70,21 @@ final public class GitHubPublisher {
         git.close();
     }
 
-    public static List<String> getAllVersions(final Git git, final String file) throws IOException, GitAPIException {
-        final List<String> list = new ArrayList<>();
+    public static List<FileVersion> getAllVersions(final Git git, final String file) throws IOException, GitAPIException {
+        final List<FileVersion> list = new ArrayList<>();
         final Iterable<RevCommit> logs = git.log()
                 .add(git.getRepository().resolve(Constants.HEAD))
                 .addPath(file)
                 .call();
         logger.trace("file = {}", file);
         for (final RevCommit rev : logs) {
-            logger.trace("Commit: {}, name: {}, id: {}", rev, rev.getName(), rev.getId().getName());
-            final ByteArrayOutputStream os = new ByteArrayOutputStream();
-            getFileFromCommit(os, file, git.getRepository(), rev.getTree());
-            list.add(os.toString("UTF-8"));
+            try(final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                logger.trace("Commit: {}, name: {}, id: {}", rev, rev.getName(), rev.getId().getName());
+                getFileFromCommit(os, file, git.getRepository(), rev.getTree());
+                list.add(new FileVersion(rev.getAuthorIdent().getWhen(), os.toString("UTF-8")));
+            } catch (final Exception e) {
+                logger.error(e.getLocalizedMessage(), e);
+            }
         }
         logger.trace("logs.count = {}", list.size());
         return list;
@@ -184,21 +188,21 @@ final public class GitHubPublisher {
 
     public static void testGetAllVersions() throws IOException, GitAPIException {
         final Git git = getRepo();
-        final List<String> list = getAllVersions(git, Wizard.by_trade_at_cities + "/" + "olga" + "/" + "retail_analytics_380000.json");
+        final List<FileVersion> list = getAllVersions(git, Wizard.by_trade_at_cities + "/" + "olga" + "/" + "retail_analytics_380000.json");
         logger.info("getAllVersions.size = {}", list.size());
         final Set<RetailAnalytics> set = new HashSet<>();
 
-        for (String file : list) {
+        for (final FileVersion fileVersion : list) {
             try {
-                logger.info(file);
-                final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(file, RetailAnalytics[].class);
-                logger.info(arr.length + "");
+                logger.info(fileVersion.getContent());
+                final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), RetailAnalytics[].class);
+                logger.info("RetailAnalytics[].length = {}", arr.length);
                 Collections.addAll(set, arr);
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
         }
-        logger.info(set.size() + "");
+        logger.info("Set<RetailAnalytics>.size = {}", set.size());
     }
 
     public static void main(String[] args) throws IOException, GitAPIException {
