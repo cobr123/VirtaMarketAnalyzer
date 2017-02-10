@@ -246,7 +246,7 @@ public final class Wizard {
                                 (f1.getShopPrice() + f2.getShopPrice()) / 2.0,
                                 (f1.getShopQuality() + f2.getShopQuality()) / 2.0,
                                 f1.getDate(),
-                                (f1.getVolume() + f2.getVolume()) / 2,
+                                f1.getVolume() + f2.getVolume(),
                                 (f1.getLocalMarketVolumeSum() + f2.getLocalMarketVolumeSum()) / 2.0,
                                 (f1.getShopMarketVolumeSum() + f2.getShopMarketVolumeSum()) / 2.0,
                                 (f1.getLocalMarketVolumeSumTotal() + f2.getLocalMarketVolumeSumTotal()) / 2.0,
