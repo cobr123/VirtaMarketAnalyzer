@@ -236,8 +236,26 @@ public final class Wizard {
 
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
         return list.stream()
-                .map(RetailTrend::new)
-                .collect(toList());
+                .collect(Collectors.groupingBy(TradeAtCity::getDate))
+                .entrySet().stream()
+                .map(e -> e.getValue().stream()
+                        .map(RetailTrend::new)
+                        .reduce((f1, f2) -> new RetailTrend(
+                                (f1.getLocalPrice() + f2.getLocalPrice()) / 2.0,
+                                (f1.getLocalQuality() + f2.getLocalQuality()) / 2.0,
+                                (f1.getShopPrice() + f2.getShopPrice()) / 2.0,
+                                (f1.getShopQuality() + f2.getShopQuality()) / 2.0,
+                                f1.getDate(),
+                                (f1.getVolume() + f2.getVolume()) / 2,
+                                (f1.getLocalMarketVolumeSum() + f2.getLocalMarketVolumeSum()) / 2.0,
+                                (f1.getShopMarketVolumeSum() + f2.getShopMarketVolumeSum()) / 2.0,
+                                (f1.getLocalMarketVolumeSumTotal() + f2.getLocalMarketVolumeSumTotal()) / 2.0,
+                                (f1.getShopMarketVolumeSumTotal() + f2.getShopMarketVolumeSumTotal()) / 2.0,
+                                (f1.getPercentMarketVolumeSum() + f2.getPercentMarketVolumeSum()) / 2.0,
+                                (f1.getPercentMarketVolumeSumTotal() + f2.getPercentMarketVolumeSumTotal()) / 2.0
+                        )))
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     public static void collectToJsonIndustries(final String realm) throws IOException {

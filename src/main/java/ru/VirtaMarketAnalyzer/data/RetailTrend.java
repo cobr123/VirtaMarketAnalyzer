@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public final class RetailTrend {
     @SerializedName("d")
-    private String date;
+    final private String date;
     @SerializedName("lpr")
     final private double localPrice;
     @SerializedName("lq")
@@ -41,7 +41,64 @@ public final class RetailTrend {
     @SerializedName("pmvst")
     final private double percentMarketVolumeSumTotal;
 
-    public RetailTrend(final TradeAtCity tac){
+    final static transient DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+
+    public RetailTrend(
+            final double localPrice,
+            final double localQuality,
+            final double shopPrice,
+            final double shopQuality,
+            final Date date,
+            final long volume,
+            final double localMarketVolumeSum,
+            final double shopMarketVolumeSum,
+            final double localMarketVolumeSumTotal,
+            final double shopMarketVolumeSumTotal,
+            final double percentMarketVolumeSum,
+            final double percentMarketVolumeSumTotal
+    ) {
+        this.date = dateFormat.format(date);
+        this.localPrice = localPrice;
+        this.localQuality = localQuality;
+        this.shopPrice = shopPrice;
+        this.shopQuality = shopQuality;
+        this.volume = volume;
+        this.localMarketVolumeSum = localMarketVolumeSum;
+        this.shopMarketVolumeSum = shopMarketVolumeSum;
+        this.localMarketVolumeSumTotal = localMarketVolumeSumTotal;
+        this.shopMarketVolumeSumTotal = shopMarketVolumeSumTotal;
+        this.percentMarketVolumeSum = percentMarketVolumeSum;
+        this.percentMarketVolumeSumTotal = percentMarketVolumeSumTotal;
+    }
+    public RetailTrend(
+            final double localPrice,
+            final double localQuality,
+            final double shopPrice,
+            final double shopQuality,
+            final String date,
+            final long volume,
+            final double localMarketVolumeSum,
+            final double shopMarketVolumeSum,
+            final double localMarketVolumeSumTotal,
+            final double shopMarketVolumeSumTotal,
+            final double percentMarketVolumeSum,
+            final double percentMarketVolumeSumTotal
+    ) {
+        this.date = date;
+        this.localPrice = localPrice;
+        this.localQuality = localQuality;
+        this.shopPrice = shopPrice;
+        this.shopQuality = shopQuality;
+        this.volume = volume;
+        this.localMarketVolumeSum = localMarketVolumeSum;
+        this.shopMarketVolumeSum = shopMarketVolumeSum;
+        this.localMarketVolumeSumTotal = localMarketVolumeSumTotal;
+        this.shopMarketVolumeSumTotal = shopMarketVolumeSumTotal;
+        this.percentMarketVolumeSum = percentMarketVolumeSum;
+        this.percentMarketVolumeSumTotal = percentMarketVolumeSumTotal;
+    }
+
+    public RetailTrend(final TradeAtCity tac) {
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         this.date = df.format(tac.getDate());
         this.localPrice = tac.getLocalPrice();
@@ -75,5 +132,33 @@ public final class RetailTrend {
 
     public long getVolume() {
         return volume;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public double getLocalMarketVolumeSum() {
+        return localMarketVolumeSum;
+    }
+
+    public double getShopMarketVolumeSum() {
+        return shopMarketVolumeSum;
+    }
+
+    public double getLocalMarketVolumeSumTotal() {
+        return localMarketVolumeSumTotal;
+    }
+
+    public double getShopMarketVolumeSumTotal() {
+        return shopMarketVolumeSumTotal;
+    }
+
+    public double getPercentMarketVolumeSum() {
+        return percentMarketVolumeSum;
+    }
+
+    public double getPercentMarketVolumeSumTotal() {
+        return percentMarketVolumeSumTotal;
     }
 }
