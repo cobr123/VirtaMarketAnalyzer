@@ -293,7 +293,8 @@ public final class ShopParser {
                 return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
                         visitorsCount, serviceLevel, shopProducts);
             } else {
-                throw new Exception("Неизвестный тип юнита");
+                logger.error("Неизвестный тип юнита, infoRowCnt = {}, url = {}. Возможно еще идет пересчет.", infoRowCnt, url);
+                return null;
             }
         } catch (final Exception e) {
             logger.error("url = {}", url);
