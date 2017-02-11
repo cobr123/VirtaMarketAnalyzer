@@ -236,7 +236,7 @@ public final class Wizard {
 
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
         return list.stream()
-                .collect(Collectors.groupingBy(TradeAtCity::getDate))
+                .collect(Collectors.groupingBy((tac) -> RetailTrend.dateFormat.format(tac.getDate())))
                 .entrySet().stream()
                 .map(e -> e.getValue().stream()
                         .map(RetailTrend::new)
@@ -255,6 +255,7 @@ public final class Wizard {
                                 (f1.getPercentMarketVolumeSumTotal() + f2.getPercentMarketVolumeSumTotal()) / 2.0
                         )))
                 .map(Optional::get)
+                .sorted(Comparator.comparing(RetailTrend::getDate))
                 .collect(Collectors.toList());
     }
 

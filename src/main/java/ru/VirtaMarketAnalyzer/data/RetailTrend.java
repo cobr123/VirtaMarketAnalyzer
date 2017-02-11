@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public final class RetailTrend {
     @SerializedName("d")
-    final private String date;
+    final private String dateStr;
     @SerializedName("lpr")
     final private double localPrice;
     @SerializedName("lq")
@@ -41,7 +41,8 @@ public final class RetailTrend {
     @SerializedName("pmvst")
     final private double percentMarketVolumeSumTotal;
 
-    final static transient DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+    final private transient Date date;
+    final public static transient DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     public RetailTrend(
             final double localPrice,
@@ -57,34 +58,8 @@ public final class RetailTrend {
             final double percentMarketVolumeSum,
             final double percentMarketVolumeSumTotal
     ) {
-        this.date = dateFormat.format(date);
-        this.localPrice = localPrice;
-        this.localQuality = localQuality;
-        this.shopPrice = shopPrice;
-        this.shopQuality = shopQuality;
-        this.volume = volume;
-        this.localMarketVolumeSum = localMarketVolumeSum;
-        this.shopMarketVolumeSum = shopMarketVolumeSum;
-        this.localMarketVolumeSumTotal = localMarketVolumeSumTotal;
-        this.shopMarketVolumeSumTotal = shopMarketVolumeSumTotal;
-        this.percentMarketVolumeSum = percentMarketVolumeSum;
-        this.percentMarketVolumeSumTotal = percentMarketVolumeSumTotal;
-    }
-    public RetailTrend(
-            final double localPrice,
-            final double localQuality,
-            final double shopPrice,
-            final double shopQuality,
-            final String date,
-            final long volume,
-            final double localMarketVolumeSum,
-            final double shopMarketVolumeSum,
-            final double localMarketVolumeSumTotal,
-            final double shopMarketVolumeSumTotal,
-            final double percentMarketVolumeSum,
-            final double percentMarketVolumeSumTotal
-    ) {
         this.date = date;
+        this.dateStr = dateFormat.format(date);
         this.localPrice = localPrice;
         this.localQuality = localQuality;
         this.shopPrice = shopPrice;
@@ -99,8 +74,8 @@ public final class RetailTrend {
     }
 
     public RetailTrend(final TradeAtCity tac) {
-        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
-        this.date = df.format(tac.getDate());
+        this.date = tac.getDate();
+        this.dateStr = dateFormat.format(tac.getDate());
         this.localPrice = tac.getLocalPrice();
         this.localQuality = tac.getLocalQuality();
         this.shopPrice = tac.getShopPrice();
@@ -134,7 +109,7 @@ public final class RetailTrend {
         return volume;
     }
 
-    public String getDate() {
+    public Date getDate() {
         return date;
     }
 
