@@ -21,7 +21,7 @@ public final class RetailTrend {
     @SerializedName("sq")
     final private double shopQuality;
     @SerializedName("v")
-    final private long volume;
+    final private double volume;
     //Емкость рынка (по этому товару в городе)
     @SerializedName("lmvs")
     final private double localMarketVolumeSum;
@@ -42,6 +42,7 @@ public final class RetailTrend {
     final private double percentMarketVolumeSumTotal;
 
     final private transient Date date;
+    final private transient double weigh;
     final public static transient DateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
 
     public RetailTrend(
@@ -50,7 +51,8 @@ public final class RetailTrend {
             final double shopPrice,
             final double shopQuality,
             final Date date,
-            final long volume,
+            final double volume,
+            final double weigh,
             final double localMarketVolumeSum,
             final double shopMarketVolumeSum,
             final double localMarketVolumeSumTotal,
@@ -65,6 +67,7 @@ public final class RetailTrend {
         this.shopPrice = shopPrice;
         this.shopQuality = shopQuality;
         this.volume = volume;
+        this.weigh = weigh;
         this.localMarketVolumeSum = localMarketVolumeSum;
         this.shopMarketVolumeSum = shopMarketVolumeSum;
         this.localMarketVolumeSumTotal = localMarketVolumeSumTotal;
@@ -81,6 +84,7 @@ public final class RetailTrend {
         this.shopPrice = tac.getShopPrice();
         this.shopQuality = tac.getShopQuality();
         this.volume = tac.getVolume();
+        this.weigh = tac.getVolume();
         this.localMarketVolumeSum = tac.getLocalMarketVolumeSum();
         this.localMarketVolumeSumTotal = tac.getLocalMarketVolumeSumTotal();
         this.shopMarketVolumeSum = tac.getShopMarketVolumeSum();
@@ -105,7 +109,11 @@ public final class RetailTrend {
         return shopQuality;
     }
 
-    public long getVolume() {
+    public double getWeigh() {
+        return weigh;
+    }
+
+    public double getVolume() {
         return volume;
     }
 

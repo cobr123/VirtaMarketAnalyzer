@@ -220,8 +220,8 @@ public final class Utils {
     public static double getWeighed(
             final double price1,
             final double price2,
-            final long volume1,
-            final long volume2
+            final double volume1,
+            final double volume2
     ) {
         return (price1 * volume1 + price2 * volume2) / (volume1 + volume2);
     }
