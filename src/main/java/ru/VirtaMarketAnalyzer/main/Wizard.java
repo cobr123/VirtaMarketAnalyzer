@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.VirtaMarketAnalyzer.main.Utils.getWeighed;
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
 
 /**
@@ -233,31 +232,36 @@ public final class Wizard {
             Utils.writeToGsonZip(fileNamePath, getRetailTrends(entry.getValue()));
         }
     }
-
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
         return list.stream()
                 .collect(Collectors.groupingBy((tac) -> RetailTrend.dateFormat.format(tac.getDate())))
                 .entrySet().stream()
-                .map(e -> e.getValue().parallelStream()
-                        .map(RetailTrend::new)
-                        .reduce((f1, f2) -> new RetailTrend(
-                                getWeighed(f1.getLocalPrice(), f2.getLocalPrice(), f1.getWeigh(), f2.getWeigh()),
-                                getWeighed(f1.getLocalQuality(), f2.getLocalQuality(), f1.getWeigh(), f2.getWeigh()),
-                                getWeighed(f1.getShopPrice(), f2.getShopPrice(), f1.getWeigh(), f2.getWeigh()),
-                                getWeighed(f1.getShopQuality(), f2.getShopQuality(), f1.getWeigh(), f2.getWeigh()),
-                                f1.getDate(),
-                                f1.getVolume() + f2.getVolume(),
-                                (f1.getWeigh() + f2.getWeigh()) / 2.0,
-                                (f1.getLocalMarketVolumeSum() + f2.getLocalMarketVolumeSum()) / 2.0,
-                                (f1.getShopMarketVolumeSum() + f2.getShopMarketVolumeSum()) / 2.0,
-                                (f1.getLocalMarketVolumeSumTotal() + f2.getLocalMarketVolumeSumTotal()) / 2.0,
-                                (f1.getShopMarketVolumeSumTotal() + f2.getShopMarketVolumeSumTotal()) / 2.0,
-                                (f1.getPercentMarketVolumeSum() + f2.getPercentMarketVolumeSum()) / 2.0,
-                                (f1.getPercentMarketVolumeSumTotal() + f2.getPercentMarketVolumeSumTotal()) / 2.0
-                        )))
-                .map(Optional::get)
+                .map(e -> getWeighedRetailTrend(e.getValue()))
                 .sorted(Comparator.comparing(RetailTrend::getDate))
                 .collect(Collectors.toList());
+    }
+    private static RetailTrend getWeighedRetailTrend(final List<TradeAtCity> tradeAtCityList){
+        //данные по одному продукту на одну дату
+        final Date date = tradeAtCityList.get(0).getDate();
+        final double volume = tradeAtCityList.stream().mapToDouble(tac -> tac.getVolume()).sum();
+        //=SUMPRODUCT(A2:A3,B2:B3)/SUM(B2:B3)
+        final double localPrice = tradeAtCityList.stream()
+                .mapToDouble(tac -> tac.getLocalPrice() * tac.getVolume() / volume).sum();
+        final double localQuality = tradeAtCityList.stream()
+                .mapToDouble(tac -> tac.getLocalQuality() * tac.getVolume() / volume).sum();
+        final double shopPrice = tradeAtCityList.stream()
+                .mapToDouble(tac -> tac.getShopPrice() * tac.getVolume() / volume).sum();
+        final double shopQuality = tradeAtCityList.stream()
+                .mapToDouble(tac -> tac.getShopQuality() * tac.getVolume() / volume).sum();
+
+        return new RetailTrend(
+                localPrice,
+                localQuality,
+                shopPrice,
+                shopQuality,
+                date,
+                volume
+        );
     }
 
     public static void collectToJsonIndustries(final String realm) throws IOException {

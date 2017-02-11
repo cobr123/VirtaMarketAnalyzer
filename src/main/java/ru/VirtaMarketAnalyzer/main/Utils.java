@@ -217,16 +217,6 @@ public final class Utils {
         return Math.round(num * 100.0) / 100.0;
     }
 
-    public static double getWeighed(
-            final double price1,
-            final double price2,
-            final double volume1,
-            final double volume2
-    ) {
-        return (price1 * volume1 + price2 * volume2) / (volume1 + volume2);
-    }
-
-
     private static class Prefix<T> {
         final T value;
         final Prefix<T> parent;
