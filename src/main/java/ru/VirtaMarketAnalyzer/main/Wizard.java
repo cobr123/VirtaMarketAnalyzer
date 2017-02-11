@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
+import static ru.VirtaMarketAnalyzer.main.Utils.getWeighed;
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
 
 /**
@@ -241,10 +241,10 @@ public final class Wizard {
                 .map(e -> e.getValue().stream()
                         .map(RetailTrend::new)
                         .reduce((f1, f2) -> new RetailTrend(
-                                (f1.getLocalPrice() + f2.getLocalPrice()) / 2.0,
-                                (f1.getLocalQuality() + f2.getLocalQuality()) / 2.0,
-                                (f1.getShopPrice() + f2.getShopPrice()) / 2.0,
-                                (f1.getShopQuality() + f2.getShopQuality()) / 2.0,
+                                getWeighed(f1.getLocalPrice(), f2.getLocalPrice(), f1.getVolume(), f2.getVolume()) / 2.0,
+                                getWeighed(f1.getLocalQuality(), f2.getLocalQuality(), f1.getVolume(), f2.getVolume()) / 2.0,
+                                getWeighed(f1.getShopPrice(), f2.getShopPrice(), f1.getVolume(), f2.getVolume()) / 2.0,
+                                getWeighed(f1.getShopQuality(), f2.getShopQuality(), f1.getVolume(), f2.getVolume()) / 2.0,
                                 f1.getDate(),
                                 f1.getVolume() + f2.getVolume(),
                                 (f1.getLocalMarketVolumeSum() + f2.getLocalMarketVolumeSum()) / 2.0,

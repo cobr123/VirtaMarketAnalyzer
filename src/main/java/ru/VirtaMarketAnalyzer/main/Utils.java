@@ -49,7 +49,7 @@ public final class Utils {
     }
 
     public static void writeToZip(final String path, final Object obj) throws IOException {
-        final File file = Utils.mkdirs(path+ ".zip");
+        final File file = Utils.mkdirs(path + ".zip");
         try (final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file))) {
             final ZipEntry e = new ZipEntry(new File(path).getName());
             out.putNextEntry(e);
@@ -213,9 +213,19 @@ public final class Utils {
         return getLastBySep(url, "/");
     }
 
-    public static double round2(double num) {
+    public static double round2(final double num) {
         return Math.round(num * 100.0) / 100.0;
     }
+
+    public static double getWeighed(
+            final double price1,
+            final double price2,
+            final long volume1,
+            final long volume2
+    ) {
+        return (price1 * volume1 + price2 * volume2) / (volume1 + volume2);
+    }
+
 
     private static class Prefix<T> {
         final T value;
