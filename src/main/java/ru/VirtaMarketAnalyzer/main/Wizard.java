@@ -223,7 +223,7 @@ public final class Wizard {
         final Date today = new Date();
         final boolean todayExist = set.stream()
                 .anyMatch(tac -> RetailTrend.dateFormat.format(tac.getDate()).equals(RetailTrend.dateFormat.format(today)));
-        if(!todayExist) {
+        if (!todayExist) {
             //добавляем незакомиченные данные
             todayStats.entrySet().stream()
                     .map(Map.Entry::getValue)
@@ -245,15 +245,35 @@ public final class Wizard {
             Utils.writeToGsonZip(fileNamePath, getRetailTrends(entry.getValue()));
         }
     }
+
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
         return list.stream()
                 .collect(Collectors.groupingBy((tac) -> RetailTrend.dateFormat.format(tac.getDate())))
                 .entrySet().stream()
-                .map(e -> getWeighedRetailTrend(e.getValue()))
+                .map(e -> getWeighedRetailTrend(groupByTown(e.getValue())))
                 .sorted(Comparator.comparing(RetailTrend::getDate))
                 .collect(Collectors.toList());
     }
-    private static RetailTrend getWeighedRetailTrend(final List<TradeAtCity> tradeAtCityList){
+
+    private static List<TradeAtCity> groupByTown(final List<TradeAtCity> list) {
+        //проверяем что для одного продукта в одном городе только одна запись на дату
+        return list.stream()
+                .collect(Collectors.groupingBy(TradeAtCity::getTownId))
+                .entrySet().stream()
+                .map(e -> e.getValue().stream()
+                        .reduce((f1, f2) -> {
+                            //logger.info("reduce, productID = {}, town = {}, date = {}", f1.getProductId(), f1.getTownCaption(), f1.getDate());
+                            if (f1.getVolume() > f2.getVolume()) {
+                                return f1;
+                            } else {
+                                return f2;
+                            }
+                        }))
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    private static RetailTrend getWeighedRetailTrend(final List<TradeAtCity> tradeAtCityList) {
         //данные по одному продукту на одну дату
         final Date date = tradeAtCityList.get(0).getDate();
         final double volume = tradeAtCityList.stream().mapToDouble(tac -> tac.getVolume()).sum();
