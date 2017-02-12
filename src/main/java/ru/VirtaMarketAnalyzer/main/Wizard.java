@@ -212,14 +212,27 @@ public final class Wizard {
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
         logger.info("обновляем тренды");
-        updateAllRetailTrends(realm);
+        updateAllRetailTrends(realm, stats);
         logger.info("запоминаем дату обновления данных");
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
-    public static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
+    public static void updateAllRetailTrends(final String realm, final Map<String, List<TradeAtCity>> todayStats) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
+        final Date today = new Date();
+        final boolean todayExist = set.stream()
+                .anyMatch(tac -> RetailTrend.dateFormat.format(tac.getDate()).equals(RetailTrend.dateFormat.format(today)));
+        if(!todayExist) {
+            //добавляем незакомиченные данные
+            todayStats.entrySet().stream()
+                    .map(Map.Entry::getValue)
+                    .flatMap(Collection::stream)
+                    .forEach(tac -> {
+                        tac.setDate(today);
+                        set.add(tac);
+                    });
+        }
         logger.info("updateAllRetailAnalytics.size() = {}", set.size());
 
         //группируем аналитику по товарам и сохраняем
