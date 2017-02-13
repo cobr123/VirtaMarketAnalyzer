@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.PRODUCT_REMAINS_;
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
 
 /**
@@ -36,6 +37,7 @@ public final class Wizard {
     public static final String countrydutylist = "countrydutylist";
     public static final String tech = "tech";
     public static final String retail_trends = "retail_trends";
+    public static final String product_remains_trends = "product_remains_trends";
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
@@ -297,7 +299,7 @@ public final class Wizard {
         );
     }
 
-    public static void collectToJsonIndustries(final String realm) throws IOException {
+    public static void collectToJsonIndustries(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
 
         logger.info("собираем рецепты производства товаров и материалов");
@@ -347,8 +349,94 @@ public final class Wizard {
         logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
         Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
         Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
+        logger.info("обновляем тренды");
+        updateAllProductRemainTrends(realm, productRemains);
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
+
+    public static void updateAllProductRemainTrends(final String realm, final Map<String, List<ProductRemain>> todayProductRemains) throws IOException, GitAPIException {
+        final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
+        final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm);
+        final Date today = new Date();
+        final boolean todayExist = set.stream()
+                .anyMatch(pr -> RetailTrend.dateFormat.format(pr.getDate()).equals(RetailTrend.dateFormat.format(today)));
+        if (!todayExist) {
+            //добавляем незакомиченные данные
+            todayProductRemains.entrySet().stream()
+                    .map(Map.Entry::getValue)
+                    .flatMap(Collection::stream)
+                    .forEach(pr -> {
+                        pr.setDate(today);
+                        set.add(pr);
+                    });
+        }
+        logger.info("updateAllProductRemainTrends.size() = {}, {}", set.size(), realm);
+
+        //группируем аналитику по товарам и сохраняем
+        final Map<String, List<ProductRemain>> productRemainByProduct = set.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.groupingBy(ProductRemain::getProductID));
+
+        for (final Map.Entry<String, List<ProductRemain>> entry : productRemainByProduct.entrySet()) {
+            final String fileNamePath = baseDir + product_remains_trends + File.separator + entry.getKey() + ".json";
+            Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(entry.getValue()));
+        }
+    }
+
+    private static List<ProductRemainTrend> getProductRemainTrends(final List<ProductRemain> list) {
+        return list.stream()
+                .collect(Collectors.groupingBy((pr) -> RetailTrend.dateFormat.format(pr.getDate())))
+                .entrySet().stream()
+                .map(e -> getWeighedProductRemainTrend(groupByUnit(e.getValue())))
+                .sorted(Comparator.comparing(ProductRemainTrend::getDate))
+                .collect(Collectors.toList());
+    }
+
+    private static List<ProductRemain> groupByUnit(final List<ProductRemain> list) {
+        //проверяем что для одного продукта в одном подразделении только одна запись на дату
+        return list.stream()
+                .collect(Collectors.groupingBy(ProductRemain::getUnitID))
+                .entrySet().stream()
+                .map(e -> e.getValue().stream()
+                        .reduce((f1, f2) -> {
+                            if (f1.getRemain() > f2.getRemain()) {
+                                return f1;
+                            } else {
+                                return f2;
+                            }
+                        }))
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
+
+    private static ProductRemainTrend getWeighedProductRemainTrend(final List<ProductRemain> productRemain) {
+        //данные по одному продукту на одну дату
+        final Date date = productRemain.get(0).getDate();
+        final double remain = productRemain.stream()
+                .filter(pr -> pr.getRemain() > 0)
+                .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
+                .mapToDouble(pr -> (pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder())
+                .sum();
+        //=SUMPRODUCT(A2:A3,B2:B3)/SUM(B2:B3)
+        final double quality = productRemain.stream()
+                .filter(pr -> pr.getRemain() > 0)
+                .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
+                .mapToDouble(pr -> pr.getQuality() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remain)
+                .sum();
+        final double price = productRemain.stream()
+                .filter(pr -> pr.getRemain() > 0)
+                .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
+                .mapToDouble(pr -> pr.getPrice() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remain)
+                .sum();
+
+        return new ProductRemainTrend(
+                remain,
+                quality,
+                price,
+                date
+        );
+    }
+
 }

@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * Created by cobr123 on 15.01.2016.
@@ -56,6 +57,7 @@ public final class RetailSalePrediction {
     public static final String[] words = new String[]{"около", "более"};
     public static final String RETAIL_ANALYTICS_ = "retail_analytics_";
     public static final String TRADE_AT_CITY_ = "tradeAtCity_";
+    public static final String PRODUCT_REMAINS_ = "product_remains_";
     public static final String RETAIL_ANALYTICS_HIST = "retail_analytics_hist";
     public static final String WEKA = "weka";
 
@@ -106,25 +108,49 @@ public final class RetailSalePrediction {
     }
 
     public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
-        final Set<TradeAtCity> set = new HashSet<>();
-        getAllVersions(fileNameStartWith, realm)
-                .forEach(fileVersion -> {
+        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, realm)
+                .map(fileVersion -> {
                     try {
                         final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
-                        for (final TradeAtCity ra : arr) {
-                            if(ra.getProductId() != null) {
-                                ra.setDate(fileVersion.getDate());
-                                set.add(ra);
-                            }
-                        }
+                        return Stream.of(arr)
+                                .filter(ra -> ra.getProductId() != null)
+                                .map(ra -> {
+                                    ra.setDate(fileVersion.getDate());
+                                    return ra;
+                                })
+                                .collect(toList());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
+                        return null;
                     }
-                });
-        return set;
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(toSet());
     }
-    public static Stream<FileVersion> getAllVersions(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
-        final File dir = new File(GitHubPublisher.localPath + Wizard.by_trade_at_cities + File.separator);
+    public static Set<ProductRemain> getAllProductRemains(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
+        return getAllVersions(Wizard.industry, fileNameStartWith, realm)
+                .map(fileVersion -> {
+                    try {
+                        final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
+                        return Stream.of(arr)
+                                .filter(ra -> ra.getProductID() != null)
+                                .map(ra -> {
+                                    ra.setDate(fileVersion.getDate());
+                                    return ra;
+                                })
+                                .collect(toList());
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(toSet());
+    }
+    public static Stream<FileVersion> getAllVersions(final String dirName, final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
+        final File dir = new File(GitHubPublisher.localPath + dirName + File.separator);
         final Git git = GitHubPublisher.getRepo();
         logger.trace("dir = {}", dir.getAbsoluteFile());
         if (dir.listFiles() == null) {
@@ -139,7 +165,7 @@ public final class RetailSalePrediction {
                 .filter(f -> f.getName().startsWith(fileNameStartWith))
                 .map(file -> {
                     try {
-                        return GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realm + "/" + file.getName());
+                        return GitHubPublisher.getAllVersions(git, dirName + "/" + realm + "/" + file.getName());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
                         return null;
@@ -147,6 +173,7 @@ public final class RetailSalePrediction {
                 })
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
+                .parallel()
                 ;
     }
 

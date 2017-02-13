@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Date;
+
 /**
  * Created by cobr123 on 20.05.2015.
  */
@@ -26,6 +28,8 @@ public final class ProductRemain {
     @SerializedName("mo")
     final private double maxOrder;
 
+    transient private Date date;
+
     public ProductRemain(final String productID, final String unitID, final long total, final long remain, final double quality, final double price,final MaxOrderType maxOrderType, final double maxOrder) {
         this.productID = productID;
         this.unitID = unitID;
@@ -49,7 +53,7 @@ public final class ProductRemain {
         return total;
     }
 
-    public long getRemain() {
+    public double getRemain() {
         return remain;
     }
 
@@ -67,5 +71,13 @@ public final class ProductRemain {
 
     public MaxOrderType getMaxOrderType() {
         return maxOrderType;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(final Date date) {
+        this.date = date;
     }
 }
