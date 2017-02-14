@@ -223,7 +223,7 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
         final Date today = new Date();
-        if(todayStats != null) {
+        if (todayStats != null) {
             final boolean todayExist = set.stream()
                     .anyMatch(tac -> RetailTrend.dateFormat.format(tac.getDate()).equals(RetailTrend.dateFormat.format(today)));
             if (!todayExist) {
@@ -294,12 +294,12 @@ public final class Wizard {
                 .mapToDouble(tac -> tac.getShopQuality() * tac.getVolume() / volume).sum();
 
         return new RetailTrend(
-                localPrice,
-                localQuality,
-                shopPrice,
-                shopPriceMin,
-                shopPriceMax,
-                shopQuality,
+                Utils.round2(localPrice),
+                Utils.round2(localQuality),
+                Utils.round2(shopPrice),
+                Utils.round2(shopPriceMin),
+                Utils.round2(shopPriceMax),
+                Utils.round2(shopQuality),
                 date,
                 volume
         );
@@ -366,7 +366,7 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
         final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm);
         final Date today = new Date();
-        if(todayProductRemains != null) {
+        if (todayProductRemains != null) {
             final boolean todayExist = set.stream()
                     .anyMatch(pr -> RetailTrend.dateFormat.format(pr.getDate()).equals(RetailTrend.dateFormat.format(today)));
             if (!todayExist) {
@@ -441,8 +441,8 @@ public final class Wizard {
 
         return new ProductRemainTrend(
                 remain,
-                quality,
-                price,
+                Utils.round2(quality),
+                Utils.round2(price),
                 date
         );
     }
