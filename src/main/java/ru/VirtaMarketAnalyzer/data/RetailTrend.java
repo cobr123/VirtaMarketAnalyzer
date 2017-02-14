@@ -18,6 +18,10 @@ public final class RetailTrend {
     final private double localQuality;
     @SerializedName("spr")
     final private double shopPrice;
+    @SerializedName("sprmin")
+    final private double shopPriceMin;
+    @SerializedName("sprmax")
+    final private double shopPriceMax;
     @SerializedName("sq")
     final private double shopQuality;
     @SerializedName("v")
@@ -30,6 +34,8 @@ public final class RetailTrend {
             final double localPrice,
             final double localQuality,
             final double shopPrice,
+            final double shopPriceMin,
+            final double shopPriceMax,
             final double shopQuality,
             final Date date,
             final double volume
@@ -39,6 +45,8 @@ public final class RetailTrend {
         this.localPrice = localPrice;
         this.localQuality = localQuality;
         this.shopPrice = shopPrice;
+        this.shopPriceMin = shopPriceMin;
+        this.shopPriceMax = shopPriceMax;
         this.shopQuality = shopQuality;
         this.volume = volume;
     }

@@ -286,6 +286,10 @@ public final class Wizard {
                 .mapToDouble(tac -> tac.getLocalQuality() * tac.getVolume() / volume).sum();
         final double shopPrice = tradeAtCityList.stream()
                 .mapToDouble(tac -> tac.getShopPrice() * tac.getVolume() / volume).sum();
+        final double shopPriceMin = tradeAtCityList.stream()
+                .mapToDouble(tac -> tac.getShopPrice() * tac.getVolume() / volume).min().getAsDouble();
+        final double shopPriceMax = tradeAtCityList.stream()
+                .mapToDouble(tac -> tac.getShopPrice() * tac.getVolume() / volume).max().getAsDouble();
         final double shopQuality = tradeAtCityList.stream()
                 .mapToDouble(tac -> tac.getShopQuality() * tac.getVolume() / volume).sum();
 
@@ -293,6 +297,8 @@ public final class Wizard {
                 localPrice,
                 localQuality,
                 shopPrice,
+                shopPriceMin,
+                shopPriceMax,
                 shopQuality,
                 date,
                 volume
