@@ -80,8 +80,9 @@ final public class GitHubPublisher {
         for (final RevCommit rev : logs) {
             try(final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
                 logger.trace("Commit: {}, name: {}, id: {}", rev, rev.getName(), rev.getId().getName());
-                getFileFromCommit(os, file, git.getRepository(), rev.getTree());
-                list.add(new FileVersion(rev.getAuthorIdent().getWhen(), os.toString("UTF-8")));
+                if(getFileFromCommit(os, file, git.getRepository(), rev.getTree())) {
+                    list.add(new FileVersion(rev.getAuthorIdent().getWhen(), os.toString("UTF-8")));
+                }
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
@@ -90,13 +91,14 @@ final public class GitHubPublisher {
         return list;
     }
 
-    public static void getFileFromCommit(final OutputStream os, final String file, final Repository repo, final RevTree tree) throws IOException, GitAPIException {
+    public static boolean getFileFromCommit(final OutputStream os, final String file, final Repository repo, final RevTree tree) throws IOException, GitAPIException {
         final TreeWalk treeWalk = new TreeWalk(repo);
         treeWalk.addTree(tree);
         treeWalk.setRecursive(true);
         treeWalk.setFilter(PathFilter.create(file));
         if (!treeWalk.next()) {
-            throw new IllegalStateException("Did not find expected file '" + file + "'");
+            logger.info("Did not find expected file '" + file + "'");
+            return false;
         }
 
         final ObjectId objectId = treeWalk.getObjectId(0);
@@ -104,6 +106,7 @@ final public class GitHubPublisher {
 
         // and then one can the loader to read the file
         loader.copyTo(os);
+        return true;
     }
 
 
