@@ -223,17 +223,19 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
         final Date today = new Date();
-        final boolean todayExist = set.stream()
-                .anyMatch(tac -> RetailTrend.dateFormat.format(tac.getDate()).equals(RetailTrend.dateFormat.format(today)));
-        if (!todayExist) {
-            //добавляем незакомиченные данные
-            todayStats.entrySet().stream()
-                    .map(Map.Entry::getValue)
-                    .flatMap(Collection::stream)
-                    .forEach(tac -> {
-                        tac.setDate(today);
-                        set.add(tac);
-                    });
+        if(todayStats != null) {
+            final boolean todayExist = set.stream()
+                    .anyMatch(tac -> RetailTrend.dateFormat.format(tac.getDate()).equals(RetailTrend.dateFormat.format(today)));
+            if (!todayExist) {
+                //добавляем незакомиченные данные
+                todayStats.entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .flatMap(Collection::stream)
+                        .forEach(tac -> {
+                            tac.setDate(today);
+                            set.add(tac);
+                        });
+            }
         }
         logger.info("updateAllRetailAnalytics.size() = {}", set.size());
 
@@ -366,17 +368,19 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
         final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm);
         final Date today = new Date();
-        final boolean todayExist = set.stream()
-                .anyMatch(pr -> RetailTrend.dateFormat.format(pr.getDate()).equals(RetailTrend.dateFormat.format(today)));
-        if (!todayExist) {
-            //добавляем незакомиченные данные
-            todayProductRemains.entrySet().stream()
-                    .map(Map.Entry::getValue)
-                    .flatMap(Collection::stream)
-                    .forEach(pr -> {
-                        pr.setDate(today);
-                        set.add(pr);
-                    });
+        if(todayProductRemains != null) {
+            final boolean todayExist = set.stream()
+                    .anyMatch(pr -> RetailTrend.dateFormat.format(pr.getDate()).equals(RetailTrend.dateFormat.format(today)));
+            if (!todayExist) {
+                //добавляем незакомиченные данные
+                todayProductRemains.entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .flatMap(Collection::stream)
+                        .forEach(pr -> {
+                            pr.setDate(today);
+                            set.add(pr);
+                        });
+            }
         }
         logger.info("updateAllProductRemainTrends.size() = {}, {}", set.size(), realm);
 
