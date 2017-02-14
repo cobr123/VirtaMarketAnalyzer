@@ -281,8 +281,6 @@ public final class Wizard {
         //данные по одному продукту на одну дату
         final Date date = tradeAtCityList.get(0).getDate();
         final double volume = tradeAtCityList.stream().mapToDouble(TradeAtCity::getVolume).sum();
-        final double shopPriceMin = tradeAtCityList.stream().mapToDouble(TradeAtCity::getShopPrice).min().getAsDouble();
-        final double shopPriceMax = tradeAtCityList.stream().mapToDouble(TradeAtCity::getShopPrice).max().getAsDouble();
         //=SUMPRODUCT(A2:A3,B2:B3)/SUM(B2:B3)
         final double localPrice = tradeAtCityList.stream()
                 .mapToDouble(tac -> tac.getLocalPrice() * tac.getVolume() / volume).sum();
@@ -297,8 +295,6 @@ public final class Wizard {
                 Utils.round2(localPrice),
                 Utils.round2(localQuality),
                 Utils.round2(shopPrice),
-                Utils.round2(shopPriceMin),
-                Utils.round2(shopPriceMax),
                 Utils.round2(shopQuality),
                 date,
                 volume
