@@ -280,7 +280,9 @@ public final class Wizard {
     private static RetailTrend getWeighedRetailTrend(final List<TradeAtCity> tradeAtCityList) {
         //данные по одному продукту на одну дату
         final Date date = tradeAtCityList.get(0).getDate();
-        final double volume = tradeAtCityList.stream().mapToDouble(tac -> tac.getVolume()).sum();
+        final double volume = tradeAtCityList.stream().mapToDouble(TradeAtCity::getVolume).sum();
+        final double shopPriceMin = tradeAtCityList.stream().mapToDouble(TradeAtCity::getShopPrice).min().getAsDouble();
+        final double shopPriceMax = tradeAtCityList.stream().mapToDouble(TradeAtCity::getShopPrice).max().getAsDouble();
         //=SUMPRODUCT(A2:A3,B2:B3)/SUM(B2:B3)
         final double localPrice = tradeAtCityList.stream()
                 .mapToDouble(tac -> tac.getLocalPrice() * tac.getVolume() / volume).sum();
@@ -288,10 +290,6 @@ public final class Wizard {
                 .mapToDouble(tac -> tac.getLocalQuality() * tac.getVolume() / volume).sum();
         final double shopPrice = tradeAtCityList.stream()
                 .mapToDouble(tac -> tac.getShopPrice() * tac.getVolume() / volume).sum();
-        final double shopPriceMin = tradeAtCityList.stream()
-                .mapToDouble(tac -> tac.getShopPrice() * tac.getVolume() / volume).min().getAsDouble();
-        final double shopPriceMax = tradeAtCityList.stream()
-                .mapToDouble(tac -> tac.getShopPrice() * tac.getVolume() / volume).max().getAsDouble();
         final double shopQuality = tradeAtCityList.stream()
                 .mapToDouble(tac -> tac.getShopQuality() * tac.getVolume() / volume).sum();
 
