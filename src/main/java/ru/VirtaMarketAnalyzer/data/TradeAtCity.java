@@ -1,6 +1,8 @@
 package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import ru.VirtaMarketAnalyzer.main.Utils;
 
 import java.util.Date;
@@ -132,6 +134,80 @@ public final class TradeAtCity {
         this.percentMarketVolumeSum = Utils.round2(shopMarketVolumeSum / localMarketVolumeSum * 100.0);
         //Емкость всего, % = (Емкость игроков всего) / (Емкость рынка всего) * 100
         this.percentMarketVolumeSumTotal = Utils.round2(shopMarketVolumeSumTotal / localMarketVolumeSumTotal * 100.0);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+
+        if (o == null || getClass() != o.getClass()) return false;
+
+        final TradeAtCity that = (TradeAtCity) o;
+
+        return new EqualsBuilder()
+                .append(wealthIndex, that.wealthIndex)
+                .append(educationIndex, that.educationIndex)
+                .append(averageSalary, that.averageSalary)
+                .append(volume, that.volume)
+                .append(sellerCnt, that.sellerCnt)
+                .append(companiesCnt, that.companiesCnt)
+                .append(localPercent, that.localPercent)
+                .append(localPrice, that.localPrice)
+                .append(localQuality, that.localQuality)
+                .append(shopPrice, that.shopPrice)
+                .append(shopQuality, that.shopQuality)
+                .append(shopBrand, that.shopBrand)
+                .append(incomeTaxRate, that.incomeTaxRate)
+                .append(importTaxPercent, that.importTaxPercent)
+                .append(localMarketVolumeSum, that.localMarketVolumeSum)
+                .append(shopMarketVolumeSum, that.shopMarketVolumeSum)
+                .append(localMarketVolumeSumTotal, that.localMarketVolumeSumTotal)
+                .append(shopMarketVolumeSumTotal, that.shopMarketVolumeSumTotal)
+                .append(percentMarketVolumeSum, that.percentMarketVolumeSum)
+                .append(percentMarketVolumeSumTotal, that.percentMarketVolumeSumTotal)
+                .append(countryId, that.countryId)
+                .append(regionId, that.regionId)
+                .append(townId, that.townId)
+                .append(townCaption, that.townCaption)
+                .append(productId, that.productId)
+                .append(productCategoryId, that.productCategoryId)
+                .append(marketIdx, that.marketIdx)
+                .append(date, that.date)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(countryId)
+                .append(regionId)
+                .append(townId)
+                .append(townCaption)
+                .append(wealthIndex)
+                .append(educationIndex)
+                .append(averageSalary)
+                .append(productId)
+                .append(productCategoryId)
+                .append(marketIdx)
+                .append(volume)
+                .append(sellerCnt)
+                .append(companiesCnt)
+                .append(localPercent)
+                .append(localPrice)
+                .append(localQuality)
+                .append(shopPrice)
+                .append(shopQuality)
+                .append(shopBrand)
+                .append(incomeTaxRate)
+                .append(importTaxPercent)
+                .append(localMarketVolumeSum)
+                .append(shopMarketVolumeSum)
+                .append(localMarketVolumeSumTotal)
+                .append(shopMarketVolumeSumTotal)
+                .append(percentMarketVolumeSum)
+                .append(percentMarketVolumeSumTotal)
+                .append(date)
+                .toHashCode();
     }
 
     public String getCountryRegionTownIds() {
