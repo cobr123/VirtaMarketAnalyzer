@@ -117,13 +117,13 @@ public final class Downloader {
                     conn.header("Accept-Encoding", "gzip, deflate");
                     conn.userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0");
                     conn.maxBodySize(0);
-                    conn.timeout(600000);
+                    conn.timeout(60_000);
                     final Document doc = conn.get();
                     Utils.writeFile(fileToSave, doc.outerHtml());
                     return doc;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
-                    logger.error("Ошибка: ", e.getMessage());
+                    logger.error("Ошибка: {}", e.getLocalizedMessage());
                     if (maxTriesCnt == tries) {
                         throw new IOException(e);
                     } else {
