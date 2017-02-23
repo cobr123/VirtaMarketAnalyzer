@@ -13,10 +13,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
@@ -36,9 +33,9 @@ public final class TopRetailParser {
     public static List<Shop> getShopList(final String realm, final Map<String, List<TradeAtCity>> stats, final List<Product> products) throws IOException {
         final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
         return stats.values().parallelStream()
-                .flatMap(Collection::parallelStream)
+                .flatMap(Collection::stream)
                 .map(TradeAtCity::getMajorSellInCityList)
-                .flatMap(Collection::parallelStream)
+                .flatMap(Collection::stream)
                 .map(msic -> {
                             Shop shop = null;
                             try {
@@ -49,7 +46,7 @@ public final class TopRetailParser {
                             return shop;
                         }
                 )
-                .filter(s -> s != null)
+                .filter(Objects::nonNull)
                 .filter(s -> s.getShopProducts().size() > 0)
                 .filter(s -> !"Не известен".equals(s.getTownDistrict()))
                 .filter(s -> !"Не известен".equals(s.getServiceLevel()))
