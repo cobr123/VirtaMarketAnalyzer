@@ -55,10 +55,12 @@ public final class Wizard {
             collectToJsonIndustries(realm);
             collectToJsonTech(realm);
         }
-//        final File localPathFile = new File(GitHubPublisher.localPath);
-//        if (localPathFile.exists()) {
-//            FileUtils.deleteDirectory(localPathFile);
-//        }
+        //публикуем на сайте
+        GitHubPublisher.publishRetail(realms);
+
+        for (final String realm : realms) {
+            updateTrends(realm);
+        }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
         //собираем данные со всех реалмов и продуктов
@@ -213,30 +215,29 @@ public final class Wizard {
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
-        logger.info("обновляем тренды");
-        updateAllRetailTrends(realm, stats);
         logger.info("запоминаем дату обновления данных");
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
-    public static void updateAllRetailTrends(final String realm, final Map<String, List<TradeAtCity>> todayStats) throws IOException, GitAPIException {
+    private static void updateTrends(final String realm) throws IOException, GitAPIException {
+        final Calendar today = Calendar.getInstance();
+        if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
+        } else if ("anna".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
+        } else if ("mary".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+        } else if ("lien".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+        } else if ("vera".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)) {
+        } else if ("fast".equalsIgnoreCase(realm)) {
+        } else {
+            return;
+        }
+        logger.info("обновляем тренды");
+        updateAllRetailTrends(realm);
+        updateAllProductRemainTrends(realm);
+    }
+
+    public static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
-        final Date today = new Date();
-        if (todayStats != null) {
-            final boolean todayExist = set.stream()
-                    .anyMatch(tac -> RetailTrend.dateFormat.format(tac.getDate()).equals(RetailTrend.dateFormat.format(today)));
-            if (!todayExist) {
-                //добавляем незакомиченные данные
-                todayStats.entrySet().stream()
-                        .map(Map.Entry::getValue)
-                        .flatMap(Collection::stream)
-                        .forEach(tac -> {
-                            tac.setDate(today);
-                            set.add(tac);
-                        });
-            }
-        }
         logger.info("updateAllRetailAnalytics.size() = {}", set.size());
 
         //группируем аналитику по товарам и сохраняем
@@ -351,31 +352,14 @@ public final class Wizard {
         logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
         Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
         Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
-        logger.info("обновляем тренды");
-        updateAllProductRemainTrends(realm, productRemains);
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
-    public static void updateAllProductRemainTrends(final String realm, final Map<String, List<ProductRemain>> todayProductRemains) throws IOException, GitAPIException {
+    public static void updateAllProductRemainTrends(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
         final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm);
-        final Date today = new Date();
-        if (todayProductRemains != null) {
-            final boolean todayExist = set.stream()
-                    .anyMatch(pr -> RetailTrend.dateFormat.format(pr.getDate()).equals(RetailTrend.dateFormat.format(today)));
-            if (!todayExist) {
-                //добавляем незакомиченные данные
-                todayProductRemains.entrySet().stream()
-                        .map(Map.Entry::getValue)
-                        .flatMap(Collection::stream)
-                        .forEach(pr -> {
-                            pr.setDate(today);
-                            set.add(pr);
-                        });
-            }
-        }
         logger.info("updateAllProductRemainTrends.size() = {}, {}", set.size(), realm);
 
         //группируем аналитику по товарам и сохраняем
