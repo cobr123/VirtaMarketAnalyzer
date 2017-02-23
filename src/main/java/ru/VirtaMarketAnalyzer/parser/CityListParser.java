@@ -57,7 +57,8 @@ public final class CityListParser {
             final String averageSalary = town.select("tr > td:nth-child(3)").text();
             final String educationIndex = town.select("tr > td:nth-child(5)").text();
             final String wealthIndex = town.select("tr > td:nth-child(6)").html();
-            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary)));
+            final int demography = Utils.toInt(town.select("tr > td:nth-child(7)").text().replace("ths.","").replace("тыс. чел.","").replaceAll("\\s+",""));
+            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary), demography));
         });
     }
 }
