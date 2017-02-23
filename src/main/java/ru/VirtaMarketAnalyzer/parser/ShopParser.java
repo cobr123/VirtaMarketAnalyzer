@@ -34,7 +34,7 @@ public final class ShopParser {
         final String url = host + realm + "/main/unit/view/3943258";
 //        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
-        cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0));
+        cities.add(new City("3010", "3023", "7073", "Херсон", 0.0, 0.0, 0.0,0));
         final List<Product> products = new ArrayList<>();
         products.add(ProductInitParser.getTradingProduct(host, realm, "422547"));
         products.add(ProductInitParser.getTradingProduct(host, realm, "3838"));
@@ -254,25 +254,12 @@ public final class ShopParser {
                 }
             }
 
-            final int infoRowCnt = doc.select("table.infoblock > tbody > tr").size();
-            if (infoRowCnt == 5) {
-                //заправки
-                int shopSize = 0;
-                final String size = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text().trim();
+            final String unitImage = doc.select("#unitImage > img").attr("src");
 
-                if ("Малая городская АЗС".equals(size) || "Small gas station".equals(size)) {
-                    shopSize = 1;
-                } else if ("Средняя городская АЗС".equals(size) || "Medium gas station".equals(size)) {
-                    shopSize = 2;
-                } else if ("Большая городская АЗС".equals(size) || "Large gas station".equals(size)) {
-                    shopSize = 3;
-                } else if ("Пригородная сеть АЗС".equals(size) || "Suburban network of gas stations".equals(size)) {
-                    shopSize = 4;
-                } else if ("Областная сеть АЗС".equals(size) || "Regional network of gas stations".equals(size)) {
-                    shopSize = 5;
-                } else {
-                    throw new Exception("Неизвестный размер юнита: " + size);
-                }
+            if (unitImage.startsWith("/img/v2/units/fuel_")) {
+                //заправки
+                int shopSize = Utils.toInt(unitImage.substring("/img/v2/units/fuel_".length(), "/img/v2/units/fuel_".length() + 1));
+
                 final String townDistrict = "";
                 final int departmentCount = 1;
                 final double notoriety = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
@@ -281,7 +268,7 @@ public final class ShopParser {
 
                 return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
                         visitorsCount, serviceLevel, shopProducts);
-            } else if (infoRowCnt == 7) {
+            } else if (unitImage.startsWith("/img/v2/units/shop_")) {
                 //магазины
                 final int shopSize = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
                 final String townDistrict = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text();
@@ -293,7 +280,7 @@ public final class ShopParser {
                 return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
                         visitorsCount, serviceLevel, shopProducts);
             } else {
-                logger.error("Неизвестный тип юнита, infoRowCnt = {}, url = {}. Возможно еще идет пересчет.", infoRowCnt, url);
+                logger.error("Неизвестный тип юнита, unitImage = {}, url = {}. Возможно еще идет пересчет.", unitImage, url);
                 return null;
             }
         } catch (final Exception e) {
