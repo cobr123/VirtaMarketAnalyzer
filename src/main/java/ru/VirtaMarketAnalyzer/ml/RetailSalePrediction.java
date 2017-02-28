@@ -415,7 +415,7 @@ public final class RetailSalePrediction {
                 // Print the result à la Weka explorer:
 //                logger.info((cModel.toString());
 
-                // Test the model
+                // TestWeka the model
                 final Evaluation eTest = new Evaluation(trainingSet);
                 eTest.evaluateModel(tree, trainingSet);
 

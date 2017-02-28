@@ -8,7 +8,7 @@ import weka.core.*;
 /**
  * Created by cobr123 on 15.01.2016.
  */
-public class Test {
+public class TestWeka {
     private static FastVector attrs;
     private static Instances isTrainingSet;
 
@@ -32,7 +32,7 @@ public class Test {
         // Print the result à la Weka explorer:
         System.out.println(cModel.toString());
 
-        // Test the model
+        // TestWeka the model
         Evaluation eTest = new Evaluation(isTrainingSet);
         eTest.evaluateModel(cModel, isTrainingSet);
 
