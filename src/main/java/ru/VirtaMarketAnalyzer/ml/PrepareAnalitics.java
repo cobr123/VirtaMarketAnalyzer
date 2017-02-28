@@ -60,6 +60,7 @@ public final class PrepareAnalitics {
                                             shopProduct.getPrice(),
                                             shopProduct.getQuality(),
                                             shopProduct.getBrand(),
+                                            shopProduct.getMarketShare(),
                                             tradeAtCity.getWealthIndex(),
                                             tradeAtCity.getEducationIndex(),
                                             tradeAtCity.getAverageSalary(),

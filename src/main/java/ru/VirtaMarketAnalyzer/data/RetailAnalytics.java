@@ -35,6 +35,8 @@ public final class RetailAnalytics {
     private final double quality;
     @SerializedName("b")
     private final double brand;
+    @SerializedName("ms")
+    private final double marketShare;
     @SerializedName("wi")
     final private double wealthIndex;
     @SerializedName("ei")
@@ -58,7 +60,7 @@ public final class RetailAnalytics {
 
     public RetailAnalytics(final String productId, final String productCategory, final int shopSize, final String townDistrict, final int departmentCount,
                            final double notoriety, final String visitorsCount, final String serviceLevel,
-                           final String sellVolume, final double price, final double quality, final double brand,
+                           final String sellVolume, final double price, final double quality, final double brand, final double marketShare,
                            final double wealthIndex, final double educationIndex, final double averageSalary,
                            final String marketIdx, final long marketVolume, final int sellerCnt, final double localPercent,
                            final double localPrice, final double localQuality) {
@@ -74,6 +76,7 @@ public final class RetailAnalytics {
         this.price = price;
         this.quality = quality;
         this.brand = brand;
+        this.marketShare = marketShare;
         this.wealthIndex = wealthIndex;
         this.educationIndex = educationIndex;
         this.averageSalary = averageSalary;
@@ -113,6 +116,7 @@ public final class RetailAnalytics {
         this.price = ra.price;
         this.quality = ra.quality;
         this.brand = ra.brand;
+        this.marketShare = ra.marketShare;
         this.wealthIndex = ra.wealthIndex;
         this.educationIndex = ra.educationIndex;
         this.averageSalary = ra.averageSalary;
