@@ -1,5 +1,8 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -22,9 +25,16 @@ import static java.util.stream.Collectors.toList;
 public final class CityParser {
     private static final Logger logger = LoggerFactory.getLogger(CityParser.class);
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws Exception {
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         //final Document doc = Downloader.getDoc(Wizard.host + "olga/main/globalreport/marketing/by_trade_at_cities/422433/422607/422608/422622");
-        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/globalreport/marketing/by_trade_at_cities/422549/3054/3055/3056");
+        final String realm = "olga";
+        final String productId = "370080";
+        final String countryId = "303829";
+        final String regionId = "303830";
+        final String townId = "303831";
+        final String url = Wizard.host + realm + "/main/globalreport/marketing/by_trade_at_cities/370080/303829/303830/303831";
+        final Document doc = Downloader.getDoc(url);
         final Element table = doc.select("table[class=\"grid\"]").first();
         final Elements percs = table.nextElementSibling().select("table > tbody > tr > td > table > tbody > tr > td");
 
@@ -40,12 +50,16 @@ public final class CityParser {
 
         final Element list = doc.select("table[class=\"list\"]").last();
         //System.out.println(list.outerHtml());
+        System.out.println(url);
         final Elements bestInTown = list.select("table > tbody > tr");
         for (final Element best : bestInTown) {
             if (!best.select("tr > td:nth-child(1) > div:nth-child(2) > img").eq(0).attr("title").isEmpty()) {
                 final String unitID = Utils.getLastFromUrl(best.select("tr > td:nth-child(1) > div:nth-child(1) > a:nth-child(2)").attr("href"));
 
-                System.out.println(unitID);
+                final String unitUrl = Wizard.host + realm + "/main/unit/view/" + unitID;
+                System.out.println(unitUrl);
+                final Shop shop = ShopParser.parse(realm, productId, countryId, regionId, townId, unitUrl, null);
+                System.out.println(shop.getShopProducts().size());
             }
         }
     }

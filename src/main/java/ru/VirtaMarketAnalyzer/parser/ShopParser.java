@@ -34,7 +34,7 @@ public final class ShopParser {
         final String url = host + realm + "/main/unit/view/3943258";
 //        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
-        cities.add(new City("422653", "422655", "422682", "Вашингтон", 0.0, 0.0, 0.0,0));
+        cities.add(new City("422653", "422655", "422682", "Вашингтон", 0.0, 0.0, 0.0, 0));
         final List<Product> products = new ArrayList<>();
         products.add(ProductInitParser.getTradingProduct(host, realm, "422547"));
         products.add(ProductInitParser.getTradingProduct(host, realm, "3838"));
@@ -61,7 +61,7 @@ public final class ShopParser {
         }
         if (townId.isEmpty()) {
             final Element tmpFirst = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").first();
-            if(tmpFirst != null && tmpFirst.children() != null) {
+            if (tmpFirst != null && tmpFirst.children() != null) {
                 tmpFirst.children().remove();
             }
             final String dyrtyCaption = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").text();
@@ -215,7 +215,11 @@ public final class ShopParser {
         return parse(realm, "", countryId, regionId, townId, url, productsByImgSrc);
     }
 
-    public static Shop parse(final String realm, final String productId, final String countryId, final String regionId, final String townId, final String url, final Map<String, List<Product>> productsByImgSrc) throws Exception {
+    public static Shop parse(final String realm, final String productId
+            , final String countryId, final String regionId, final String townId
+            , final String url
+            , final Map<String, List<Product>> productsByImgSrc
+    ) throws Exception {
         Document doc = null;
         if (oneTryErrorUrl.contains(url)) {
             return null;
