@@ -30,8 +30,10 @@ public final class ShopParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        final String url = Wizard.host + "olga/main/unit/view/5788675";
         final String host = Wizard.host;
-        final String realm = "mary";
-        final String url = host + realm + "/main/unit/view/3943258";
+//        final String realm = "mary";
+//        final String url = host + realm + "/main/unit/view/3943258";
+        final String realm = "olga";
+        final String url = host + realm + "/main/unit/view/6519771";
 //        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
         cities.add(new City("422653", "422655", "422682", "Вашингтон", 0.0, 0.0, 0.0, 0));
@@ -45,13 +47,14 @@ public final class ShopParser {
     public static Shop parse(final String realm, final String url, final List<City> cities, final Map<String, List<Product>> productsByImgSrc, final String cityCaption) throws Exception {
         final Document doc = Downloader.getDoc(url);
 
-        final String countryId = Utils.getLastFromUrl(doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)").attr("href"));
-        final String regionId = Utils.getLastFromUrl(doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2) > a:nth-child(2)").attr("href"));
+        final String countryId = Utils.getLastFromUrl(doc.select("div.officePlace > a:nth-child(2)").attr("href"));
+        final String regionId = Utils.getLastFromUrl(doc.select("div.officePlace > a:nth-child(3)").attr("href"));
 
         String townId = "";
         if (!cityCaption.isEmpty()) {
             final Optional<City> city = cities.stream()
-                    .filter(c -> c.getCountryId().equals(countryId))
+                    .filter(c -> countryId.isEmpty() || c.getCountryId().equals(countryId))
+                    .filter(c -> regionId.isEmpty() || c.getRegionId().equals(regionId))
                     .filter(c -> c.getCaption().equals(cityCaption))
                     .findFirst();
 
@@ -60,11 +63,14 @@ public final class ShopParser {
             }
         }
         if (townId.isEmpty()) {
-            final Element tmpFirst = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").first();
-            if (tmpFirst != null && tmpFirst.children() != null) {
-                tmpFirst.children().remove();
+            String dyrtyCaption = doc.select("#mainContent > div.unit_box-container > div > div:nth-child(1) > table > tbody > tr:nth-child(1) > td:nth-child(2) > a").text();
+            if(dyrtyCaption == null || dyrtyCaption.isEmpty()) {
+                final Element tmpFirst = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").first();
+                if (tmpFirst != null && tmpFirst.children() != null) {
+                    tmpFirst.children().remove();
+                }
+                dyrtyCaption = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").text();
             }
-            final String dyrtyCaption = doc.select("table.infoblock > tbody > tr:nth-child(1) > td:nth-child(2)").text();
             final String dyrtyCaptionReplaced = dyrtyCaption.replaceFirst("\\([^\\)]*\\)$", "").trim()
                     .replace("San Diego", "Сан-Диего")
                     .replace("Indianapolis", "Индианаполис")
@@ -245,11 +251,11 @@ public final class ShopParser {
                         continue;
                     }
                     final String prodId = productsByImgSrc.get(row.select("> td:eq(0) > img").first().attr("src")).get(0).getId();
-                    final String sellVolume = row.select("> td").eq(1).text().trim();
-                    final double quality = Utils.toDouble(row.select("> td").eq(2).text());
-                    final double brand = Utils.toDouble(row.select("> td").eq(3).text());
-                    final double price = Utils.toDouble(row.select("> td").eq(4).text());
-                    final double marketShare = Utils.toDouble(row.select("> td").eq(5).text());
+                    final String sellVolume = row.select("> td:nth-child(2)").text().trim();
+                    final double quality = Utils.toDouble(row.select("> td:nth-child(3)").text());
+                    final double brand = Utils.toDouble(row.select("> td:nth-child(4)").text());
+                    final double price = Utils.toDouble(row.select("> td:nth-child(5)").text());
+                    final double marketShare = Utils.toDouble(row.select("> td:nth-child(6)").text());
 
                     final ShopProduct shopProduct = new ShopProduct(prodId, sellVolume, price, quality, brand, marketShare);
                     shopProducts.add(shopProduct);
@@ -277,12 +283,14 @@ public final class ShopParser {
                         visitorsCount, serviceLevel, shopProducts);
             } else if (unitImage.startsWith("/img/v2/units/shop_")) {
                 //магазины
-                final int shopSize = Utils.toInt(doc.select("table.infoblock > tbody > tr:nth-child(3) > td:nth-child(2)").text());
-                final String townDistrict = doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text();
-                final int departmentCount = Utils.doubleToInt(Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(4) > td:nth-child(2)").text()));
-                final double notoriety = Utils.toDouble(doc.select("table.infoblock > tbody > tr:nth-child(5) > td:nth-child(2)").text());
-                final String visitorsCount = doc.select("table.infoblock > tbody > tr:nth-child(6) > td:nth-child(2)").text().trim();
-                final String serviceLevel = doc.select("table.infoblock > tbody > tr:nth-child(7) > td:nth-child(2)").text();
+                doc.select("table.unit_table > tbody > tr:nth-child(1) > td:nth-child(2)").first().children().remove();
+                final String townDistrict = doc.select("table.unit_table > tbody > tr:nth-child(1) > td:nth-child(2)").text().replaceAll("^\\s*,","").trim();
+                doc.select("table.unit_table > tbody > tr:nth-child(2) > td:nth-child(2)").first().children().remove();
+                final int shopSize = Utils.toInt(doc.select("table.unit_table > tbody > tr:nth-child(2) > td:nth-child(2)").text());
+                final int departmentCount = Utils.doubleToInt(Utils.toDouble(doc.select("table.unit_table > tbody > tr:nth-child(3) > td:nth-child(2)").text()));
+                final double notoriety = Utils.toDouble(doc.select("table.unit_table > tbody > tr:nth-child(4) > td:nth-child(2)").text());
+                final String visitorsCount = doc.select("table.unit_table > tbody > tr:nth-child(5) > td:nth-child(2)").text().trim();
+                final String serviceLevel = doc.select("table.unit_table > tbody > tr:nth-child(6) > td:nth-child(2)").text();
 
                 return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
                         visitorsCount, serviceLevel, shopProducts);
