@@ -402,28 +402,65 @@ public final class Wizard {
     private static ProductRemainTrend getWeighedProductRemainTrend(final List<ProductRemain> productRemain) {
         //данные по одному продукту на одну дату
         final Date date = productRemain.get(0).getDate();
-        final double remain = productRemain.stream()
+        final List<ProductRemain> productRemainFiltered = productRemain.stream()
                 .filter(pr -> pr.getRemain() > 0)
                 .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
+                .collect(Collectors.toList());
+                ;
+        final double remain = productRemainFiltered.stream()
                 .mapToDouble(pr -> (pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder())
                 .sum();
         //=SUMPRODUCT(A2:A3,B2:B3)/SUM(B2:B3)
-        final double quality = productRemain.stream()
-                .filter(pr -> pr.getRemain() > 0)
-                .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
+        final double quality = productRemainFiltered.stream()
                 .mapToDouble(pr -> pr.getQuality() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remain)
                 .sum();
-        final double price = productRemain.stream()
-                .filter(pr -> pr.getRemain() > 0)
-                .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
+        final double price = productRemainFiltered.stream()
                 .mapToDouble(pr -> pr.getPrice() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remain)
                 .sum();
+
+        //меньше 5% общего объема группируем в одну запись
+        final List<ProductRemain> productRemainOthersFiltered = productRemainFiltered.stream()
+                .filter(pr -> ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) <= remain * 0.05)
+                .collect(Collectors.toList());
+        ;
+        final double totalOthers = productRemainOthersFiltered.stream()
+                .mapToDouble(ProductRemain::getTotal)
+                .sum();
+        final double remainOthers = productRemainOthersFiltered.stream()
+                .mapToDouble(pr -> (pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder())
+                .sum();
+        final double qualityOthers = productRemainOthersFiltered.stream()
+                .mapToDouble(pr -> pr.getQuality() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remainOthers)
+                .sum();
+        final double priceOthers = productRemainOthersFiltered.stream()
+                .mapToDouble(pr -> pr.getPrice() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remainOthers)
+                .sum();
+        final double maxOrderOthers = productRemainOthersFiltered.stream()
+                .mapToDouble(ProductRemain::getMaxOrder)
+                .min()
+                .orElse(remainOthers);
+        final ProductRemainTrendSup others = new ProductRemainTrendSup("", totalOthers, remainOthers, qualityOthers, priceOthers, ProductRemain.MaxOrderType.L, maxOrderOthers);
+
+        final List<ProductRemainTrendSup> sup = productRemainFiltered.stream()
+                .filter(pr -> ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) > remain * 0.05)
+                .map(pr -> new ProductRemainTrendSup(
+                        pr.getUnitID()
+                        , pr.getTotal()
+                        , pr.getRemain()
+                        , pr.getQuality()
+                        , pr.getPrice()
+                        , pr.getMaxOrderType()
+                        , pr.getMaxOrder()
+                ))
+                .collect(Collectors.toList());
+        sup.add(others);
 
         return new ProductRemainTrend(
                 remain,
                 Utils.round2(quality),
                 Utils.round2(price),
-                date
+                date,
+                sup
         );
     }
 
