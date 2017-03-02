@@ -450,7 +450,7 @@ public final class Wizard {
                         , pr.getQuality()
                         , pr.getPrice()
                         , pr.getMaxOrderType()
-                        , pr.getMaxOrder()
+                        , (pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()
                 ))
                 .collect(Collectors.toList());
         sup.add(others);
