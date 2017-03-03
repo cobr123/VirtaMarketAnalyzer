@@ -16,6 +16,8 @@ public final class ProductRemain {
     }
 
     //Infinity
+    @SerializedName("cn")
+    final private String companyName;
     @SerializedName("pi")
     final private String productID;
     @SerializedName("ui")
@@ -35,8 +37,9 @@ public final class ProductRemain {
 
     transient private Date date;
 
-    public ProductRemain(final String productID, final String unitID, final long total, final long remain, final double quality, final double price, final MaxOrderType maxOrderType, final double maxOrder) {
+    public ProductRemain(final String productID, final String companyName, final String unitID, final long total, final long remain, final double quality, final double price, final MaxOrderType maxOrderType, final double maxOrder) {
         this.productID = productID;
+        this.companyName = companyName;
         this.unitID = unitID;
         this.total = total;
         this.remain = remain;
@@ -50,6 +53,7 @@ public final class ProductRemain {
     public int hashCode() {
         return new HashCodeBuilder()
                 .append(productID)
+                .append(companyName)
                 .append(unitID)
                 .append(total)
                 .append(remain)
@@ -66,6 +70,7 @@ public final class ProductRemain {
             final ProductRemain other = (ProductRemain) obj;
             return new EqualsBuilder()
                     .append(productID, other.productID)
+                    .append(companyName, other.companyName)
                     .append(unitID, other.unitID)
                     .append(total, other.total)
                     .append(remain, other.remain)
@@ -77,6 +82,10 @@ public final class ProductRemain {
         } else {
             return false;
         }
+    }
+
+    public String getCompanyName() {
+        return companyName;
     }
 
     public String getProductID() {

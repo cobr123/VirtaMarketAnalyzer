@@ -11,6 +11,8 @@ import java.util.List;
  * Created by cobr123 on 02.03.2017.
  */
 public final class ProductRemainTrendSup {
+    @SerializedName("cn")
+    final private String companyName;
     @SerializedName("ui")
     final private String unitID;
     @SerializedName("t")
@@ -26,7 +28,8 @@ public final class ProductRemainTrendSup {
     @SerializedName("mo")
     final private double maxOrder;
 
-    public ProductRemainTrendSup(String unitID, double total, double remain, double quality, double price, ProductRemain.MaxOrderType maxOrderType, double maxOrder) {
+    public ProductRemainTrendSup(String companyName, String unitID, double total, double remain, double quality, double price, ProductRemain.MaxOrderType maxOrderType, double maxOrder) {
+        this.companyName = companyName;
         this.unitID = unitID;
         this.total = total;
         this.remain = remain;
@@ -34,6 +37,10 @@ public final class ProductRemainTrendSup {
         this.price = price;
         this.maxOrderType = maxOrderType;
         this.maxOrder = maxOrder;
+    }
+
+    public String getCompanyName() {
+        return companyName;
     }
 
     public String getUnitID() {

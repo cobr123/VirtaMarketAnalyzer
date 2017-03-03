@@ -1,5 +1,8 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -25,6 +28,7 @@ public final class ProductRemainParser {
     private static final Logger logger = LoggerFactory.getLogger(ProductRemainParser.class);
 
     public static void main(final String[] args) throws IOException {
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
         final String realm = "olga";
         final String url = host + realm + "/main/globalreport/marketing/by_products/";
@@ -59,6 +63,7 @@ public final class ProductRemainParser {
 
                 for (final Element row : rows) {
                     if (!row.select("> td:nth-child(1)").isEmpty()) {
+                        final String companyName = row.select("> td:nth-child(1) > table > tbody > tr > td:nth-child(2) > a > strong").text();
                         final String unitID = Utils.getLastFromUrl(row.select("> td:nth-child(1) > table > tbody > tr > td:nth-child(2) > a").attr("href"));
                         final double maxOrder = Utils.toDouble(row.select("> td:nth-child(2) > span").text().replace("Max:", ""));
                         final ProductRemain.MaxOrderType maxOrderType = (maxOrder > 0) ? ProductRemain.MaxOrderType.L : ProductRemain.MaxOrderType.U;
@@ -80,7 +85,7 @@ public final class ProductRemainParser {
                         final double quality = Utils.toDouble(row.select("> td:nth-child(4)").text());
                         final double price = Utils.toDouble(row.select("> td:nth-child(5)").text());
                         if (remain > 0) {
-                            map.put(material.getId() + "|" + unitID, new ProductRemain(material.getId(), unitID, total, remain, quality, price, maxOrderType, maxOrder));
+                            map.put(material.getId() + "|" + unitID, new ProductRemain(material.getId(), companyName, unitID, total, remain, quality, price, maxOrderType, maxOrder));
                         }
                     }
                 }
