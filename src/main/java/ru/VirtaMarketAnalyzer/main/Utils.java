@@ -3,7 +3,10 @@ package ru.VirtaMarketAnalyzer.main;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.compress.archivers.zip.ZipFile;
+import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -58,6 +61,12 @@ public final class Utils {
             out.write(data, 0, data.length);
             out.closeEntry();
             out.close();
+        }
+    }
+
+    public static String readFromZip(final String path, final ByteArrayOutputStream os) throws IOException {
+        try (final ZipFile zipFile = new ZipFile(new SeekableInMemoryByteChannel(os.toByteArray()))) {
+            return IOUtils.toString(zipFile.getInputStream(zipFile.getEntry(path)), "UTF-8");
         }
     }
 
