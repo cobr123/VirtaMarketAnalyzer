@@ -157,6 +157,7 @@ public final class RetailAnalytics {
                 .append(price)
                 .append(quality)
                 .append(brand)
+                .append(marketShare)
                 .append(wealthIndex)
                 .append(educationIndex)
                 .append(averageSalary)
@@ -186,6 +187,7 @@ public final class RetailAnalytics {
                     .append(price, other.price)
                     .append(quality, other.quality)
                     .append(brand, other.brand)
+                    .append(marketShare, other.marketShare)
                     .append(wealthIndex, other.wealthIndex)
                     .append(educationIndex, other.educationIndex)
                     .append(averageSalary, other.averageSalary)
@@ -233,8 +235,11 @@ public final class RetailAnalytics {
         return serviceLevel;
     }
 
-    public String getSellVolume() {
-        return sellVolume;
+//    public String getSellVolume() {
+//        return sellVolume;
+//    }
+    public double getSellVolumeNumber() {
+        return Math.round(getMarketShare() / 100.0 * getMarketVolume());
     }
 
     public double getPrice() {
@@ -247,6 +252,10 @@ public final class RetailAnalytics {
 
     public double getBrand() {
         return brand;
+    }
+
+    public double getMarketShare() {
+        return marketShare;
     }
 
     public double getWealthIndex() {
