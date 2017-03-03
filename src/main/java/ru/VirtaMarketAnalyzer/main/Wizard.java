@@ -439,7 +439,7 @@ public final class Wizard {
                 .mapToDouble(ProductRemain::getMaxOrder)
                 .min()
                 .orElse(remainOthers);
-        final ProductRemainTrendSup others = new ProductRemainTrendSup("","", totalOthers, remainOthers, qualityOthers, priceOthers, ProductRemain.MaxOrderType.L, maxOrderOthers);
+        final ProductRemainTrendSup others = new ProductRemainTrendSup("","", totalOthers, remainOthers, Utils.round2(qualityOthers), Utils.round2(priceOthers), ProductRemain.MaxOrderType.L, maxOrderOthers);
 
         final List<ProductRemainTrendSup> sup = productRemainFiltered.stream()
                 .filter(pr -> ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) > remain * 0.05)
