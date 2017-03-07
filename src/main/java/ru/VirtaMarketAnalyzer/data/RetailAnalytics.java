@@ -97,6 +97,7 @@ public final class RetailAnalytics {
                 .replace("City centre", "Центр города")
                 .replace("Центр міста", "Центр города")
                 .replace("Centro de la ciudad", "Центр города")
+                .replace("社区", "Спальный район")
                 .replace("Residential area", "Спальный район")
                 .replace("Área residencial", "Спальный район")
                 .replace("Trendy neighborhood", "Фешенебельный район")
