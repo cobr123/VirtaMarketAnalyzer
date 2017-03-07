@@ -82,7 +82,7 @@ final public class GitHubPublisher {
             try (final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
                 logger.trace("Commit: {}, name: {}, id: {}", rev, rev.getName(), rev.getId().getName());
                 if (getFileFromCommit(os, file, git.getRepository(), rev.getTree())) {
-                    if (file.endsWith(".zip") /*&& file.contains("422437")*/) {
+                    if (file.endsWith(".zip")) {
                         list.add(new FileVersion(rev.getAuthorIdent().getWhen(), Utils.readFromZip(new File(file).getName().replace(".zip", ""), os)));
                     } else {
                         list.add(new FileVersion(rev.getAuthorIdent().getWhen(), os.toString("UTF-8")));
