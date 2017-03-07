@@ -93,6 +93,7 @@ public final class RetailAnalytics {
         return townDistrict
                 .replace("Outskirts", "Окраина")
                 .replace("Suburb", "Пригород")
+                .replace("城市中心", "Центр города")
                 .replace("City centre", "Центр города")
                 .replace("Центр міста", "Центр города")
                 .replace("Centro de la ciudad", "Центр города")
