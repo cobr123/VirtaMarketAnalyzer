@@ -64,7 +64,10 @@ public final class Wizard {
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
         //собираем данные со всех реалмов и продуктов
-//        RetailSalePrediction.createCommonPrediction();
+        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, "olga");
+        for (final Product product : products) {
+            RetailSalePrediction.createCommonPrediction(product.getId());
+        }
         //публикуем на сайте
 //        GitHubPublisher.publishPredictions();
     }
