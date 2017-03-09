@@ -667,14 +667,14 @@ public final class RetailSalePrediction {
                 sizes.addElement("5");
 
                 attrs.addElement(new Attribute(attr.name(), sizes));
-//            } else if (attr.ordinal() == ATTR.PRODUCT_ID.ordinal()) {
-//                final FastVector fv = new FastVector(productIds.size());
-//                productIds.forEach(fv::addElement);
-//                attrs.addElement(new Attribute(attr.name(), fv));
-//            } else if (attr.ordinal() == ATTR.PRODUCT_CATEGORY.ordinal()) {
-//                final FastVector fv = new FastVector(productCategories.size());
-//                productCategories.forEach(fv::addElement);
-//                attrs.addElement(new Attribute(attr.name(), fv));
+            } else if (attr.ordinal() == ATTR.PRODUCT_ID.ordinal()) {
+                final FastVector fv = new FastVector(productIds.size());
+                productIds.forEach(fv::addElement);
+                attrs.addElement(new Attribute(attr.name(), fv));
+            } else if (attr.ordinal() == ATTR.PRODUCT_CATEGORY.ordinal()) {
+                final FastVector fv = new FastVector(productCategories.size());
+                productCategories.forEach(fv::addElement);
+                attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.DEPARTMENT_COUNT.ordinal()) {
                 final int maxDepCnt = retailAnalytics.parallelStream().max((o1, o2) -> o1.getDepartmentCount() - o2.getDepartmentCount()).get().getDepartmentCount();
                 logger.info("maxDepCnt =  {}", maxDepCnt);
