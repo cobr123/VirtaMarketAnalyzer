@@ -8,6 +8,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +16,30 @@ import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
+import ru.VirtaMarketAnalyzer.ml.js.LinearRegressionToJson;
+import ru.VirtaMarketAnalyzer.parser.ProductInitParser;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 import weka.classifiers.Evaluation;
+import weka.classifiers.functions.GaussianProcesses;
 import weka.classifiers.functions.LibSVM;
+import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.meta.Bagging;
+import weka.classifiers.meta.MultiBoostAB;
+import weka.classifiers.meta.RandomCommittee;
+import weka.classifiers.rules.DecisionTable;
 import weka.classifiers.trees.J48;
+import weka.classifiers.trees.M5P;
+import weka.classifiers.trees.RandomForest;
+import weka.classifiers.trees.RandomTree;
 import weka.core.Attribute;
 import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
+import weka.core.converters.CSVSaver;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Standardize;
 
 import java.io.*;
 import java.text.DateFormat;
@@ -64,12 +80,13 @@ public final class RetailSalePrediction {
     public enum ATTR {
         WEALTH_INDEX, EDUCATION_INDEX, AVERAGE_SALARY,
         MARKET_INDEX, MARKET_VOLUME, LOCAL_PERCENT,
-        LOCAL_PRICE, LOCAL_QUALITY, PRICE,
+        LOCAL_PRICE, LOCAL_QUALITY,
         SHOP_SIZE, TOWN_DISTRICT, DEPARTMENT_COUNT,
         BRAND, QUALITY, NOTORIETY, VISITORS_COUNT,
-        SERVICE_LEVEL, SELLER_COUNT, PRODUCT_ID, PRODUCT_CATEGORY,
+        SERVICE_LEVEL, SELLER_COUNT,// PRODUCT_ID, PRODUCT_CATEGORY,
+        SELL_VOLUME_NUMBER,
         //последний для автоподстановки при открытии в weka
-        SELL_VOLUME;
+        PRICE;
 
         public String getFunctionName() {
             final StringBuilder sb = new StringBuilder();
@@ -108,7 +125,7 @@ public final class RetailSalePrediction {
     }
 
     public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
-        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, realm)
+        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
                 .map(fileVersion -> {
                     try {
                         final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
@@ -128,8 +145,9 @@ public final class RetailSalePrediction {
                 .flatMap(Collection::stream)
                 .collect(toSet());
     }
+
     public static Set<ProductRemain> getAllProductRemains(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
-        return getAllVersions(Wizard.industry, fileNameStartWith, realm)
+        return getAllVersions(Wizard.industry, fileNameStartWith, Optional.of(realm))
                 .map(fileVersion -> {
                     try {
                         final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
@@ -149,9 +167,16 @@ public final class RetailSalePrediction {
                 .flatMap(Collection::stream)
                 .collect(toSet());
     }
-    public static Stream<FileVersion> getAllVersions(final String dirName, final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
+
+    public static Stream<FileVersion> getAllVersions(final String dirName, final String fileNameStartWith, final Optional<String> realm) throws IOException, GitAPIException {
         final File dir = new File(GitHubPublisher.localPath + dirName + File.separator);
         final Git git = GitHubPublisher.getRepo();
+        logger.info("git fetch");
+        git.fetch().call();
+        logger.info("git fetch finished");
+        logger.info("git reset");
+        git.reset().setMode(ResetCommand.ResetType.HARD).call();
+        logger.info("git reset finished");
         logger.trace("dir = {}", dir.getAbsoluteFile());
         if (dir.listFiles() == null) {
             return Stream.empty();
@@ -159,13 +184,14 @@ public final class RetailSalePrediction {
 
         return Stream.of(dir.listFiles())
                 .filter(File::isDirectory)
+                .filter(realmDir -> !realm.isPresent() || realmDir.getName().equals(realm.get()))
                 .map(File::listFiles)
                 .flatMap(Stream::of)
                 .filter(File::isFile)
                 .filter(f -> f.getName().startsWith(fileNameStartWith))
                 .map(file -> {
                     try {
-                        return GitHubPublisher.getAllVersions(git, dirName + "/" + realm + "/" + file.getName());
+                        return GitHubPublisher.getAllVersions(git, dirName + "/" + realm.orElse(new File(file.getParent()).getName()) + "/" + file.getName());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
                         return null;
@@ -177,73 +203,81 @@ public final class RetailSalePrediction {
                 ;
     }
 
-    public static Set<RetailAnalytics> getAllRetailAnalytics() throws IOException, GitAPIException {
-        final Set<RetailAnalytics> set = new HashSet<>();
-        final File dir = new File(GitHubPublisher.localPath + Wizard.by_trade_at_cities + File.separator);
-        final Git git = GitHubPublisher.getRepo();
-        final List<Product> products = getAllProducts(dir);
-        logger.trace("dir = {}", dir.getAbsoluteFile());
-//        final Set<String> productCategories = products.stream().map(Product::getProductCategory).collect(Collectors.toSet());
-        for (final File realmDir : dir.listFiles()) {
-            if (realmDir.isDirectory()) {
-                for (final File file : realmDir.listFiles()) {
-                    if (file.isFile() && file.getName().startsWith(RETAIL_ANALYTICS_)) {
-                        final List<FileVersion> list = GitHubPublisher.getAllVersions(git, Wizard.by_trade_at_cities + "/" + realmDir.getName() + "/" + file.getName());
-                        final String productId = Utils.getLastBySep(FilenameUtils.removeExtension(file.getName()), "_");
-                        final Product product = products.stream().filter(p -> p.getId().equals(productId)).findFirst().get();
-                        for (final FileVersion fileVersion : list) {
-                            try {
-                                final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), RetailAnalytics[].class);
-                                for (final RetailAnalytics ra : arr) {
+    public static Stream<RetailAnalytics> getAllRetailAnalytics(final String fileNameStartWith) throws IOException, GitAPIException {
+        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.empty())
+                .map(fileVersion -> {
+                    try {
+                        final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), RetailAnalytics[].class);
+                        return Stream.of(arr)
+                                .filter(ra -> ra.getProductId() != null)
+                                .map(ra -> {
                                     ra.setDate(fileVersion.getDate());
-                                    //раньше посетители были числом, теперь как объем продаж, например "менее 50"
-                                    if (ra.getVisitorsCount().contains(" ")) {
-                                        set.add(RetailAnalytics.fillProductId(product.getId(), product.getProductCategory(), ra));
-                                    }
-                                }
-                            } catch (final Exception e) {
-                                logger.error(e.getLocalizedMessage(), e);
-                            }
-                        }
+                                    return ra;
+                                })
+                                .collect(toList());
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
                     }
-                }
-            }
-        }
-        return set;
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream);
     }
 
-    public static void createCommonPrediction() throws IOException, GitAPIException {
-        final Set<RetailAnalytics> set = getAllRetailAnalytics();
-        logger.info("set.size() = " + set.size());
+    public static void createCommonPrediction(final String productID) throws IOException, GitAPIException {
+        logger.info("productID = {}", productID);
+        final Set<RetailAnalytics> set = getAllRetailAnalytics(RETAIL_ANALYTICS_ + productID)
+                .filter(ra -> ra.getShopSize() == 100 || ra.getShopSize() == 500 || ra.getShopSize() == 1_000 || ra.getShopSize() == 10_000 || ra.getShopSize() == 100_000)
+                .filter(ra -> ra.getSellVolumeNumber() > 0)
+                .filter(ra -> ra.getMarketIdx().isEmpty() || ra.getMarketIdx().equals("E"))
+                .collect(toSet());
+        logger.info("set.size() = {}", set.size());
 
         if (!set.isEmpty()) {
             //группируем аналитику по товарам и сохраняем
-            final Map<String, List<RetailAnalytics>> retailAnalyticsHist = set.parallelStream()
-                    .filter(ra -> ra.getNotoriety() >= 100)
-                    .collect(Collectors.groupingBy(RetailAnalytics::getProductId));
+//            final Map<String, List<RetailAnalytics>> retailAnalyticsHist = set.parallelStream()
+//                    .filter(ra -> ra.getNotoriety() >= 100)
+//                    .collect(Collectors.groupingBy(RetailAnalytics::getProductId));
 
-            final ExclusionStrategy es = new HistAnalytExclStrat();
-            for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalyticsHist.entrySet()) {
-                final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator
-                        + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
-                Utils.writeToGson(fileNamePath, squeeze(entry.getValue()), es);
-            }
-//            final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
+//            final ExclusionStrategy es = new HistAnalytExclStrat();
+//            for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalyticsHist.entrySet()) {
+//                final String fileNamePath = GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator
+//                        + RetailSalePrediction.RETAIL_ANALYTICS_HIST + File.separator + entry.getKey() + ".json";
+//                Utils.writeToGson(fileNamePath, squeeze(entry.getValue()), es);
+//            }
+            final Set<String> productIds = set.parallelStream().map(RetailAnalytics::getProductId).collect(Collectors.toSet());
+            final Set<String> productCategories = set.parallelStream().map(RetailAnalytics::getProductCategory).collect(Collectors.toSet());
             try {
-//                final Instances trainingSet = createTrainingSet(set, productIds, productCategories);
-                //
-//                final ArffSaver saver = new ArffSaver();
-//                saver.setInstances(trainingSet);
-//                saver.setFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff"));
-//                saver.writeBatch();
+                final Instances trainingSet = createTrainingSet(set, productIds, productCategories);
+
+//                final Standardize standardize = new Standardize();
+//                standardize.setInputFormat(trainingSetRaw);
+//                final Instances trainingSet = Filter.useFilter(trainingSetRaw, standardize);
+
+                final ArffSaver saver = new ArffSaver();
+                saver.setInstances(trainingSet);
+                saver.setFile(new File(Utils.getDir() + WEKA + File.separator + "common_" + productID + ".arff"));
+                saver.writeBatch();
+
+                final CSVSaver saverCsv = new CSVSaver();
+                saverCsv.setInstances(trainingSet);
+                saverCsv.setFile(new File(Utils.getDir() + WEKA + File.separator + "common_" + productID + ".csv"));
+                saverCsv.writeBatch();
 //                final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff");
 //                file.delete();
 
-                //trainLibSvm(trainingSet);
+//                trainLinearRegression(trainingSet);
+//                trainRandomCommittee(trainingSet);
+//                trainDecisionTable(trainingSet);
+//                trainMultilayerPerceptron(trainingSet);
+
+//                trainRandomForest(trainingSet);
+//                trainRandomTree(trainingSet);
+//                trainLibSvm(trainingSet);
 //                logger.info("begin trainJ48BySet");
 //                trainJ48BySet(trainingSet);
 //                logger.info("end trainJ48BySet");
-
+//
 //                logger.info("begin trainJ48CrossValidation");
 //                trainJ48CrossValidation(trainingSet);
 //                logger.info("end trainJ48CrossValidation");
@@ -252,6 +286,7 @@ public final class RetailSalePrediction {
                 final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
                 Utils.writeToGson(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
             } catch (final Exception e) {
+                logger.info("productID = {}", productID);
                 logger.error(e.getLocalizedMessage(), e);
             }
         }
@@ -314,6 +349,138 @@ public final class RetailSalePrediction {
         return result;
     }
 
+    public static void trainRandomCommittee(final Instances trainingSet) throws Exception {
+        logger.info("Create a classifier");
+        final RandomTree classifier = new RandomTree();
+        classifier.setKValue(0);
+        classifier.setMaxDepth(0);
+        classifier.setMinNum(0.001);
+        classifier.setAllowUnclassifiedInstances(false);
+        classifier.setNumFolds(0);
+
+        final RandomCommittee tree = new RandomCommittee();
+        tree.setClassifier(classifier);
+        tree.setNumIterations(10);
+        tree.buildClassifier(trainingSet);
+
+        logger.info("Test the model");
+        final Evaluation eval = new Evaluation(trainingSet);
+//        eval.crossValidateModel(tree, trainingSet, 10, new Random(1));
+        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+        logger.info(tree.toString());
+        logger.info(eval.toMatrixString());
+        logger.info(eval.toClassDetailsString());
+        logger.info(eval.toCumulativeMarginDistributionString());
+
+//        logger.info("coefficients");
+//        for(int i = 0; i < tree.coefficients().length; ++i){
+//            logger.info("{} | {}", trainingSet.attribute(i).name(), tree.coefficients()[i]);
+//        }
+
+//        try {
+//            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
+//            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
+//        } catch (final Exception e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
+    }
+
+    public static void trainLinearRegression(final Instances trainingSet) throws Exception {
+        logger.info("Create a classifier");
+        final LinearRegression tree = new LinearRegression();
+        tree.buildClassifier(trainingSet);
+
+        logger.info("Test the model");
+        final Evaluation eval = new Evaluation(trainingSet);
+        eval.crossValidateModel(tree, trainingSet, 10, new Random(1));
+//        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+//        logger.info(LinearRegressionToJson.toString(tree));
+        logger.info(LinearRegressionToJson.toJson(tree));
+
+
+//        try {
+//            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
+//            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
+//        } catch (final Exception e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
+    }
+
+    public static void trainDecisionTable(final Instances trainingSet) throws Exception {
+        // Create a classifier
+        final DecisionTable tree = new DecisionTable();
+        tree.buildClassifier(trainingSet);
+
+        // Test the model
+        final Evaluation eval = new Evaluation(trainingSet);
+//        eval.crossValidateModel(tree, trainingSet, 10, new Random(1));
+        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+        logger.info(tree.toString());
+
+//        try {
+//            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
+//            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
+//        } catch (final Exception e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
+    }
+
+    public static void trainMultilayerPerceptron(final Instances trainingSet) throws Exception {
+        // Create a classifier
+        final MultilayerPerceptron tree = new MultilayerPerceptron();
+        tree.buildClassifier(trainingSet);
+
+        // Test the model
+        final Evaluation eval = new Evaluation(trainingSet);
+//        eval.crossValidateModel(tree, trainingSet, 10, new Random(1));
+        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+        logger.info(eval.toMatrixString());
+        logger.info(tree.toString());
+    }
+
+    public static void trainRandomTree(final Instances trainingSet) throws Exception {
+        // Create a classifier
+        final RandomTree tree = new RandomTree();
+        tree.buildClassifier(trainingSet);
+
+        // Test the model
+        final Evaluation eval = new Evaluation(trainingSet);
+        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+        logger.info(eval.toMatrixString());
+        logger.info(tree.toString());
+    }
+
+    public static void trainRandomForest(final Instances trainingSet) throws Exception {
+        // Create a classifier
+        final RandomForest tree = new RandomForest();
+        tree.buildClassifier(trainingSet);
+
+        // Test the model
+        final Evaluation eval = new Evaluation(trainingSet);
+//        eval.crossValidateModel(tree, trainingSet, 10, new Random(1));
+        eval.evaluateModel(tree, trainingSet);
+
+        // Print the result à la Weka explorer:
+        logger.info(eval.toSummaryString());
+        logger.info(eval.toMatrixString());
+        logger.info(tree.toString());
+    }
+
     public static void trainLibSvm(final Instances trainingSet) throws Exception {
         // Create a classifier
         final LibSVM tree = new LibSVM();
@@ -321,7 +488,8 @@ public final class RetailSalePrediction {
 
         // Test the model
         final Evaluation eval = new Evaluation(trainingSet);
-        eval.evaluateModel(tree, trainingSet);
+        eval.crossValidateModel(tree, trainingSet, 10, new Random(1));
+        //eval.evaluateModel(tree, trainingSet);
 
         // Print the result à la Weka explorer:
         logger.info(eval.toSummaryString());
@@ -341,18 +509,19 @@ public final class RetailSalePrediction {
 
         // Test the model
         final Evaluation eval = new Evaluation(trainingSet);
-        eval.evaluateModel(tree, trainingSet);
+        eval.crossValidateModel(tree, trainingSet, 10, new Random(1));
+        //eval.evaluateModel(tree, trainingSet);
 
         // Print the result à la Weka explorer:
         logger.info(eval.toSummaryString());
-        FileUtils.writeStringToFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_summary.txt"), eval.toSummaryString());
+//        FileUtils.writeStringToFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_summary.txt"), eval.toSummaryString());
 
-        try {
-            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
-            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
-        } catch (final Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
+//        try {
+//            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
+//            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
+//        } catch (final Exception e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
     }
 
     public static void trainJ48CrossValidation(final Instances trainingSet) throws Exception {
@@ -377,12 +546,12 @@ public final class RetailSalePrediction {
         tree.buildClassifier(trainingSet);
 //                logger.info(tree.graph());
 
-        try {
-            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_cv_script.js");
-            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonByCV")), "UTF-8");
-        } catch (final Exception e) {
-            logger.error(e.getLocalizedMessage(), e);
-        }
+//        try {
+//            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_cv_script.js");
+//            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonByCV")), "UTF-8");
+//        } catch (final Exception e) {
+//            logger.error(e.getLocalizedMessage(), e);
+//        }
     }
 
     public static void createPrediction(final String realm, final Map<String, Set<RetailAnalytics>> retailAnalytics, final Set<String> productIds, final Set<String> productCategories) throws IOException {
@@ -417,7 +586,8 @@ public final class RetailSalePrediction {
 
                 // TestWeka the model
                 final Evaluation eTest = new Evaluation(trainingSet);
-                eTest.evaluateModel(tree, trainingSet);
+                eTest.crossValidateModel(tree, trainingSet, 10, new Random(1));
+                //eTest.evaluateModel(tree, trainingSet);
 
                 // Print the result à la Weka explorer:
                 logger.info(eTest.toSummaryString());
@@ -479,14 +649,14 @@ public final class RetailSalePrediction {
                 sizes.addElement("100000");
 
                 attrs.addElement(new Attribute(attr.name(), sizes));
-            } else if (attr.ordinal() == ATTR.PRODUCT_ID.ordinal()) {
-                final FastVector fv = new FastVector(productIds.size());
-                productIds.forEach(fv::addElement);
-                attrs.addElement(new Attribute(attr.name(), fv));
-            } else if (attr.ordinal() == ATTR.PRODUCT_CATEGORY.ordinal()) {
-                final FastVector fv = new FastVector(productCategories.size());
-                productCategories.forEach(fv::addElement);
-                attrs.addElement(new Attribute(attr.name(), fv));
+//            } else if (attr.ordinal() == ATTR.PRODUCT_ID.ordinal()) {
+//                final FastVector fv = new FastVector(productIds.size());
+//                productIds.forEach(fv::addElement);
+//                attrs.addElement(new Attribute(attr.name(), fv));
+//            } else if (attr.ordinal() == ATTR.PRODUCT_CATEGORY.ordinal()) {
+//                final FastVector fv = new FastVector(productCategories.size());
+//                productCategories.forEach(fv::addElement);
+//                attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.DEPARTMENT_COUNT.ordinal()) {
                 final int maxDepCnt = retailAnalytics.parallelStream().max((o1, o2) -> o1.getDepartmentCount() - o2.getDepartmentCount()).get().getDepartmentCount();
                 logger.info("maxDepCnt =  {}", maxDepCnt);
@@ -503,7 +673,7 @@ public final class RetailSalePrediction {
                     fv.addElement(i + "");
                 }
                 attrs.addElement(new Attribute(attr.name(), fv));
-            } else if (attr.ordinal() == ATTR.SELL_VOLUME.ordinal() || attr.ordinal() == ATTR.VISITORS_COUNT.ordinal()) {
+            } else if (attr.ordinal() == ATTR.VISITORS_COUNT.ordinal()) {
                 final FastVector values = new FastVector(numbers.length * words.length + 2);
                 values.addElement("менее 50");
                 values.addElement("около 50");
@@ -520,7 +690,8 @@ public final class RetailSalePrediction {
         }
         final Instances trainingSet = new Instances("RetailSalePrediction", attrs, retailAnalytics.size());
         // Set class index (ATTR.SELL_VOLUME.ordinal())
-        trainingSet.setClassIndex(ATTR.SELL_VOLUME.ordinal());
+//        trainingSet.setClassIndex(ATTR.SELL_VOLUME_NUMBER.ordinal());
+        trainingSet.setClassIndex(ATTR.PRICE.ordinal());
 
         for (final RetailAnalytics ra : retailAnalytics) {
             try {
@@ -544,18 +715,18 @@ public final class RetailSalePrediction {
         instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_PRICE.ordinal()), retailAnalytics.getLocalPrice());
         instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_QUALITY.ordinal()), retailAnalytics.getLocalQuality());
 
-        try {
-            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_ID.ordinal()), retailAnalytics.getProductId());
-        } catch (final Exception e) {
-            logger.info("retailAnalytics.getProductId() = '{}'", retailAnalytics.getProductId());
-            throw e;
-        }
-        try {
-            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_CATEGORY.ordinal()), retailAnalytics.getProductCategory());
-        } catch (final Exception e) {
-            logger.info("retailAnalytics.getProductCategory() = '{}'", retailAnalytics.getProductCategory());
-            throw e;
-        }
+//        try {
+//            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_ID.ordinal()), retailAnalytics.getProductId());
+//        } catch (final Exception e) {
+//            logger.info("retailAnalytics.getProductId() = '{}'", retailAnalytics.getProductId());
+//            throw e;
+//        }
+//        try {
+//            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_CATEGORY.ordinal()), retailAnalytics.getProductCategory());
+//        } catch (final Exception e) {
+//            logger.info("retailAnalytics.getProductCategory() = '{}'", retailAnalytics.getProductCategory());
+//            throw e;
+//        }
         try {
             instance.setValue((Attribute) attrs.elementAt(ATTR.SHOP_SIZE.ordinal()), retailAnalytics.getShopSize() + "");
         } catch (final Exception e) {
@@ -597,18 +768,18 @@ public final class RetailSalePrediction {
         instance.setValue((Attribute) attrs.elementAt(ATTR.BRAND.ordinal()), retailAnalytics.getBrand());
         instance.setValue((Attribute) attrs.elementAt(ATTR.PRICE.ordinal()), retailAnalytics.getPrice());
         instance.setValue((Attribute) attrs.elementAt(ATTR.QUALITY.ordinal()), retailAnalytics.getQuality());
-        try {
-            instance.setValue((Attribute) attrs.elementAt(ATTR.SELL_VOLUME.ordinal()), retailAnalytics.getSellVolume());
-        } catch (final Exception e) {
-            logger.info("retailAnalytics.getSellVolume() = '{}'", retailAnalytics.getSellVolume());
-            throw e;
-        }
+        instance.setValue((Attribute) attrs.elementAt(ATTR.SELL_VOLUME_NUMBER.ordinal()), retailAnalytics.getSellVolumeNumber());
+
         return instance;
     }
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-
-        createCommonPrediction();
+//        createCommonPrediction("");
+        createCommonPrediction("1490");
+//        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, "olga");
+//        for (final Product product : products) {
+//            createCommonPrediction(product.getId());
+//        }
     }
 }
