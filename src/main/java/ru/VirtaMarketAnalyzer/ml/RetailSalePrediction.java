@@ -83,7 +83,7 @@ public final class RetailSalePrediction {
         LOCAL_PRICE, LOCAL_QUALITY,
         SHOP_SIZE, TOWN_DISTRICT, DEPARTMENT_COUNT,
         BRAND, QUALITY, NOTORIETY, VISITORS_COUNT,
-        SERVICE_LEVEL, SELLER_COUNT, PRODUCT_ID, PRODUCT_CATEGORY,
+        SERVICE_LEVEL, SELLER_COUNT, PRODUCT_ID, //PRODUCT_CATEGORY,
         SELL_VOLUME_NUMBER,
         //последний для автоподстановки при открытии в weka
         PRICE;
@@ -639,6 +639,8 @@ public final class RetailSalePrediction {
                 districts.addElement("Спальный район");
                 districts.addElement("Пригород");
                 districts.addElement("Окраина");
+                //заправки
+                districts.addElement("");
 
                 attrs.addElement(new Attribute(attr.name(), districts));
             } else if (attr.ordinal() == ATTR.SERVICE_LEVEL.ordinal()) {
@@ -671,10 +673,10 @@ public final class RetailSalePrediction {
                 final FastVector fv = new FastVector(productIds.size());
                 productIds.forEach(fv::addElement);
                 attrs.addElement(new Attribute(attr.name(), fv));
-            } else if (attr.ordinal() == ATTR.PRODUCT_CATEGORY.ordinal()) {
-                final FastVector fv = new FastVector(productCategories.size());
-                productCategories.forEach(fv::addElement);
-                attrs.addElement(new Attribute(attr.name(), fv));
+//            } else if (attr.ordinal() == ATTR.PRODUCT_CATEGORY.ordinal()) {
+//                final FastVector fv = new FastVector(productCategories.size());
+//                productCategories.forEach(fv::addElement);
+//                attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.DEPARTMENT_COUNT.ordinal()) {
                 final int maxDepCnt = retailAnalytics.parallelStream().max((o1, o2) -> o1.getDepartmentCount() - o2.getDepartmentCount()).get().getDepartmentCount();
                 logger.info("maxDepCnt =  {}", maxDepCnt);
@@ -733,12 +735,12 @@ public final class RetailSalePrediction {
         instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_PRICE.ordinal()), retailAnalytics.getLocalPrice());
         instance.setValue((Attribute) attrs.elementAt(ATTR.LOCAL_QUALITY.ordinal()), retailAnalytics.getLocalQuality());
 
-//        try {
-//            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_ID.ordinal()), retailAnalytics.getProductId());
-//        } catch (final Exception e) {
-//            logger.info("retailAnalytics.getProductId() = '{}'", retailAnalytics.getProductId());
-//            throw e;
-//        }
+        try {
+            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_ID.ordinal()), retailAnalytics.getProductId());
+        } catch (final Exception e) {
+            logger.info("retailAnalytics.getProductId() = '{}'", retailAnalytics.getProductId());
+            throw e;
+        }
 //        try {
 //            instance.setValue((Attribute) attrs.elementAt(ATTR.PRODUCT_CATEGORY.ordinal()), retailAnalytics.getProductCategory());
 //        } catch (final Exception e) {
