@@ -93,7 +93,9 @@ public final class RetailAnalytics {
         return townDistrict
                 .replace("Outskirts", "Окраина")
                 .replace("Suburb", "Пригород")
+                .replace("Arrabal", "Пригород")
                 .replace("城市中心", "Центр города")
+                .replace("Centre de ville", "Центр города")
                 .replace("City center", "Центр города")
                 .replace("City centre", "Центр города")
                 .replace("Центр міста", "Центр города")
@@ -103,6 +105,8 @@ public final class RetailAnalytics {
                 .replace("Residential area", "Спальный район")
                 .replace("Área residencial", "Спальный район")
                 .replace("Elitesbezirk", "Фешенебельный район")
+                .replace("Arrondissement fashionable", "Фешенебельный район")
+                .replace("Prestigioso distrito", "Фешенебельный район")
                 .replace("Trendy neighborhood", "Фешенебельный район")
                 .replace("Фешенебельний район", "Фешенебельный район");
     }
