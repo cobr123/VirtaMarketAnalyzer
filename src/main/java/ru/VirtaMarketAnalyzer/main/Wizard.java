@@ -8,6 +8,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
+import ru.VirtaMarketAnalyzer.ml.LinearRegressionSummary;
 import ru.VirtaMarketAnalyzer.ml.PrepareAnalitics;
 import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 import ru.VirtaMarketAnalyzer.parser.*;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.PRODUCT_REMAINS_;
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
+import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.WEKA;
 
 /**
  * Created by cobr123 on 25.04.2015.
@@ -50,10 +52,13 @@ public final class Wizard {
         realms.add("fast");
         realms.add("olga");
         realms.add("vera");
+        final Set<Product> products = new HashSet<>();
         for (final String realm : realms) {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
             collectToJsonTech(realm);
+
+            products.addAll(ProductInitParser.getTradingProducts(Wizard.host, realm));
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
@@ -64,10 +69,15 @@ public final class Wizard {
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
         //собираем данные со всех реалмов и продуктов
-        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, "olga");
+        final List<LinearRegressionSummary> summaries = new ArrayList<>();
+        int iter = 1;
+        int total = products.size();
         for (final Product product : products) {
-            RetailSalePrediction.createCommonPrediction(product.getId());
+            logger.info("{}/{}", iter, total);
+            summaries.add(RetailSalePrediction.createCommonPrediction(product.getId()));
+            ++iter;
         }
+        Utils.writeToGson(Utils.getDir() + WEKA + File.separator  + "summaries.json", summaries);
         //публикуем на сайте
 //        GitHubPublisher.publishPredictions();
     }
@@ -202,7 +212,7 @@ public final class Wizard {
         logger.info("собираем данные из магазинов");
         final List<Shop> shops = TopRetailParser.getShopList(realm, stats, products);
         logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
-        final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, products);
+        final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, products, cities);
         for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
             Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
         }
