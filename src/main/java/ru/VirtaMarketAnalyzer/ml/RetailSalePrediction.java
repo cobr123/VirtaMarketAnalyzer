@@ -1,9 +1,7 @@
 package ru.VirtaMarketAnalyzer.ml;
 
-import com.google.gson.ExclusionStrategy;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -15,21 +13,16 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
-import ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs;
 import ru.VirtaMarketAnalyzer.ml.js.LinearRegressionToJson;
 import ru.VirtaMarketAnalyzer.parser.ProductInitParser;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.GaussianProcesses;
 import weka.classifiers.functions.LibSVM;
 import weka.classifiers.functions.LinearRegression;
 import weka.classifiers.functions.MultilayerPerceptron;
-import weka.classifiers.meta.Bagging;
-import weka.classifiers.meta.MultiBoostAB;
 import weka.classifiers.meta.RandomCommittee;
 import weka.classifiers.rules.DecisionTable;
 import weka.classifiers.trees.J48;
-import weka.classifiers.trees.M5P;
 import weka.classifiers.trees.RandomForest;
 import weka.classifiers.trees.RandomTree;
 import weka.core.Attribute;
@@ -38,14 +31,11 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVSaver;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Standardize;
 
 import java.io.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,7 +74,7 @@ public final class RetailSalePrediction {
         SHOP_SIZE, TOWN_DISTRICT, DEPARTMENT_COUNT,
         BRAND, QUALITY, NOTORIETY, VISITORS_COUNT,
         SERVICE_LEVEL, SELLER_COUNT, PRODUCT_ID, //PRODUCT_CATEGORY,
-        SELL_VOLUME_NUMBER,
+        SELL_VOLUME_NUMBER, DEMOGRAPHY,
         //последний для автоподстановки при открытии в weka
         PRICE;
 
@@ -199,8 +189,7 @@ public final class RetailSalePrediction {
                 })
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
-                .parallel()
-                ;
+                .parallel();
         logger.info("getAllVersions done");
         return stream;
     }
@@ -229,7 +218,7 @@ public final class RetailSalePrediction {
         return stream;
     }
 
-    public static void createCommonPrediction(final String productID) throws IOException, GitAPIException {
+    public static LinearRegressionSummary createCommonPrediction(final String productID) throws IOException, GitAPIException {
         logger.info("productID = {}", productID);
         final Set<RetailAnalytics> set = getAllRetailAnalytics(RETAIL_ANALYTICS_ + productID)
                 .filter(ra -> productID.isEmpty() || ra.getProductId().equals(productID))
@@ -276,7 +265,7 @@ public final class RetailSalePrediction {
 //                final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + WEKA + File.separator + "common.arff");
 //                file.delete();
 
-//                trainLinearRegression(trainingSet);
+                final LinearRegressionSummary summary = trainLinearRegression(trainingSet, productID);
 //                trainRandomCommittee(trainingSet);
 //                trainDecisionTable(trainingSet);
 //                trainMultilayerPerceptron(trainingSet);
@@ -295,11 +284,14 @@ public final class RetailSalePrediction {
                 //запоминаем дату обновления данных
                 final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
                 Utils.writeToGson(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
+
+                return summary;
             } catch (final Exception e) {
                 logger.info("productID = {}", productID);
                 logger.error(e.getLocalizedMessage(), e);
             }
         }
+        return null;
     }
 
     /**
@@ -398,7 +390,7 @@ public final class RetailSalePrediction {
 //        }
     }
 
-    public static void trainLinearRegression(final Instances trainingSet) throws Exception {
+    public static LinearRegressionSummary trainLinearRegression(final Instances trainingSet, final String productID) throws Exception {
         logger.info("Create a classifier");
         final LinearRegression tree = new LinearRegression();
         tree.setEliminateColinearAttributes(true);
@@ -410,17 +402,31 @@ public final class RetailSalePrediction {
         eval.evaluateModel(tree, trainingSet);
 
         // Print the result à la Weka explorer:
-        logger.info(eval.toSummaryString());
-//        logger.info(LinearRegressionToJson.toString(tree));
-        logger.info(LinearRegressionToJson.toJson(tree));
+//        logger.info(eval.toSummaryString());
+//        logger.info(tree.toString());
+//        logger.info(LinearRegressionToJson.toJson(tree));
 
-
-//        try {
-//            final File file = new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_set_script.js");
-//            FileUtils.writeStringToFile(file, ClassifierToJs.compress(ClassifierToJs.toSource(tree, "predictCommonBySet")), "UTF-8");
-//        } catch (final Exception e) {
-//            logger.error(e.getLocalizedMessage(), e);
-//        }
+        try {
+            final File file = new File(Utils.getDir() + WEKA + File.separator + "coefficients" + File.separator + productID + ".json");
+            FileUtils.writeStringToFile(file, LinearRegressionToJson.toJson(tree), "UTF-8");
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        try {
+            final File file = new File(Utils.getDir() + WEKA + File.separator + "coefficients" + File.separator + productID + ".summary.txt");
+            FileUtils.writeStringToFile(file, eval.toSummaryString(), "UTF-8");
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return new LinearRegressionSummary(
+                productID
+                , eval.correlationCoefficient()
+                , eval.meanAbsoluteError()
+                , eval.rootMeanSquaredError()
+                , eval.relativeAbsoluteError()
+                , eval.rootRelativeSquaredError()
+                , eval.numInstances()
+        );
     }
 
     public static void trainDecisionTable(final Instances trainingSet) throws Exception {
@@ -552,7 +558,7 @@ public final class RetailSalePrediction {
         //random seed
         eval.crossValidateModel(tree, trainingSet, 10, new Random(new Date().getTime()));
         logger.info(eval.toSummaryString());
-        FileUtils.writeStringToFile(new File(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_cv_summary.txt"), eval.toSummaryString());
+        Utils.writeFile(GitHubPublisher.localPath + RetailSalePrediction.predict_retail_sales + File.separator + "prediction_cv_summary.txt", eval.toSummaryString());
 
         tree.buildClassifier(trainingSet);
 //                logger.info(tree.graph());
@@ -695,13 +701,18 @@ public final class RetailSalePrediction {
                 attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.VISITORS_COUNT.ordinal()) {
                 final FastVector values = new FastVector(numbers.length * words.length + 2);
-                values.addElement("менее 50");
-                values.addElement("около 50");
-                for (final String number : numbers) {
-                    for (final String word : words) {
-                        values.addElement(word + " " + number);
-                    }
-                }
+                retailAnalytics.stream()
+                        .map(RetailAnalytics::getVisitorsCount)
+                        .distinct()
+                        .forEach(values::addElement);
+
+//                values.addElement("менее 50");
+//                values.addElement("около 50");
+//                for (final String number : numbers) {
+//                    for (final String word : words) {
+//                        values.addElement(word + " " + number);
+//                    }
+//                }
 
                 attrs.addElement(new Attribute(attr.name(), values));
             } else {
@@ -789,17 +800,22 @@ public final class RetailSalePrediction {
         instance.setValue((Attribute) attrs.elementAt(ATTR.PRICE.ordinal()), retailAnalytics.getPrice());
         instance.setValue((Attribute) attrs.elementAt(ATTR.QUALITY.ordinal()), retailAnalytics.getQuality());
         instance.setValue((Attribute) attrs.elementAt(ATTR.SELL_VOLUME_NUMBER.ordinal()), retailAnalytics.getSellVolumeNumber());
+        instance.setValue((Attribute) attrs.elementAt(ATTR.DEMOGRAPHY.ordinal()), retailAnalytics.getDemography());
 
         return instance;
     }
 
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        createCommonPrediction("");
+//        createCommonPrediction("");
 //        createCommonPrediction("1490");
-//        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, "olga");
-//        for (final Product product : products) {
-//            createCommonPrediction(product.getId());
-//        }
+//        createCommonPrediction("422705");
+        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, "olga");
+        final List<LinearRegressionSummary> summaries = new ArrayList<>();
+        for (int i = 0, productsSize = products.size(); i < productsSize; i++) {
+            logger.info("{}/{}", i, productsSize);
+            summaries.add(RetailSalePrediction.createCommonPrediction(products.get(i).getId()));
+        }
+        Utils.writeToGson(Utils.getDir() + WEKA + File.separator  + "summaries.json", summaries);
     }
 }
