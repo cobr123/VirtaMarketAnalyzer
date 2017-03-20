@@ -225,6 +225,7 @@ public final class RetailSalePrediction {
                 //.filter(ra -> ra.getShopSize() == 100 || ra.getShopSize() == 500 || ra.getShopSize() == 1_000 || ra.getShopSize() == 10_000 || ra.getShopSize() == 100_000)
                 .filter(ra -> ra.getShopSize() > 0)
                 .filter(ra -> ra.getSellVolumeNumber() > 0)
+                .filter(ra -> ra.getDemography() > 0)
                 .filter(ra -> ra.getMarketIdx().isEmpty() || ra.getMarketIdx().equals("E"))
                 .collect(toSet());
         logger.info("set.size() = {}", set.size());
