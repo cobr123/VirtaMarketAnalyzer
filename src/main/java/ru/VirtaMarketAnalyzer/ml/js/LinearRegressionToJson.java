@@ -70,8 +70,8 @@ public final class LinearRegressionToJson {
         text.append(m_TransformedData.classAttribute().name() + " =\n\n");
 
         json.append("{");
-        json.append("\"" + m_TransformedData.classAttribute().name() + "\": {");
-        json.append("\"attrs\": [");
+        json.append("\"name\": \"" + m_TransformedData.classAttribute().name() + "\"");
+        json.append(",\"attrs\": [");
         for (int i = 0; i < m_TransformedData.numAttributes(); i++) {
             if ((i != m_ClassIndex) && (m_SelectedAttributes[i])) {
                 if (!first) {
@@ -111,9 +111,8 @@ public final class LinearRegressionToJson {
         json.append("]");
         json.append(",\"coef\": " + Utils.doubleToString(m_Coefficients[column], 12, 4).trim());
         json.append("}");
-        json.append("}");
         text.append(" +\n" + Utils.doubleToString(m_Coefficients[column], 12, 4));
-        logger.info(json.toString());
-        return text.toString();
+        //logger.info(json.toString());
+        return json.toString();
     }
 }
