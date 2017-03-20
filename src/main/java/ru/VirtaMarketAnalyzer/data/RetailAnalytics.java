@@ -55,6 +55,9 @@ public final class RetailAnalytics {
     final private double localPrice;
     @SerializedName("lq")
     final private double localQuality;
+    @SerializedName("d")
+    final private int demography;
+
     transient final private long sellVolumeAsNumber;
     transient private Date date;
 
@@ -63,7 +66,7 @@ public final class RetailAnalytics {
                            final String sellVolume, final double price, final double quality, final double brand, final double marketShare,
                            final double wealthIndex, final double educationIndex, final double averageSalary,
                            final String marketIdx, final long marketVolume, final int sellerCnt, final double localPercent,
-                           final double localPrice, final double localQuality) {
+                           final double localPrice, final double localQuality, final int demography) {
         this.productId = productId;
         this.productCategory = productCategory;
         this.shopSize = shopSize;
@@ -87,6 +90,7 @@ public final class RetailAnalytics {
         this.localPrice = localPrice;
         this.localQuality = localQuality;
         this.sellVolumeAsNumber = calcSellVolumeAsNumber();
+        this.demography = demography;
     }
 
     public static String fixTownDistrict(final String townDistrict) {
@@ -137,6 +141,7 @@ public final class RetailAnalytics {
         this.localQuality = ra.localQuality;
         this.sellVolumeAsNumber = calcSellVolumeAsNumber();
         this.date = ra.date;
+        this.demography = ra.demography;
     }
 
     public static RetailAnalytics fillProductId(final String productId, final String productCategory, final RetailAnalytics ra) {
@@ -176,6 +181,7 @@ public final class RetailAnalytics {
                 .append(localPercent)
                 .append(localPrice)
                 .append(localQuality)
+                .append(demography)
                 .toHashCode();
     }
 
@@ -206,6 +212,7 @@ public final class RetailAnalytics {
                     .append(localPercent, other.localPercent)
                     .append(localPrice, other.localPrice)
                     .append(localQuality, other.localQuality)
+                    .append(demography, other.demography)
                     .isEquals();
         } else {
             return false;
@@ -321,4 +328,7 @@ public final class RetailAnalytics {
         return sellVolumeAsNumber;
     }
 
+    public int getDemography() {
+        return demography;
+    }
 }
