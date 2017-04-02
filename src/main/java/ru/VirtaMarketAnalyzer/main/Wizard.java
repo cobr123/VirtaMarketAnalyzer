@@ -68,16 +68,20 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
-        //собираем данные со всех реалмов и продуктов
-        final List<LinearRegressionSummary> summaries = new ArrayList<>();
-        int iter = 1;
-        int total = products.size();
-        for (final Product product : products) {
-            logger.info("{}/{}", iter, total);
-            summaries.add(RetailSalePrediction.createCommonPrediction(product.getId()));
-            ++iter;
+
+        final Calendar today = Calendar.getInstance();
+        if (today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+            //собираем данные со всех реалмов и продуктов
+            final List<LinearRegressionSummary> summaries = new ArrayList<>();
+            int iter = 1;
+            int total = products.size();
+            for (final Product product : products) {
+                logger.info("{}/{}", iter, total);
+                summaries.add(RetailSalePrediction.createCommonPrediction(product.getId()));
+                ++iter;
+            }
+            Utils.writeToGson(Utils.getDir() + WEKA + File.separator  + "summaries.json", summaries);
         }
-        Utils.writeToGson(Utils.getDir() + WEKA + File.separator  + "summaries.json", summaries);
         //публикуем на сайте
 //        GitHubPublisher.publishPredictions();
     }
@@ -421,32 +425,32 @@ public final class Wizard {
                 .collect(Collectors.toList());
                 ;
         final double remain = productRemainFiltered.stream()
-                .mapToDouble(pr -> (pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder())
+                .mapToDouble(ProductRemain::getRemainByMaxOrderType)
                 .sum();
         //=SUMPRODUCT(A2:A3,B2:B3)/SUM(B2:B3)
         final double quality = productRemainFiltered.stream()
-                .mapToDouble(pr -> pr.getQuality() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remain)
+                .mapToDouble(pr -> pr.getQuality() * pr.getRemainByMaxOrderType() / remain)
                 .sum();
         final double price = productRemainFiltered.stream()
-                .mapToDouble(pr -> pr.getPrice() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remain)
+                .mapToDouble(pr -> pr.getPrice() * pr.getRemainByMaxOrderType() / remain)
                 .sum();
 
         //меньше 5% общего объема группируем в одну запись
         final List<ProductRemain> productRemainOthersFiltered = productRemainFiltered.stream()
-                .filter(pr -> ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) <= remain * 0.05)
+                .filter(pr -> pr.getRemainByMaxOrderType() <= remain * 0.05)
                 .collect(Collectors.toList());
         ;
         final double totalOthers = productRemainOthersFiltered.stream()
                 .mapToDouble(ProductRemain::getTotal)
                 .sum();
         final double remainOthers = productRemainOthersFiltered.stream()
-                .mapToDouble(pr -> (pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder())
+                .mapToDouble(ProductRemain::getRemainByMaxOrderType)
                 .sum();
         final double qualityOthers = productRemainOthersFiltered.stream()
-                .mapToDouble(pr -> pr.getQuality() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remainOthers)
+                .mapToDouble(pr -> pr.getQuality() * pr.getRemainByMaxOrderType() / remainOthers)
                 .sum();
         final double priceOthers = productRemainOthersFiltered.stream()
-                .mapToDouble(pr -> pr.getPrice() * ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) / remainOthers)
+                .mapToDouble(pr -> pr.getPrice() * pr.getRemainByMaxOrderType() / remainOthers)
                 .sum();
         final ProductRemainTrendSup others = new ProductRemainTrendSup("",""
                 , totalOthers, remainOthers
@@ -454,7 +458,7 @@ public final class Wizard {
                 , ProductRemain.MaxOrderType.L, remainOthers);
 
         final List<ProductRemainTrendSup> sup = productRemainFiltered.stream()
-                .filter(pr -> ((pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()) > remain * 0.05)
+                .filter(pr -> pr.getRemainByMaxOrderType() > remain * 0.05)
                 .map(pr -> new ProductRemainTrendSup(
                         pr.getCompanyName()
                         , pr.getUnitID()
@@ -463,7 +467,7 @@ public final class Wizard {
                         , pr.getQuality()
                         , pr.getPrice()
                         , pr.getMaxOrderType()
-                        , (pr.getMaxOrderType() == ProductRemain.MaxOrderType.U) ? pr.getRemain() : pr.getMaxOrder()
+                        , pr.getRemainByMaxOrderType()
                 ))
                 .collect(Collectors.toList());
         sup.add(others);

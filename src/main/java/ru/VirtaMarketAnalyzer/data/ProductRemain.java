@@ -120,6 +120,10 @@ public final class ProductRemain {
         return maxOrderType;
     }
 
+    public double getRemainByMaxOrderType() {
+        return (getMaxOrderType() == MaxOrderType.L && getRemain() > getMaxOrder()) ? getMaxOrder() : getRemain();
+    }
+
     public Date getDate() {
         return date;
     }
