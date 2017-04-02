@@ -223,10 +223,10 @@ public final class RetailSalePrediction {
         final Set<RetailAnalytics> set = getAllRetailAnalytics(RETAIL_ANALYTICS_ + productID)
                 .filter(ra -> productID.isEmpty() || ra.getProductId().equals(productID))
                 //.filter(ra -> ra.getShopSize() == 100 || ra.getShopSize() == 500 || ra.getShopSize() == 1_000 || ra.getShopSize() == 10_000 || ra.getShopSize() == 100_000)
-                .filter(ra -> ra.getShopSize() > 0)
-                .filter(ra -> ra.getSellVolumeNumber() > 0)
-                .filter(ra -> ra.getDemography() > 0)
-                .filter(ra -> ra.getMarketIdx().isEmpty() || ra.getMarketIdx().equals("E"))
+//                .filter(ra -> ra.getShopSize() > 0)
+//                .filter(ra -> ra.getSellVolumeNumber() > 0)
+//                .filter(ra -> ra.getDemography() > 0)
+//                .filter(ra -> ra.getMarketIdx().isEmpty() || ra.getMarketIdx().equals("E"))
                 .collect(toSet());
         logger.info("set.size() = {}", set.size());
 
@@ -406,10 +406,18 @@ public final class RetailSalePrediction {
 //        logger.info(eval.toSummaryString());
 //        logger.info(tree.toString());
 //        logger.info(LinearRegressionToJson.toJson(tree));
-
+        final LinearRegressionSummary summary = new LinearRegressionSummary(
+                productID
+                , eval.correlationCoefficient()
+                , eval.meanAbsoluteError()
+                , eval.rootMeanSquaredError()
+                , eval.relativeAbsoluteError()
+                , eval.rootRelativeSquaredError()
+                , eval.numInstances()
+        );
         try {
             final File file = new File(Utils.getDir() + WEKA + File.separator + "coefficients" + File.separator + productID + ".json");
-            FileUtils.writeStringToFile(file, LinearRegressionToJson.toJson(tree), "UTF-8");
+            FileUtils.writeStringToFile(file, LinearRegressionToJson.toJson(tree, summary), "UTF-8");
         } catch (final Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
@@ -419,15 +427,13 @@ public final class RetailSalePrediction {
         } catch (final Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        return new LinearRegressionSummary(
-                productID
-                , eval.correlationCoefficient()
-                , eval.meanAbsoluteError()
-                , eval.rootMeanSquaredError()
-                , eval.relativeAbsoluteError()
-                , eval.rootRelativeSquaredError()
-                , eval.numInstances()
-        );
+        try {
+            final File file = new File(Utils.getDir() + WEKA + File.separator + "coefficients" + File.separator + productID + ".formula.txt");
+            FileUtils.writeStringToFile(file, tree.toString(), "UTF-8");
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        return summary;
     }
 
     public static void trainDecisionTable(final Instances trainingSet) throws Exception {

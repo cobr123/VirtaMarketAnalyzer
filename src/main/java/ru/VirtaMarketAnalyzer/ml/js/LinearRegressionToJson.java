@@ -3,6 +3,7 @@ package ru.VirtaMarketAnalyzer.ml.js;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.ml.LinearRegressionSummary;
 import weka.classifiers.functions.LinearRegression;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -15,43 +16,7 @@ import static ru.VirtaMarketAnalyzer.ml.js.ClassifierToJs.getPrivateFieldValue;
 public final class LinearRegressionToJson {
     private static final Logger logger = LoggerFactory.getLogger(LinearRegressionToJson.class);
 
-    public static String toString(final LinearRegression classifier) throws Exception {
-        final Instances m_TransformedData = (Instances) getPrivateFieldValue(classifier.getClass(), classifier, "m_TransformedData");
-        final int m_ClassIndex = (int) getPrivateFieldValue(classifier.getClass(), classifier, "m_ClassIndex");
-        final boolean[] m_SelectedAttributes = (boolean[]) getPrivateFieldValue(classifier.getClass(), classifier, "m_SelectedAttributes");
-        final double[] m_Coefficients = (double[]) getPrivateFieldValue(classifier.getClass(), classifier, "m_Coefficients");
-
-        if (m_TransformedData == null) {
-            return "Linear Regression: No model built yet.";
-        }
-        try {
-            StringBuffer text = new StringBuffer();
-            int column = 0;
-            boolean first = true;
-
-            text.append("\nLinear Regression Model\n\n");
-
-            text.append(m_TransformedData.classAttribute().name() + " =\n\n");
-            for (int i = 0; i < m_TransformedData.numAttributes(); i++) {
-                if ((i != m_ClassIndex) && (m_SelectedAttributes[i])) {
-                    if (!first) {
-                        text.append(" +\n");
-                    } else {
-                        first = false;
-                    }
-                    text.append(Utils.doubleToString(m_Coefficients[column], 12, 4) + " * ");
-                    text.append(m_TransformedData.attribute(i).name());
-                    column++;
-                }
-            }
-            text.append(" +\n" + Utils.doubleToString(m_Coefficients[column], 12, 4));
-            return text.toString();
-        } catch (Exception e) {
-            return "Can't print Linear Regression!";
-        }
-    }
-
-    public static String toJson(final LinearRegression classifier) throws Exception {
+    public static String toJson(final LinearRegression classifier, final LinearRegressionSummary summary) throws Exception {
         final Instances m_TransformedData = (Instances) getPrivateFieldValue(classifier.getClass(), classifier, "m_TransformedData");
         final int m_ClassIndex = (int) getPrivateFieldValue(classifier.getClass(), classifier, "m_ClassIndex");
         final boolean[] m_SelectedAttributes = (boolean[]) getPrivateFieldValue(classifier.getClass(), classifier, "m_SelectedAttributes");
@@ -67,10 +32,16 @@ public final class LinearRegressionToJson {
 
         text.append("\nLinear Regression Model\n\n");
 
-        text.append(m_TransformedData.classAttribute().name() + " =\n\n");
+        text.append(m_TransformedData.classAttribute().name()).append(" =\n\n");
 
         json.append("{");
-        json.append("\"name\": \"" + m_TransformedData.classAttribute().name() + "\"");
+        json.append("\"name\": \"").append(m_TransformedData.classAttribute().name()).append("\"");
+        json.append(",\"correlation_coefficient\": ").append(summary.getCorrelationCoefficient());
+        json.append(",\"mean_absolute_error\": ").append(summary.getMeanAbsoluteError());
+        json.append(",\"root_mean_squared_error\": ").append(summary.getRootMeanSquaredError());
+        json.append(",\"relative_absolute_error\": ").append(summary.getRelativeAbsoluteError());
+        json.append(",\"root_relative_squared_error\": ").append(summary.getRootRelativeSquaredError());
+        json.append(",\"num_instances\": ").append(summary.getNumInstances());
         json.append(",\"attrs\": [");
         for (int i = 0; i < m_TransformedData.numAttributes(); i++) {
             if ((i != m_ClassIndex) && (m_SelectedAttributes[i])) {
@@ -81,12 +52,12 @@ public final class LinearRegressionToJson {
                     first = false;
                 }
                 final String coef = Utils.doubleToString(m_Coefficients[column], 12, 4).trim();
-                text.append(coef + " * ");
+                text.append(coef).append(" * ");
                 text.append(m_TransformedData.attribute(i).name());
                 final String[] tmp = m_TransformedData.attribute(i).name().split("=");
                 final String attrName = tmp[0];
-                json.append("{\"name\": \"" + attrName + "\"");
-                json.append(",\"coef\": " + coef);
+                json.append("{\"name\": \"").append(attrName).append("\"");
+                json.append(",\"coef\": ").append(coef);
                 if (tmp.length == 1) {
                     json.append(",\"values\": []");
                 } else if (tmp.length == 2) {
@@ -98,7 +69,7 @@ public final class LinearRegressionToJson {
                         if (i1 > 0) {
                             json.append(",");
                         }
-                        json.append("\"" + value + "\"");
+                        json.append("\"").append(value).append("\"");
                     }
                     json.append("]");
                 } else {
@@ -109,9 +80,9 @@ public final class LinearRegressionToJson {
             }
         }
         json.append("]");
-        json.append(",\"coef\": " + Utils.doubleToString(m_Coefficients[column], 12, 4).trim());
+        json.append(",\"coef\": ").append(Utils.doubleToString(m_Coefficients[column], 12, 4).trim());
         json.append("}");
-        text.append(" +\n" + Utils.doubleToString(m_Coefficients[column], 12, 4));
+        text.append(" +\n").append(Utils.doubleToString(m_Coefficients[column], 12, 4));
         //logger.info(json.toString());
         return json.toString();
     }
