@@ -68,7 +68,7 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
-
+/*
         final Calendar today = Calendar.getInstance();
         if (today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
             //собираем данные со всех реалмов и продуктов
@@ -81,7 +81,7 @@ public final class Wizard {
                 ++iter;
             }
             Utils.writeToGson(Utils.getDir() + WEKA + File.separator  + "summaries.json", summaries);
-        }
+        }*/
         //публикуем на сайте
 //        GitHubPublisher.publishPredictions();
     }
