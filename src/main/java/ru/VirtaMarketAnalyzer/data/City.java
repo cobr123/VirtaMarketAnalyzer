@@ -22,11 +22,14 @@ public final class City {
     final private double averageSalary;
     @SerializedName("d")
     final private int demography;
+    @SerializedName("p")
+    final private int population;
 
     public City(final String countryId, final String regionId
             , final String id, final String caption
             , final double wealthIndex, final double educationIndex
-            , final double averageSalary, final int demography) {
+            , final double averageSalary, final int demography
+            , final int population) {
         this.countryId = countryId;
         this.regionId = regionId;
         this.id = id;
@@ -35,6 +38,7 @@ public final class City {
         this.educationIndex = educationIndex;
         this.averageSalary = averageSalary;
         this.demography = demography;
+        this.population = population;
     }
 
     public String getRegionId() {
@@ -67,5 +71,9 @@ public final class City {
 
     public int getDemography() {
         return demography;
+    }
+
+    public int getPopulation() {
+        return population;
     }
 }

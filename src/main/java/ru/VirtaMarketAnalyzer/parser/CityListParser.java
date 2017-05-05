@@ -54,11 +54,21 @@ public final class CityListParser {
             final String[] parts = town.select("tr > td:nth-child(1) > a").eq(0).attr("href").split("/");
             final String caption = town.select("tr > td:nth-child(1) > a").eq(0).text();
             final String id = parts[parts.length - 1];
+            final String population = town.select("tr > td:nth-child(2)").text();
             final String averageSalary = town.select("tr > td:nth-child(3)").text();
             final String educationIndex = town.select("tr > td:nth-child(5)").text();
             final String wealthIndex = town.select("tr > td:nth-child(6)").html();
-            final int demography = Utils.toInt(town.select("tr > td:nth-child(7)").text().replace("ths.","").replace("тыс. чел.","").replaceAll("\\s+",""));
-            cities.add(new City(region.getCountryId(), region.getId(), id, caption, Utils.toDouble(wealthIndex), Utils.toDouble(educationIndex), Utils.toDouble(averageSalary), demography));
+            final String demography = town.select("tr > td:nth-child(7)").text()
+                    .replace("ths.","")
+                    .replace("тыс. чел.","")
+                    .replaceAll("\\s+","");
+            cities.add(new City(region.getCountryId(), region.getId(), id, caption
+                    , Utils.toDouble(wealthIndex)
+                    , Utils.toDouble(educationIndex)
+                    , Utils.toDouble(averageSalary)
+                    , Utils.toInt(demography)
+                    , Utils.toInt(population)
+            ));
         });
     }
 }

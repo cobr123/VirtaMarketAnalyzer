@@ -27,7 +27,7 @@ public final class ServiceAtCityParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
         final String realm = "olga";
-        final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0,0);
+        final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0,0,0);
         final List<City> cities = new ArrayList<>();
         cities.add(city);
 

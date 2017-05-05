@@ -36,7 +36,7 @@ public final class ShopParser {
         final String url = host + realm + "/main/unit/view/6519771";
 //        Downloader.invalidateCache(url);
         final List<City> cities = new ArrayList<>();
-        cities.add(new City("422653", "422655", "422682", "Вашингтон", 0.0, 0.0, 0.0, 0));
+        cities.add(new City("422653", "422655", "422682", "Вашингтон", 0.0, 0.0, 0.0, 0,0));
         final List<Product> products = new ArrayList<>();
         products.add(ProductInitParser.getTradingProduct(host, realm, "422547"));
         products.add(ProductInitParser.getTradingProduct(host, realm, "3838"));
