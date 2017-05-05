@@ -98,7 +98,7 @@ public final class Wizard {
         final List<TechLicenseLvl> licenseAskWoBid = TechMarketAskParser.getLicenseAskWoBid(Wizard.host, realm);
         Utils.writeToGson(baseDir + "license_ask_wo_bid.json", licenseAskWoBid);
         //цены на технологии
-        final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm);
+        final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm, techList);
         Utils.writeToGson(baseDir + "technology_market.json", techLvls);
         //запоминаем дату обновления данных
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -364,8 +364,9 @@ public final class Wizard {
         final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", materials);
         Utils.writeToGson(baseDir + "product_history.json", productHistory);
         logger.info("собираем товары которые можно произвести с качеством выше среднего");
-        final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes, manufactures);
-        final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en, manufactures);
+        final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
+        final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes, manufactures, techList);
+        final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en, manufactures, techList);
         logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
         Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
         Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);

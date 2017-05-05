@@ -1,5 +1,7 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import com.google.gson.GsonBuilder;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -8,20 +10,21 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.TechLicenseAskBid;
-import ru.VirtaMarketAnalyzer.data.TechLicenseLvl;
-import ru.VirtaMarketAnalyzer.data.TechLvl;
+import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -54,7 +57,9 @@ final public class TechMarketAskParser {
             break;
         }
         logger.info("askWoBidTechLvl.size() = {}", askWoBidTechLvl.size());
-        System.out.println(Utils.getPrettyGson(getTech(Wizard.host, realm)));
+        final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
+        logger.info("techList.size() = {}", techList.size());
+        System.out.println(Utils.getPrettyGson(getTech(Wizard.host, realm, techList)));
     }
 
     public static List<TechLicenseLvl> getLicenseAskWoBid(final String host, final String realm) throws IOException {
@@ -173,47 +178,31 @@ final public class TechMarketAskParser {
         return null;
     }
 
-    public static List<TechLvl> getTech(final String host, final String realm) throws IOException {
-        final String url = host + realm + "/main/globalreport/technology_market/total";
-        final int maxTryCnt = 3;
-//        logger.info(url);
-//        Downloader.invalidateCache(url);
-        for (int tryCnt = 1; tryCnt <= maxTryCnt; ++tryCnt) {
-            final Document doc = Downloader.getDoc(url);
-            final Element table = doc.select("table.list").first();
-            if (table == null) {
-                Downloader.invalidateCache(url);
-                logger.error("На странице '" + url + "' не найдена таблица с классом list");
-                Downloader.waitSecond(3);
-                continue;
-            }
-            final Element footer = doc.select("div.metro_footer").first();
-            if (footer == null) {
-                Downloader.invalidateCache(url);
-                logger.error("На странице '" + url + "' не найден div.metro_footer");
-                Downloader.waitSecond(3);
-                continue;
-            }
-            final Elements rows = doc.select("table.list > tbody > tr[class]");
-            final Elements headers = doc.select("table.list > tbody > tr:nth-child(2) > th");
+    public static List<TechLvl> getTech(final String host, final String realm, final List<TechUnitType> techList) throws IOException {
+        return techList.stream()
+                .map(tl -> {
+                    try {
+                        return getTech(host, realm, tl.getId());
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(toList());
+    }
 
-            return rows.stream()
-                    .map(row -> {
-                        final List<TechLvl> list = new ArrayList<>();
-                        final String techID = Utils.getLastFromUrl(row.select("> th > a").first().attr("href"));
-                        row.select("> td").stream()
-                                .forEachOrdered(cell -> {
-                                    if (!cell.attr("title").equals("--")) {
-                                        final int lvl = Utils.toInt(headers.eq(cell.elementSiblingIndex()).text());
-                                        final double price = Utils.toDouble(cell.attr("title"));
-                                        list.add(new TechLvl(techID, lvl, price));
-                                    }
-                                });
-                        return list;
-                    })
-                    .flatMap(Collection::stream)
-                    .collect(toList());
-        }
-        return null;
+    public static List<TechLvl> getTech(final String host, final String realm, final String unit_type_id) throws IOException {
+        final String url = host + "api/" + realm + "/main/technology/report/unittype?unit_type_id=" + unit_type_id + "&format=json&wrap=0";
+        final String fileToSave = Utils.getDir() + Downloader.getCrearedUrl(host + "api/" + realm + "/main/technology/report/unittype/", null) + unit_type_id + ".json";
+        //logger.info(fileToSave);
+        FileUtils.copyURLToFile(new URL(url), new File(fileToSave));
+
+        final TechReport[] arr = new GsonBuilder().create().fromJson(Utils.readFile(fileToSave), TechReport[].class);
+
+        return Stream.of(arr)
+                .map(row -> new TechLvl(row.getUnitTypeID(), row.getLevel(), row.getPrice()))
+                .collect(toList());
     }
 }

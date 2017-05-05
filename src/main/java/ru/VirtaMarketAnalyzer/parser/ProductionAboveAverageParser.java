@@ -54,7 +54,8 @@ public final class ProductionAboveAverageParser {
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
         logger.info("calc");
 //        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes)));
-        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes, manufactures)));
+        final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
+        logger.info(Utils.getPrettyGson(calc(host, realm, productHistory, productRemains, productRecipes, manufactures, techList)));
 //        final long total = ProductInitParser.getManufactureProductCategories(host, realm)
 //                .stream()
 //                .mapToLong(pc -> {
@@ -85,8 +86,9 @@ public final class ProductionAboveAverageParser {
             , final Map<String, List<ProductRemain>> productRemains
             , final Map<String, List<ProductRecipe>> productRecipes
             , final List<Manufacture> manufactures
+            , final List<TechUnitType> techList
     ) throws IOException {
-        final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm);
+        final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm, techList);
 //        productRecipes.values().stream()
 //                .flatMap(Collection::stream)
 //                .mapToInt(pr -> pr.getInputProducts().size())
