@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by cobr123 on 25.04.2015.
  */
@@ -24,12 +26,16 @@ public final class City {
     final private int demography;
     @SerializedName("p")
     final private int population;
+    //названия спонсируемых мэром продуктовых категорий
+    @SerializedName("mb")
+    final private List<String> mayoralBonuses;
 
     public City(final String countryId, final String regionId
             , final String id, final String caption
             , final double wealthIndex, final double educationIndex
             , final double averageSalary, final int demography
-            , final int population) {
+            , final int population, final List<String> mayoralBonuses
+    ) {
         this.countryId = countryId;
         this.regionId = regionId;
         this.id = id;
@@ -39,6 +45,7 @@ public final class City {
         this.averageSalary = averageSalary;
         this.demography = demography;
         this.population = population;
+        this.mayoralBonuses = mayoralBonuses;
     }
 
     public String getRegionId() {

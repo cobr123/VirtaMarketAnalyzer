@@ -129,7 +129,7 @@ public final class Wizard {
                 });
     }
 
-    private static boolean todayIs(final int dayOfWeek){
+    private static boolean todayIs(final int dayOfWeek) {
         final Calendar today = Calendar.getInstance();
         return today.get(Calendar.DAY_OF_WEEK) == dayOfWeek;
     }
@@ -159,9 +159,9 @@ public final class Wizard {
         final List<Region> regions_en = CityInitParser.getRegions(host_en + realm + "/main/geo/regionlist/", countries);
         Utils.writeToGson(baseDir + "regions_en.json", regions_en);
         //города и уровень богатства городов
-        final List<City> cities = CityListParser.fillWealthIndex(host + realm + "/main/geo/citylist/", regions);
+        final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
         Utils.writeToGson(baseDir + "cities.json", cities);
-        final List<City> cities_en = CityListParser.fillWealthIndex(host_en + realm + "/main/geo/citylist/", regions);
+        final List<City> cities_en = CityListParser.fillWealthIndex(host_en, realm, regions);
         Utils.writeToGson(baseDir + "cities_en.json", cities_en);
         logger.info("cities.size() = {}, realm = {}", cities.size(), realm);
 
@@ -426,7 +426,7 @@ public final class Wizard {
                 .filter(pr -> pr.getRemain() > 0)
                 .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
                 .collect(Collectors.toList());
-                ;
+        ;
         final double remain = productRemainFiltered.stream()
                 .mapToDouble(ProductRemain::getRemainByMaxOrderType)
                 .sum();
@@ -455,7 +455,7 @@ public final class Wizard {
         final double priceOthers = productRemainOthersFiltered.stream()
                 .mapToDouble(pr -> pr.getPrice() * pr.getRemainByMaxOrderType() / remainOthers)
                 .sum();
-        final ProductRemainTrendSup others = new ProductRemainTrendSup("",""
+        final ProductRemainTrendSup others = new ProductRemainTrendSup("", ""
                 , totalOthers, remainOthers
                 , Utils.round2(qualityOthers), Utils.round2(priceOthers)
                 , ProductRemain.MaxOrderType.L, remainOthers);
