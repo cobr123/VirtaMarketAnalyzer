@@ -69,8 +69,7 @@ public final class Wizard {
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
 /*
-        final Calendar today = Calendar.getInstance();
-        if (today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
+        if (todayIs(Calendar.SUNDAY)) {
             //собираем данные со всех реалмов и продуктов
             final List<LinearRegressionSummary> summaries = new ArrayList<>();
             int iter = 1;
@@ -130,6 +129,11 @@ public final class Wizard {
                 });
     }
 
+    private static boolean todayIs(final int dayOfWeek){
+        final Calendar today = Calendar.getInstance();
+        return today.get(Calendar.DAY_OF_WEEK) == dayOfWeek;
+    }
+
     public static void collectToJsonTradeAtCities(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
@@ -180,12 +184,11 @@ public final class Wizard {
         final List<RentAtCity> rents = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
         Utils.writeToGson(baseDir + "rent.json", rents);
 
-        final Calendar today = Calendar.getInstance();
-        if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
-        } else if ("anna".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
-        } else if ("mary".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-        } else if ("lien".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-        } else if ("vera".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)) {
+        if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
+        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
+        } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
+        } else if ("lien".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
+        } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
             return;
@@ -237,12 +240,11 @@ public final class Wizard {
     }
 
     private static void updateTrends(final String realm) throws IOException, GitAPIException {
-        final Calendar today = Calendar.getInstance();
-        if ("olga".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.WEDNESDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY)) {
-        } else if ("anna".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.TUESDAY) {
-        } else if ("mary".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
-        } else if ("lien".equalsIgnoreCase(realm) && today.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-        } else if ("vera".equalsIgnoreCase(realm) && (today.get(Calendar.DAY_OF_WEEK) == Calendar.THURSDAY || today.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY)) {
+        if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
+        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
+        } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
+        } else if ("lien".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
+        } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
             return;
