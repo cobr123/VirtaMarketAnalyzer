@@ -194,15 +194,20 @@ final public class TechMarketAskParser {
     }
 
     public static List<TechLvl> getTech(final String host, final String realm, final String unit_type_id) throws IOException {
-        final String url = host + "api/" + realm + "/main/technology/report/unittype?unit_type_id=" + unit_type_id + "&format=json&wrap=0";
+        final String url = host + "api/" + realm + "/main/unittype/technologies?app=virtonomica&format=json&ajax=1&unit_type_id=" + unit_type_id + "&wrap=0";
         final String fileToSave = Utils.getDir() + Downloader.getCrearedUrl(host + "api/" + realm + "/main/technology/report/unittype/", null) + unit_type_id + ".json";
         //logger.info(fileToSave);
         FileUtils.copyURLToFile(new URL(url), new File(fileToSave));
 
-        final TechReport[] arr = new GsonBuilder().create().fromJson(Utils.readFile(fileToSave), TechReport[].class);
+        try {
+            final TechReport[] arr = new GsonBuilder().create().fromJson(Utils.readFile(fileToSave), TechReport[].class);
 
-        return Stream.of(arr)
-                .map(row -> new TechLvl(row.getUnitTypeID(), row.getLevel(), row.getPrice()))
-                .collect(toList());
+            return Stream.of(arr)
+                    .map(row -> new TechLvl(row.getUnitTypeID(), row.getLevel(), row.getPrice()))
+                    .collect(toList());
+        } catch (final IOException e) {
+            logger.error("url = {}", url);
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
     }
 }
