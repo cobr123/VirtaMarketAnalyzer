@@ -46,6 +46,7 @@ public final class Wizard {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
         final List<String> realms = new ArrayList<>();
+        realms.add("nika");
         realms.add("lien");
         realms.add("mary");
         realms.add("anna");
