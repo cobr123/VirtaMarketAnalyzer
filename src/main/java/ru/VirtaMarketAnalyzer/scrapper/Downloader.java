@@ -59,7 +59,7 @@ public final class Downloader {
         }
     }
 
-    public static String getCrearedUrl(final String url, final String referrer) {
+    public static String getClearedUrl(final String url, final String referrer) {
         String clearedUrl;
         if (referrer != null && !referrer.isEmpty()) {
             final String[] parts = url.split("/");
@@ -76,7 +76,7 @@ public final class Downloader {
     }
 
     public static void invalidateCache(final String url, final String referrer) throws IOException {
-        final String clearedUrl = getCrearedUrl(url, referrer);
+        final String clearedUrl = getClearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
         if (file.exists()) {
@@ -97,7 +97,7 @@ public final class Downloader {
     }
 
     public static Document getDoc(final String url, final String referrer, final int maxTriesCnt) throws IOException {
-        final String clearedUrl = getCrearedUrl(url, referrer);
+        final String clearedUrl = getClearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
