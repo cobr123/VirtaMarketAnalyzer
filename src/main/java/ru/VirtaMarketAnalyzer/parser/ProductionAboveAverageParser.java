@@ -88,6 +88,9 @@ public final class ProductionAboveAverageParser {
             , final List<Manufacture> manufactures
             , final List<TechUnitType> techList
     ) throws IOException {
+        if("nika".equalsIgnoreCase(realm)){
+            return null;
+        }
         final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm, techList);
 //        productRecipes.values().stream()
 //                .flatMap(Collection::stream)
