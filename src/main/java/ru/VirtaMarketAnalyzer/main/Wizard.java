@@ -40,6 +40,7 @@ public final class Wizard {
     public static final String tech = "tech";
     public static final String retail_trends = "retail_trends";
     public static final String product_remains_trends = "product_remains_trends";
+    public static final String CITY_ELECTRICITY_TARIFF = "city_electricity_tariff";
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
@@ -53,13 +54,13 @@ public final class Wizard {
         realms.add("fast");
         realms.add("olga");
         realms.add("vera");
-        final Set<Product> products = new HashSet<>();
+//        final Set<Product> products = new HashSet<>();
         for (final String realm : realms) {
             collectToJsonTradeAtCities(realm);
             collectToJsonIndustries(realm);
             collectToJsonTech(realm);
 
-            products.addAll(ProductInitParser.getTradingProducts(Wizard.host, realm));
+//            products.addAll(ProductInitParser.getTradingProducts(Wizard.host, realm));
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
@@ -87,6 +88,9 @@ public final class Wizard {
     }
 
     private static void collectToJsonTech(final String realm) throws IOException {
+        if ("nika".equalsIgnoreCase(realm)) {
+            return;
+        }
         final String baseDir = Utils.getDir() + tech + File.separator + realm + File.separator;
 
         //типы подразделений для технологий
@@ -188,7 +192,7 @@ public final class Wizard {
         if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
         } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
         } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
-        } else if ("lien".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
+        } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
         } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
@@ -244,7 +248,7 @@ public final class Wizard {
         if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
         } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
         } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
-        } else if ("lien".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
+        } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
         } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
@@ -352,10 +356,17 @@ public final class Wizard {
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        //города
+        final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
         logger.info("группируем ставки енвд по регионам");
         final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/regionENVD/", regions, materials);
         for (final Map.Entry<String, List<RegionCTIE>> entry : allRegionsCTIEList.entrySet()) {
             Utils.writeToGson(baseDir + "region_ctie" + File.separator + entry.getKey() + ".json", entry.getValue());
+        }
+        logger.info("группируем тарифы на электроэнергию по товарам");
+        final Map<String, List<CityElectricityTariff>> cityElectricityTariffList = CityElectricityTariffParser.getAllCityElectricityTariffList(host, realm, cities);
+        for (final Map.Entry<String, List<CityElectricityTariff>> entry : cityElectricityTariffList.entrySet()) {
+            Utils.writeToGson(baseDir + CITY_ELECTRICITY_TARIFF + File.separator + entry.getKey() + ".json", entry.getValue());
         }
         logger.info("собираем данные о доступных товарах на оптовом рынке");
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", materials);
@@ -363,16 +374,18 @@ public final class Wizard {
         for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
             Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
         }
-        logger.info("собираем данные о среднем качестве товаров");
-        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", materials);
-        Utils.writeToGson(baseDir + "product_history.json", productHistory);
-        logger.info("собираем товары которые можно произвести с качеством выше среднего");
-        final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
-        final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes, manufactures, techList);
-        final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en, manufactures, techList);
-        logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
-        Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
-        Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
+        if (!"nika".equalsIgnoreCase(realm) && !"fast".equalsIgnoreCase(realm)) {
+            logger.info("собираем данные о среднем качестве товаров");
+            final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", materials);
+            Utils.writeToGson(baseDir + "product_history.json", productHistory);
+            logger.info("собираем товары которые можно произвести с качеством выше среднего");
+            final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
+            final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes, manufactures, techList);
+            final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en, manufactures, techList);
+            logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
+            Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
+            Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
+        }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
