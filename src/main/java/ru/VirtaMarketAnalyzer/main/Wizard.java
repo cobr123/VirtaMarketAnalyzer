@@ -358,6 +358,13 @@ public final class Wizard {
         final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
         //города
         final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
+        logger.info("парсим транспортные расходы, {}", materials.size() * cities.size());
+        for (final Product material : materials) {
+            for (final City cityFrom : cities) {
+                final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
+                Utils.writeToGson(baseDir + "transport" + File.separator + cityFrom.getId() + File.separator + material.getId() + ".json", list);
+            }
+        }
         logger.info("группируем ставки енвд по регионам");
         final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/regionENVD/", regions, materials);
         for (final Map.Entry<String, List<RegionCTIE>> entry : allRegionsCTIEList.entrySet()) {
