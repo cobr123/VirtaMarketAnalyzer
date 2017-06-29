@@ -34,7 +34,7 @@ final public class CityElectricityTariffParser {
         cities.add(city);
         final Map<String, List<CityElectricityTariff>> allCityElectricityTariffList = getAllCityElectricityTariffList(Wizard.host, realm, cities);
         logger.info(Utils.getPrettyGson(allCityElectricityTariffList));
-        logger.info("" + allCityElectricityTariffList.get("3055").size());
+        logger.info("" + allCityElectricityTariffList.get("3868").size());
     }
 
     public static Map<String, List<CityElectricityTariff>> getAllCityElectricityTariffList(final String host, final String realm, final List<City> cities) throws IOException {
@@ -52,7 +52,7 @@ final public class CityElectricityTariffParser {
     }
 
     public static List<CityElectricityTariff> getCityElectricityTariffList(final String host, final String realm, final City city) throws IOException {
-        final Document doc = Downloader.getDoc(host + realm + "/main/geo/tariff/" + city.getId());
+        final Document doc = Downloader.getDoc(host + realm + "/main/geo/tariff/" + city.getRegionId());
         final Elements elems = doc.select("table.list > tbody > tr[class] > td:nth-child(1)");
         return elems
                 .stream()
@@ -60,7 +60,7 @@ final public class CityElectricityTariffParser {
             try {
                 return getCityElectricityTariffList(el, city);
             } catch (final Exception e) {
-                logger.info("{}{}{}{}", host, realm, "/main/geo/tariff/", city.getId());
+                logger.info("{}{}{}{}", host, realm, "/main/geo/tariff/", city.getRegionId());
                 logger.error(e.getLocalizedMessage(), e);
             }
             return null;
