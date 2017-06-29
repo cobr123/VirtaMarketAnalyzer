@@ -362,7 +362,7 @@ public final class Wizard {
         for (final Product material : materials) {
             for (final City cityFrom : cities) {
                 final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
-                Utils.writeToGson(baseDir + "transport" + File.separator + cityFrom.getId() + File.separator + material.getId() + ".json", list);
+                Utils.writeToGson(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
             }
         }
         logger.info("группируем ставки енвд по регионам");
