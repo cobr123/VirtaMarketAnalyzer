@@ -39,13 +39,20 @@ public final class TransportParser {
         System.out.println(list.size());
     }
 
+    public static void setRowsOnPage(final String host, final String realm, final int cnt, final City cityFrom, final Product material) throws IOException {
+        final String ref = host + realm + "/main/geo/transport/" + cityFrom.getId()
+                + "/" + material.getId() + "/" + cityFrom.getCountryId() + "/" + cityFrom.getRegionId()
+                + "/" + cityFrom.getId();
+        Downloader.getDoc(host + realm + "/common/util/setpaging/dbproduct/transportReport/" + cnt, ref);
+    }
+
     public static List<Transport> parseTransport(final String host, final String realm, final List<City> cities, final City cityFrom, final Product material) throws IOException {
         final List<Transport> list = new ArrayList<>();
 
-        final String url = host + realm + "/main/geo/transport/";
-        String nextPageUrl = url + cityFrom.getId()
+        final String baseUrl = host + realm + "/main/geo/transport/" + cityFrom.getId()
                 + "/" + material.getId() + "/" + cityFrom.getCountryId() + "/" + cityFrom.getRegionId()
                 + "/" + cityFrom.getId();
+        String nextPageUrl = baseUrl;
         String ref = "";
         for (; ; ) {
             final Document doc = Downloader.getDoc(nextPageUrl, ref);
@@ -72,7 +79,7 @@ public final class TransportParser {
                 }
             }
             nextPageUrl = Utils.getNextPageHref(doc);
-            ref = url + material.getId();
+            ref = baseUrl;
             if (nextPageUrl.isEmpty()) {
                 break;
             }
