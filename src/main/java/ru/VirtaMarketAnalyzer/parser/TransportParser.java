@@ -43,9 +43,9 @@ public final class TransportParser {
         final List<Transport> list = new ArrayList<>();
 
         final String url = host + realm + "/main/geo/transport/";
-        String nextPageUrl = url + material.getId()
-                + "/" + cityFrom.getCountryId() + "/" + cityFrom.getRegionId() + "/" + cityFrom.getId()
-                + "/" + material.getId();
+        String nextPageUrl = url + cityFrom.getId()
+                + "/" + material.getId() + "/" + cityFrom.getCountryId() + "/" + cityFrom.getRegionId()
+                + "/" + cityFrom.getId();
         String ref = "";
         for (; ; ) {
             final Document doc = Downloader.getDoc(nextPageUrl, ref);
