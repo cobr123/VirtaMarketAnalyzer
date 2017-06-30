@@ -211,6 +211,13 @@ public final class Wizard {
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
+        logger.info("парсим транспортные расходы, {}", materials.size() * cities.size());
+        for (final Product material : materials) {
+            for (final City cityFrom : cities) {
+                final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
+                Utils.writeToGson(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
+            }
+        }
         logger.info("собираем данные продаж товаров в городах");
         final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host, realm, cities, products, countriesDutyList, regions);
         //сохраняем их в json
