@@ -219,7 +219,7 @@ public final class Wizard {
                             .forEach(cityFrom -> {
                                 try {
                                     final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
-                                    Utils.writeToGson(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
+                                    Utils.writeToGsonZip(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
                                 } catch (final IOException e) {
                                     logger.error(e.getLocalizedMessage(), e);
                                 }
