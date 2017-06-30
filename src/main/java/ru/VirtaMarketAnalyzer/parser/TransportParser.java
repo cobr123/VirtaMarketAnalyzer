@@ -43,7 +43,7 @@ public final class TransportParser {
         final String ref = host + realm + "/main/geo/transport/" + cityFrom.getId()
                 + "/" + material.getId() + "/" + cityFrom.getCountryId() + "/" + cityFrom.getRegionId()
                 + "/" + cityFrom.getId();
-        Downloader.getDoc(host + realm + "/common/util/setpaging/dbproduct/transportReport/" + cnt, ref);
+        Downloader.getDoc(host + realm + "/main/common/util/setpaging/dbproduct/transportReport/" + cnt, ref);
     }
 
     public static List<Transport> parseTransport(final String host, final String realm, final List<City> cities, final City cityFrom, final Product material) throws IOException {
