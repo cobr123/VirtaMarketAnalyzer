@@ -211,20 +211,20 @@ public final class Wizard {
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-        logger.info("парсим транспортные расходы, {}", materials.size() * cities.size());
-        TransportParser.setRowsOnPage(host, realm, Math.max(400, cities.size()), cities.get(0), materials.get(0));
-        materials.parallelStream()
-                .forEach(material -> {
-                    cities.parallelStream()
-                            .forEach(cityFrom -> {
-                                try {
-                                    final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
-                                    Utils.writeToGsonZip(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
-                                } catch (final IOException e) {
-                                    logger.error(e.getLocalizedMessage(), e);
-                                }
-                            });
-                });
+//        logger.info("парсим транспортные расходы, {}", materials.size() * cities.size());
+//        TransportParser.setRowsOnPage(host, realm, Math.max(400, cities.size()), cities.get(0), materials.get(0));
+//        materials.stream()
+//                .forEach(material -> {
+//                    cities.parallelStream()
+//                            .forEach(cityFrom -> {
+//                                try {
+//                                    final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
+//                                    Utils.writeToGsonZip(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
+//                                } catch (final IOException e) {
+//                                    logger.error(e.getLocalizedMessage(), e);
+//                                }
+//                            });
+//                });
         logger.info("собираем данные продаж товаров в городах");
         final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host, realm, cities, products, countriesDutyList, regions);
         //сохраняем их в json
