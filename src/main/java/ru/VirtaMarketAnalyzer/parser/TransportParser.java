@@ -27,16 +27,21 @@ public final class TransportParser {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
         final String realm = "olga";
+        logger.info("begin");
         final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
+        logger.info("countries.size = {}", countries.size());
         final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        logger.info("regions.size = {}", regions.size());
         final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
+        logger.info("cities.size = {}", cities.size());
+        final List<Product> materials = ProductInitParser.getManufactureProducts(host, realm);
+        logger.info("materials.size = {}", materials.size());
+        logger.info("парсим транспортные расходы, {}", materials.size() * cities.size());
 
-        final City city = new City("1480", "359837", "359838", "Алмере", 0, 0, 0, 0, 0, null);
-        final Product product = new Product("", "359845", "", "", "");
-
-        final List<Transport> list = TransportParser.parseTransport(host, realm, cities, city, product);
-        System.out.println(Utils.getPrettyGson(list));
-        System.out.println(list.size());
+        TransportParser.setRowsOnPage(host, realm, Math.max(400, cities.size()), cities.get(0), materials.get(0));
+        final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cities.get(0), materials.get(0));
+        logger.info(Utils.getPrettyGson(list));
+        logger.info("list.size = {}", list.size());
     }
 
     public static void setRowsOnPage(final String host, final String realm, final int cnt, final City cityFrom, final Product material) throws IOException {
