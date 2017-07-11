@@ -70,6 +70,12 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
+
+//        for (final String realm : realms) {
+//            collectToJsonTransport(realm);
+//        }
+//        //публикуем на сайте
+//        GitHubPublisher.publishRetail(realms);
 /*
         if (todayIs(Calendar.SUNDAY)) {
             //собираем данные со всех реалмов и продуктов
@@ -137,6 +143,46 @@ public final class Wizard {
     private static boolean todayIs(final int dayOfWeek) {
         final Calendar today = Calendar.getInstance();
         return today.get(Calendar.DAY_OF_WEEK) == dayOfWeek;
+    }
+
+    public static void collectToJsonTransport(final String realm) throws IOException, GitAPIException {
+        if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
+        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
+        } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
+        } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
+        } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
+        } else if ("fast".equalsIgnoreCase(realm)) {
+        } else {
+            return;
+        }
+        final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
+
+        //страны
+        final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
+        //регионы
+        final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        //города и уровень богатства городов
+        final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
+        logger.info("cities.size = {}, {}", cities.size(), realm);
+        final List<Product> materials = ProductInitParser.getManufactureProducts(host, realm);
+        logger.info("materials.size = {}, {}", materials.size(), realm);
+
+        logger.info("парсим транспортные расходы, {}, {}", materials.size() * cities.size(), realm);
+        TransportParser.setRowsOnPage(host, realm, Math.max(400, cities.size()), cities.get(0), materials.get(0));
+
+        for (int i = 0; i < materials.size(); i++) {
+            logger.info("{} / {}",  i + 1, materials.size());
+            final Product material = materials.get(i);
+            cities.parallelStream()
+                    .forEach(cityFrom -> {
+                        try {
+                            final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
+                            Utils.writeToGsonZip(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
+                        } catch (final IOException e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                        }
+                    });
+        }
     }
 
     public static void collectToJsonTradeAtCities(final String realm) throws IOException, GitAPIException {
@@ -211,20 +257,6 @@ public final class Wizard {
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-//        logger.info("парсим транспортные расходы, {}", materials.size() * cities.size());
-//        TransportParser.setRowsOnPage(host, realm, Math.max(400, cities.size()), cities.get(0), materials.get(0));
-//        materials.stream()
-//                .forEach(material -> {
-//                    cities.parallelStream()
-//                            .forEach(cityFrom -> {
-//                                try {
-//                                    final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
-//                                    Utils.writeToGsonZip(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
-//                                } catch (final IOException e) {
-//                                    logger.error(e.getLocalizedMessage(), e);
-//                                }
-//                            });
-//                });
         logger.info("собираем данные продаж товаров в городах");
         final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host, realm, cities, products, countriesDutyList, regions);
         //сохраняем их в json
