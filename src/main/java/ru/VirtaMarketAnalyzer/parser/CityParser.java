@@ -64,17 +64,15 @@ public final class CityParser {
         }
     }
 
-    public static Map<String, List<TradeAtCity>> collectByTradeAtCities(final String host, final String realm
+    public static List<TradeAtCity> collectByTradeAtCities(final String host, final String realm
             , final List<City> cities
-            , final List<Product> products
+            , final Product product
             , final Map<String, List<CountryDutyList>> countriesDutyList
             , final List<Region> regions
     ) throws IOException {
-        logger.info("парсим данные: {}", cities.size() * products.size());
         final Map<String, Map<String, List<TradeAtCityBuilder>>> grpByCityByCatId = cities
                 .parallelStream()
-                .flatMap(city -> products.stream().map(product -> new CityProduct(city, product, host, realm)))
-                .map(city -> city.getTradeAtCity(countriesDutyList, regions))
+                .map(city -> new CityProduct(city, product, host, realm).getTradeAtCity(countriesDutyList, regions))
                 .collect(Collectors.groupingBy(TradeAtCityBuilder::getCityId, Collectors.groupingBy(TradeAtCityBuilder::getProductCategoryId)));
 
         return grpByCityByCatId.keySet().stream()
@@ -96,7 +94,7 @@ public final class CityParser {
                             .collect(toList());
                 })
                 .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(TradeAtCity::getProductId));
+                .collect(toList());
     }
 
     public static TradeAtCityBuilder get(final String host, final String realm, final City city, final Product product

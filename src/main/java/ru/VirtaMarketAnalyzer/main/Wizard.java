@@ -171,7 +171,7 @@ public final class Wizard {
         TransportParser.setRowsOnPage(host, realm, Math.max(400, cities.size()), cities.get(0), materials.get(0));
 
         for (int i = 0; i < materials.size(); i++) {
-            logger.info("{} / {}",  i + 1, materials.size());
+            logger.info("{} / {}", i + 1, materials.size());
             final Product material = materials.get(i);
             cities.parallelStream()
                     .forEach(cityFrom -> {
@@ -257,22 +257,16 @@ public final class Wizard {
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-        logger.info("собираем данные продаж товаров в городах");
-        final Map<String, List<TradeAtCity>> stats = CityParser.collectByTradeAtCities(host, realm, cities, products, countriesDutyList, regions);
-        //сохраняем их в json
-        for (final Map.Entry<String, List<TradeAtCity>> entry : stats.entrySet()) {
-            Utils.writeToGson(baseDir + "tradeAtCity_" + entry.getKey() + ".json", entry.getValue());
-        }
-        logger.info("запоминаем дату обновления данных");
-        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
-        Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        for (final Product product : products) {
+            logger.info("собираем данные продаж товаров в городах");
+            final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product, countriesDutyList, regions);
+            Utils.writeToGson(baseDir + "tradeAtCity_" + product.getId() + ".json", stats);
 
-        logger.info("собираем данные из магазинов");
-        final List<Shop> shops = TopRetailParser.getShopList(realm, stats, products);
-        logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
-        final Map<String, List<RetailAnalytics>> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, products, cities);
-        for (final Map.Entry<String, List<RetailAnalytics>> entry : retailAnalytics.entrySet()) {
-            Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + entry.getKey() + ".json", entry.getValue());
+            logger.info("собираем данные из магазинов");
+            final List<Shop> shops = TopRetailParser.getShopList(realm, stats, products);
+            logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
+            final List<RetailAnalytics> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, product, cities);
+            Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + product.getId() + ".json", retailAnalytics);
         }
         logger.info("группируем данные о сервисах по городам");
         for (final UnitType ut : unitTypes) {
@@ -287,6 +281,8 @@ public final class Wizard {
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
         logger.info("запоминаем дату обновления данных");
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 

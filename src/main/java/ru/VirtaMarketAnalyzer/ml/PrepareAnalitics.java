@@ -13,21 +13,15 @@ import java.util.stream.Collectors;
 public final class PrepareAnalitics {
     private static final Logger logger = LoggerFactory.getLogger(PrepareAnalitics.class);
 
-    public static Map<String, List<RetailAnalytics>> getRetailAnalitincsByProducts(
+    public static List<RetailAnalytics> getRetailAnalitincsByProducts(
             final List<Shop> shops
-            , final Map<String, List<TradeAtCity>> stats
-            , final List<Product> products
+            , final List<TradeAtCity> stats
+            , final Product product
             , final List<City> cities
     ) {
         final Map<String, List<Shop>> shopBy = shops.parallelStream().collect(Collectors.groupingBy(Shop::getCountryRegionTownIds));
 
-        final Map<String, List<RetailAnalytics>> retailAnalitincs = new HashMap<>();
-
-        for (final Map.Entry<String, List<TradeAtCity>> entry : stats.entrySet()) {
-            final Product product = products.stream().filter(p -> p.getId().equals(entry.getKey())).findFirst().get();
-            retailAnalitincs.put(entry.getKey(), getRetailAnalitincsByProduct(product, shopBy, entry.getValue(), cities));
-        }
-        return retailAnalitincs;
+        return getRetailAnalitincsByProduct(product, shopBy, stats, cities);
     }
 
     public static List<RetailAnalytics> getRetailAnalitincsByProduct(final Product product,

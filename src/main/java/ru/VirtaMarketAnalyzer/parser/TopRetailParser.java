@@ -30,10 +30,9 @@ public final class TopRetailParser {
         System.out.println("list.size() = " + list.size());
     }
 
-    public static List<Shop> getShopList(final String realm, final Map<String, List<TradeAtCity>> stats, final List<Product> products) throws IOException {
+    public static List<Shop> getShopList(final String realm, final List<TradeAtCity> stats, final List<Product> products) throws IOException {
         final Map<String, List<Product>> productsByImgSrc = products.stream().collect(Collectors.groupingBy(Product::getImgUrl));
-        return stats.values().parallelStream()
-                .flatMap(Collection::stream)
+        return stats.parallelStream()
                 .map(TradeAtCity::getMajorSellInCityList)
                 .flatMap(Collection::stream)
                 .map(msic -> {
