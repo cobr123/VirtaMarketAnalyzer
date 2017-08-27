@@ -40,8 +40,8 @@ final public class GitHubPublisher {
     public static final String localPath = Utils.getDir() + "remote_repository" + File.separator;
 
     public static void publishRetail(final List<String> realms) throws IOException, GitAPIException {
-        FileUtils.copyDirectory(new File(Utils.getDir() + "img" + File.separator), new File(localPath + "img" + File.separator));
         final Git git = getRepo();
+        FileUtils.copyDirectory(new File(Utils.getDir() + "img" + File.separator), new File(localPath + "img" + File.separator));
         copyToLocalRepo(Wizard.by_trade_at_cities, realms);
         copyToLocalRepo(Wizard.by_service, realms);
         copyToLocalRepo(Wizard.industry, realms);
@@ -154,7 +154,7 @@ final public class GitHubPublisher {
     }
 
     public static Git getRepo(final File localPathFile) throws IOException, GitAPIException {
-        if (localPathFile.exists()) {
+        if (new File(localPathFile.getAbsolutePath() + ".git").exists()) {
             logger.info("git open");
             final Git git = Git.open(localPathFile);
             logger.info("git pull");
