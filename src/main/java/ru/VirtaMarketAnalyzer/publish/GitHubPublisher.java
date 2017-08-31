@@ -154,7 +154,7 @@ final public class GitHubPublisher {
     }
 
     public static Git getRepo(final File localPathFile) throws IOException, GitAPIException {
-        if (new File(localPathFile.getAbsolutePath() + ".git").exists()) {
+        if (localPathFile.exists()) {
             logger.info("git open");
             final Git git = Git.open(localPathFile);
             logger.info("git pull");
