@@ -111,7 +111,7 @@ public final class RetailSalePrediction {
                 }
             }
         }
-        return set.stream().collect(toList());
+        return new ArrayList<>(set);
     }
 
     public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
@@ -121,10 +121,7 @@ public final class RetailSalePrediction {
                         final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
                         return Stream.of(arr)
                                 .filter(ra -> ra.getProductId() != null)
-                                .map(ra -> {
-                                    ra.setDate(fileVersion.getDate());
-                                    return ra;
-                                })
+                                .peek(ra -> ra.setDate(fileVersion.getDate()))
                                 .collect(toList());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
@@ -143,9 +140,8 @@ public final class RetailSalePrediction {
                         final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
                         return Stream.of(arr)
                                 .filter(ra -> ra.getProductID() != null)
-                                .map(ra -> {
+                                .peek(ra -> {
                                     ra.setDate(fileVersion.getDate());
-                                    return ra;
                                 })
                                 .collect(toList());
                     } catch (final Exception e) {
@@ -201,10 +197,7 @@ public final class RetailSalePrediction {
                         final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), RetailAnalytics[].class);
                         return Stream.of(arr)
                                 .filter(ra -> ra.getProductId() != null)
-                                .map(ra -> {
-                                    ra.setDate(fileVersion.getDate());
-                                    return ra;
-                                })
+                                .peek(ra -> ra.setDate(fileVersion.getDate()))
                                 .collect(toList());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
