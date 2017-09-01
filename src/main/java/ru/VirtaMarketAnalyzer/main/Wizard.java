@@ -303,17 +303,13 @@ public final class Wizard {
 
     public static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
-        final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
-        logger.info("updateAllRetailAnalytics.size() = {}", set.size());
-
-        //группируем аналитику по товарам и сохраняем
-        final Map<String, List<TradeAtCity>> tradeAtCityByProduct = set.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(TradeAtCity::getProductId));
-
-        for (final Map.Entry<String, List<TradeAtCity>> entry : tradeAtCityByProduct.entrySet()) {
-            final String fileNamePath = baseDir + retail_trends + File.separator + entry.getKey() + ".json";
-            Utils.writeToGsonZip(fileNamePath, getRetailTrends(entry.getValue()));
+        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, realm);
+        for (int i = 0; i < products.size(); i++) {
+            logger.info("{} / {} updateAllRetailAnalytics", i + 1, products.size());
+            final Product product = products.get(i);
+            final List<TradeAtCity> tradeAtCity = new ArrayList<>(RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm, product.getId()));
+            final String fileNamePath = baseDir + retail_trends + File.separator + product.getId() + ".json";
+            Utils.writeToGsonZip(fileNamePath, getRetailTrends(tradeAtCity));
         }
     }
 
@@ -436,17 +432,13 @@ public final class Wizard {
 
     public static void updateAllProductRemainTrends(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
-        final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm);
-        logger.info("updateAllProductRemainTrends.size() = {}, {}", set.size(), realm);
-
-        //группируем аналитику по товарам и сохраняем
-        final Map<String, List<ProductRemain>> productRemainByProduct = set.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(ProductRemain::getProductID));
-
-        for (final Map.Entry<String, List<ProductRemain>> entry : productRemainByProduct.entrySet()) {
-            final String fileNamePath = baseDir + product_remains_trends + File.separator + entry.getKey() + ".json";
-            Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(entry.getValue()));
+        final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, realm);
+        for (int i = 0; i < materials.size(); i++) {
+            logger.info("{} / {} updateAllProductRemainTrends", i + 1, materials.size());
+            final Product material = materials.get(i);
+            final List<ProductRemain> productRemain = new ArrayList<>(RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm, material.getId()));
+            final String fileNamePath = baseDir + product_remains_trends + File.separator + material.getId() + ".json";
+            Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(productRemain));
         }
     }
 

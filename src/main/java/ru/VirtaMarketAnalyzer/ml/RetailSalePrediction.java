@@ -114,6 +114,25 @@ public final class RetailSalePrediction {
         return new ArrayList<>(set);
     }
 
+    public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
+        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
+                .map(fileVersion -> {
+                    try {
+                        final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
+                        return Stream.of(arr)
+                                .filter(ra -> productID.equals(ra.getProductId()))
+                                .peek(ra -> ra.setDate(fileVersion.getDate()))
+                                .collect(toList());
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(toSet());
+    }
+
     public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
         return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
                 .map(fileVersion -> {
@@ -122,6 +141,27 @@ public final class RetailSalePrediction {
                         return Stream.of(arr)
                                 .filter(ra -> ra.getProductId() != null)
                                 .peek(ra -> ra.setDate(fileVersion.getDate()))
+                                .collect(toList());
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(toSet());
+    }
+
+    public static Set<ProductRemain> getAllProductRemains(final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
+        return getAllVersions(Wizard.industry, fileNameStartWith, Optional.of(realm))
+                .map(fileVersion -> {
+                    try {
+                        final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
+                        return Stream.of(arr)
+                                .filter(ra -> productID.equals(ra.getProductID()))
+                                .peek(ra -> {
+                                    ra.setDate(fileVersion.getDate());
+                                })
                                 .collect(toList());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
@@ -816,6 +856,6 @@ public final class RetailSalePrediction {
             logger.info("{}/{}", i, productsSize);
             summaries.add(RetailSalePrediction.createCommonPrediction(products.get(i).getId()));
         }
-        Utils.writeToGson(Utils.getDir() + WEKA + File.separator  + "summaries.json", summaries);
+        Utils.writeToGson(Utils.getDir() + WEKA + File.separator + "summaries.json", summaries);
     }
 }
