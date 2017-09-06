@@ -312,6 +312,9 @@ public final class Wizard {
             final String fileNamePath = baseDir + retail_trends + File.separator + product.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getRetailTrends(tradeAtCity));
         }
+        logger.info("запоминаем дату обновления данных");
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        Utils.writeToGson(baseDir  + retail_trends + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
@@ -425,6 +428,9 @@ public final class Wizard {
             logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
             Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
             Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
+            logger.info("запоминаем дату обновления данных");
+            final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+            Utils.writeToGson(baseDir  + "production_above_average_updateDate.json", new UpdateDate(df.format(new Date())));
         }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -441,6 +447,9 @@ public final class Wizard {
             final String fileNamePath = baseDir + product_remains_trends + File.separator + material.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(productRemain));
         }
+        logger.info("запоминаем дату обновления данных");
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        Utils.writeToGson(baseDir  + product_remains_trends + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
     private static List<ProductRemainTrend> getProductRemainTrends(final List<ProductRemain> list) {
