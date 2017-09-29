@@ -2,7 +2,7 @@ package ru.VirtaMarketAnalyzer.ml.js;
 
 import com.yahoo.platform.yui.compressor.JavaScriptCompressor;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.text.WordUtils;
+import org.apache.commons.text.WordUtils;
 import org.mozilla.javascript.ErrorReporter;
 import org.mozilla.javascript.EvaluatorException;
 import org.slf4j.Logger;
