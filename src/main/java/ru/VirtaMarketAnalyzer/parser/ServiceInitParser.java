@@ -19,6 +19,7 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -77,7 +78,7 @@ public final class ServiceInitParser {
             }
             return null;
         })
-                .filter(uts -> uts != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 

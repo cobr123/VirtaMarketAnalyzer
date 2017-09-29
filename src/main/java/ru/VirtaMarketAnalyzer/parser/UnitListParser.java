@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -56,7 +57,7 @@ public final class UnitListParser {
                                 }
                                 return shop;
                             })
-                            .filter(s -> s != null)
+                            .filter(Objects::nonNull)
                             .filter(s -> s.getShopProducts().size() > 0)
                             .filter(s -> !"Не известен".equals(s.getTownDistrict()))
                             .filter(s -> !"Не известен".equals(s.getServiceLevel()))

@@ -114,6 +114,30 @@ public final class RetailSalePrediction {
         return new ArrayList<>(set);
     }
 
+    public static List<Product> getAllRealmProducts(final File realmDir) throws IOException {
+        final Set<Product> set = new HashSet<>();
+        for (final File file : realmDir.listFiles()) {
+            if (file.isFile() && file.getName().equals("products.json")) {
+                final String text = FileUtils.readFileToString(file, "UTF-8");
+                final Product[] arr = new GsonBuilder().create().fromJson(text, Product[].class);
+                Collections.addAll(set, arr);
+            }
+        }
+        return new ArrayList<>(set);
+    }
+
+    public static List<Product> getAllRealmMaterials(final File realmDir) throws IOException {
+        final Set<Product> set = new HashSet<>();
+        for (final File file : realmDir.listFiles()) {
+            if (file.isFile() && file.getName().equals("materials.json")) {
+                final String text = FileUtils.readFileToString(file, "UTF-8");
+                final Product[] arr = new GsonBuilder().create().fromJson(text, Product[].class);
+                Collections.addAll(set, arr);
+            }
+        }
+        return new ArrayList<>(set);
+    }
+
     public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
         return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
                 .map(fileVersion -> {

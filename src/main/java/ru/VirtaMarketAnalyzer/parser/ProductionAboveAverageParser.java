@@ -102,7 +102,7 @@ public final class ProductionAboveAverageParser {
 //                .forEachOrdered(entry -> logger.info("топ по количеству ингридиентов - {}: {} шт.", entry.getKey(), entry.getValue()));
         for (final String key : productRemains.keySet()) {
             final List<ProductRemain> sortedList = productRemains.get(key);
-            Collections.sort(sortedList, (o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1);
+            sortedList.sort((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1);
             productRemains.put(key, sortedList);
         }
         return productHistory.parallelStream()

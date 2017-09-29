@@ -51,7 +51,7 @@ final public class CountryDutyListParser {
             }
             return null;
         })
-                .filter(l -> l != null)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(groupingBy(CountryDutyList::getCountryId));
     }

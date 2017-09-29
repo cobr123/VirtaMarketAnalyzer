@@ -32,7 +32,7 @@ final public class Manufacture {
         return manufactureCategory;
     }
 
-    public void setManufactureCategory(String manufactureCategory) {
+    public void setManufactureCategory(final String manufactureCategory) {
         this.manufactureCategory = manufactureCategory;
     }
 

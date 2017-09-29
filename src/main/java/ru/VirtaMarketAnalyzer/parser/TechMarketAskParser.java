@@ -114,7 +114,7 @@ final public class TechMarketAskParser {
                     }
                     return null;
                 })
-                .filter(ask -> ask != null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 

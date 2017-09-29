@@ -226,7 +226,7 @@ public final class ShopParser {
             , final String url
             , final Map<String, List<Product>> productsByImgSrc
     ) throws Exception {
-        Document doc = null;
+        Document doc;
         if (oneTryErrorUrl.contains(url)) {
             return null;
         }
