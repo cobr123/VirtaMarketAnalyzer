@@ -3,6 +3,7 @@ package ru.VirtaMarketAnalyzer.main;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 import org.apache.commons.io.FileUtils;
@@ -287,5 +288,13 @@ public final class Utils {
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
         }
+    }
+
+    public static <T> List<T> toList(String json, Class<T> clazz) {
+        if (null == json) {
+            return null;
+        }
+        Gson gson = new Gson();
+        return gson.fromJson(json, new TypeToken<T>(){}.getType());
     }
 }

@@ -28,9 +28,9 @@ public final class TransportParser {
         final String host = Wizard.host;
         final String realm = "olga";
         logger.info("begin");
-        final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
+        final List<Country> countries = CityInitParser.getCountries(host, realm);
         logger.info("countries.size = {}", countries.size());
-        final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        final List<Region> regions = CityInitParser.getRegions(host, realm);
         logger.info("regions.size = {}", regions.size());
         final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
         logger.info("cities.size = {}", cities.size());

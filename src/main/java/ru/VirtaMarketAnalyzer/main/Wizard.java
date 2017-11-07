@@ -146,9 +146,9 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
 
         //страны
-        final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
+        final List<Country> countries = CityInitParser.getCountries(host, realm);
         //регионы
-        final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        final List<Region> regions = CityInitParser.getRegions(host, realm);
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
         logger.info("cities.size = {}, {}", cities.size(), realm);
@@ -188,14 +188,14 @@ public final class Wizard {
             FileUtils.deleteDirectory(serviceBaseDirFile);
         }
         //страны
-        final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
+        final List<Country> countries = CityInitParser.getCountries(host, realm);
         Utils.writeToGson(baseDir + "countries.json", countries);
-        final List<Country> countries_en = CityInitParser.getCountries(host_en + realm + "/main/common/main_page/game_info/world/");
+        final List<Country> countries_en = CityInitParser.getCountries(host_en, realm);
         Utils.writeToGson(baseDir + "countries_en.json", countries_en);
         //регионы
-        final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        final List<Region> regions = CityInitParser.getRegions(host, realm);
         Utils.writeToGson(baseDir + "regions.json", regions);
-        final List<Region> regions_en = CityInitParser.getRegions(host_en + realm + "/main/geo/regionlist/", countries);
+        final List<Region> regions_en = CityInitParser.getRegions(host_en, realm);
         Utils.writeToGson(baseDir + "regions_en.json", regions_en);
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
@@ -303,9 +303,9 @@ public final class Wizard {
         saveProductImg(materials);
         logger.info("materials img saved");
         //страны
-        final List<Country> countries = CityInitParser.getCountries(host + realm + "/main/common/main_page/game_info/world/");
+        final List<Country> countries = CityInitParser.getCountries(host, realm);
         //регионы
-        final List<Region> regions = CityInitParser.getRegions(host + realm + "/main/geo/regionlist/", countries);
+        final List<Region> regions = CityInitParser.getRegions(host, realm);
         //города
         final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
 
