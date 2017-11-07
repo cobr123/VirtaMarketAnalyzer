@@ -267,11 +267,21 @@ public final class ShopParser {
                 }
             }
 
-            final String unitImage = doc.select("#unitImage > img").attr("src");
-
-            if (unitImage.startsWith("/img/v2/units/fuel_")) {
+            if (doc.select("table.unit_table").size() == 0) {
                 //заправки
-                int shopSize = Utils.toInt(unitImage.substring("/img/v2/units/fuel_".length(), "/img/v2/units/fuel_".length() + 1));
+                int shopSize = 0;
+                switch (doc.select("table.infoblock > tbody > tr:nth-child(2) > td:nth-child(2)").text().trim()){
+                    case "Малая городская АЗС": shopSize = 1;
+                        break;
+                    case "Средняя городская АЗС": shopSize = 2;
+                        break;
+                    case "Большая городская АЗС": shopSize = 3;
+                        break;
+                    case "Пригородная сеть АЗС": shopSize = 4;
+                        break;
+                    case "Областная сеть АЗС": shopSize = 5;
+                        break;
+                }
 
                 final String townDistrict = "";
                 final int departmentCount = 1;
@@ -281,7 +291,7 @@ public final class ShopParser {
 
                 return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
                         visitorsCount, serviceLevel, shopProducts);
-            } else if (unitImage.startsWith("/img/v2/units/shop_")) {
+            } else if (doc.select("table.unit_table").size() == 2) {
                 //магазины
                 doc.select("table.unit_table > tbody > tr:nth-child(1) > td:nth-child(2)").first().children().remove();
                 final String townDistrict = doc.select("table.unit_table > tbody > tr:nth-child(1) > td:nth-child(2)").text().replaceAll("^\\s*,","").trim();
@@ -295,7 +305,7 @@ public final class ShopParser {
                 return new Shop(countryId, regionId, townId, shopSize, townDistrict, departmentCount, notoriety,
                         visitorsCount, serviceLevel, shopProducts);
             } else {
-                logger.error("Неизвестный тип юнита, unitImage = {}, url = {}. Возможно еще идет пересчет.", unitImage, url);
+                logger.error("Неизвестный тип юнита, url = {}. Возможно еще идет пересчет.", url);
                 return null;
             }
         } catch (final Exception e) {
