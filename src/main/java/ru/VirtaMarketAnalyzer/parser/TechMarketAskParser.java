@@ -127,7 +127,7 @@ final public class TechMarketAskParser {
             if (table == null) {
                 Downloader.invalidateCache(url);
                 logger.error("На странице '" + url + "' не найдена таблица с классом list");
-                Downloader.waitSecond(3);
+                Utils.waitSecond(3);
                 continue;
             }
             //сами ставки\предложения
@@ -152,14 +152,14 @@ final public class TechMarketAskParser {
             if (table == null) {
                 Downloader.invalidateCache(url);
                 logger.error("На странице '" + url + "' не найдена таблица с классом list");
-                Downloader.waitSecond(3);
+                Utils.waitSecond(3);
                 continue;
             }
             final Element footer = doc.select("div.metro_footer").first();
             if (footer == null) {
                 Downloader.invalidateCache(url);
                 logger.error("На странице '" + url + "' не найден div.metro_footer");
-                Downloader.waitSecond(3);
+                Utils.waitSecond(3);
                 continue;
             }
             final Elements asks = doc.select("table.list > tbody > tr > td > a:not(:contains(--))");

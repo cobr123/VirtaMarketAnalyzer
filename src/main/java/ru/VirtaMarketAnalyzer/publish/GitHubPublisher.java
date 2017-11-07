@@ -154,28 +154,44 @@ final public class GitHubPublisher {
     }
 
     public static Git getRepo(final File localPathFile) throws IOException, GitAPIException {
-        if (localPathFile.exists()) {
-            logger.info("git open");
-            final Git git = Git.open(localPathFile);
-            logger.info("git pull");
-            git.pull().setStrategy(MergeStrategy.THEIRS).call();
-            logger.info("git pull finished");
-            return git;
-        } else {
-            //"https://github.com/user/repo.git"
-            final String remotePath = System.getenv("vma.github.remotepath");
-            if (remotePath == null || remotePath.isEmpty()) {
-                throw new IllegalArgumentException("Не задан удаленный путь к репозиторию (vma.github.remotepath), например https://github.com/user/repo.git");
+        return getRepo(localPathFile, 3);
+    }
+
+    public static Git getRepo(final File localPathFile, final int maxTriesCnt) throws IOException, GitAPIException {
+        for (int tries = 1; tries <= maxTriesCnt; ++tries) {
+            try {
+                if (localPathFile.exists()) {
+                    logger.info("git open");
+                    final Git git = Git.open(localPathFile);
+                    logger.info("git pull");
+                    git.pull().setStrategy(MergeStrategy.THEIRS).call();
+                    logger.info("git pull finished");
+                    return git;
+                } else {
+                    //"https://github.com/user/repo.git"
+                    final String remotePath = System.getenv("vma.github.remotepath");
+                    if (remotePath == null || remotePath.isEmpty()) {
+                        throw new IllegalArgumentException("Не задан удаленный путь к репозиторию (vma.github.remotepath), например https://github.com/user/repo.git");
+                    }
+                    logger.info("git clone {} в {}", remotePath, localPathFile.getAbsolutePath());
+                    final CloneCommand cloneCommand = Git.cloneRepository();
+                    cloneCommand.setURI(remotePath);
+                    cloneCommand.setDirectory(localPathFile);
+                    cloneCommand.setCredentialsProvider(getCredentialsProvider());
+                    final Git git = cloneCommand.call();
+                    logger.info("git clone finished");
+                    return git;
+                }
+            } catch (final IOException e) {
+                logger.error("Ошибка, попытка #{} из {}: {}", tries, maxTriesCnt, e.getLocalizedMessage());
+                if (maxTriesCnt == tries) {
+                    throw new IOException(e);
+                } else {
+                    Utils.waitSecond(3 * tries);
+                }
             }
-            logger.info("git clone {} в {}", remotePath, localPathFile.getAbsolutePath());
-            final CloneCommand cloneCommand = Git.cloneRepository();
-            cloneCommand.setURI(remotePath);
-            cloneCommand.setDirectory(localPathFile);
-            cloneCommand.setCredentialsProvider(getCredentialsProvider());
-            final Git git = cloneCommand.call();
-            logger.info("git clone finished");
-            return git;
         }
+        return null;
     }
 
     public static void testCommit() throws IOException, GitAPIException {

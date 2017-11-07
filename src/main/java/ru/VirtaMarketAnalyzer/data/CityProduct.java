@@ -2,6 +2,7 @@ package ru.VirtaMarketAnalyzer.data;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.parser.CityParser;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
@@ -43,7 +44,7 @@ final public class CityProduct {
                 logger.error("Ошибка при запросе, попытка #{} из {}", tries, maxTriesCnt);
                 logger.error("Ошибка: ", e);
                 if (tries < maxTriesCnt) {
-                    Downloader.waitSecond(3);
+                    Utils.waitSecond(3);
                 }
             }
         }

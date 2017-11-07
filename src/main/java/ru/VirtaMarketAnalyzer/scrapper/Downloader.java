@@ -127,20 +127,12 @@ public final class Downloader {
                     if (maxTriesCnt == tries) {
                         throw new IOException(e);
                     } else {
-                        waitSecond(3 * tries);
+                        Utils.waitSecond(3 * tries);
                     }
                 }
             }
         }
         return null;
-    }
-
-    public static void waitSecond(final long seconds) {
-        try {
-            Thread.sleep(seconds * 1000);
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     public static void main(final String[] args) throws IOException {

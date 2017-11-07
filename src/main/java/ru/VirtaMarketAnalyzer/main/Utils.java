@@ -280,4 +280,12 @@ public final class Utils {
     public static double calcWorkersQualityForTech(final double techLvl) {
         return Math.pow(techLvl, 0.8);
     }
+
+    public static void waitSecond(final long seconds) {
+        try {
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
 }
