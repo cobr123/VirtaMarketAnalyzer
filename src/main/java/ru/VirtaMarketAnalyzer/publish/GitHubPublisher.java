@@ -57,7 +57,7 @@ final public class GitHubPublisher {
         git.close();
     }
 
-    public static void publishPredictions() throws IOException, GitAPIException {
+    public static void publishTrends() throws IOException, GitAPIException {
         final Git git = getRepo();
         final String pattern = ".";
         logger.info("git add " + pattern);

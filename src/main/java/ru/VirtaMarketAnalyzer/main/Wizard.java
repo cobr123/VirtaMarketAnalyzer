@@ -303,7 +303,7 @@ public final class Wizard {
         saveProductImg(materials);
         logger.info("materials img saved");
         //страны
-        final List<Country> countries = CityInitParser.getCountries(host, realm);
+        //final List<Country> countries = CityInitParser.getCountries(host, realm);
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host, realm);
         //города
