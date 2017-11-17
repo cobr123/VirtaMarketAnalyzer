@@ -194,7 +194,7 @@ final public class TechMarketAskParser {
     }
 
     public static List<TechLvl> getTech(final String host, final String realm, final String unit_type_id) throws IOException {
-        final String url = host + "api/" + realm + "/main/unittype/technologies?app=virtonomica&format=json&ajax=1&unit_type_id=" + unit_type_id + "&wrap=0";
+        final String url = host + "api/" + realm + "/main/unittype/technologies?app=virtonomica&format=json&ajax=1&id=" + unit_type_id + "&wrap=0";
         final String fileToSave = Utils.getDir() + Downloader.getClearedUrl(host + "api/" + realm + "/main/technology/report/unittype/", null) + unit_type_id + ".json";
         //logger.info(fileToSave);
         FileUtils.copyURLToFile(new URL(url), new File(fileToSave));
