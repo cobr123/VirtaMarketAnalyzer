@@ -41,7 +41,7 @@ final public class TrendUpdater {
             updateTrends(realm);
         }
         //публикуем на сайте
-        GitHubPublisher.publishTrends();
+        GitHubPublisher.publishTrends(Wizard.realms);
     }
 
     private static void updateTrends(final String realm) throws IOException, GitAPIException {
@@ -60,7 +60,7 @@ final public class TrendUpdater {
     }
 
     public static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
-        final String baseDir = GitHubPublisher.localPath + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
+        final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
         final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
         logger.info("updateAllRetailAnalytics.size() = {}, {}", set.size(), realm);
 
@@ -130,7 +130,7 @@ final public class TrendUpdater {
     }
 
     public static void updateAllProductRemainTrends(final String realm) throws IOException, GitAPIException {
-        final String baseDir = GitHubPublisher.localPath + Wizard.industry + File.separator + realm + File.separator;
+        final String baseDir = Utils.getDir() + Wizard.industry + File.separator + realm + File.separator;
         final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm);
         logger.info("updateAllProductRemainTrends.size() = {}, {}", set.size(), realm);
 

@@ -57,8 +57,10 @@ final public class GitHubPublisher {
         git.close();
     }
 
-    public static void publishTrends() throws IOException, GitAPIException {
+    public static void publishTrends(final List<String> realms) throws IOException, GitAPIException {
         final Git git = getRepo();
+        copyTrendsToLocalRepo(Wizard.by_trade_at_cities, Wizard.retail_trends, realms);
+        copyTrendsToLocalRepo(Wizard.industry, Wizard.product_remains_trends, realms);
         final String pattern = ".";
         logger.info("git add " + pattern);
         git.add().addFilepattern(pattern).call();
@@ -114,6 +116,21 @@ final public class GitHubPublisher {
         return true;
     }
 
+
+    private static void copyTrendsToLocalRepo(final String dir, final String subDir, final List<String> realms) throws IOException {
+        for (final String realm : realms) {
+            final File srcDir = new File(Utils.getDir() + dir + File.separator + realm + File.separator + subDir + File.separator);
+            if (srcDir.exists()) {
+                final File destDir = new File(localPath + dir + File.separator + realm + File.separator + subDir + File.separator);
+                if (destDir.exists()) {
+                    logger.info("удаляем {}", destDir.getAbsolutePath());
+                    FileUtils.deleteDirectory(destDir);
+                }
+                logger.info("копируем {} в {}", srcDir.getAbsolutePath(), destDir.getAbsolutePath());
+                FileUtils.copyDirectory(srcDir, destDir);
+            }
+        }
+    }
 
     private static void copyToLocalRepo(final String dir, final List<String> realms) throws IOException {
         for (final String realm : realms) {
@@ -182,7 +199,7 @@ final public class GitHubPublisher {
                     logger.info("git clone finished");
                     return git;
                 }
-            } catch (final IOException e) {
+            } catch (final IOException | GitAPIException e) {
                 logger.error("Ошибка, попытка #{} из {}: {}", tries, maxTriesCnt, e.getLocalizedMessage());
                 if (maxTriesCnt == tries) {
                     throw new IOException(e);
