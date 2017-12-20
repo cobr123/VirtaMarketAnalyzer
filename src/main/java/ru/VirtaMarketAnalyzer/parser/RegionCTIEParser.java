@@ -61,7 +61,9 @@ final public class RegionCTIEParser {
                 logger.error(e.getLocalizedMessage(), e);
             }
             return null;
-        }).collect(Collectors.toList());
+        })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public static RegionCTIE getRegionCTIEList(final Element elem, final Region region, final List<Product> materials) throws Exception {
@@ -70,7 +72,15 @@ final public class RegionCTIEParser {
             throw new Exception("Не найден продукт с изображением '" + elem.attr("src") + "'");
         }
         final String productId = product.get().getId();
-        elem.parent().nextElementSibling().nextElementSibling().children().remove();
+        try {
+            final Elements child = elem.parent().nextElementSibling().nextElementSibling().children();
+            if (child != null) {
+                child.remove();
+            }
+        } catch (final Exception e) {
+            logger.error("html = {}", elem.outerHtml());
+            throw e;
+        }
         final int rate = Utils.toInt(elem.parent().nextElementSibling().nextElementSibling().text());
         return new RegionCTIE(region.getId(), productId, rate);
     }
