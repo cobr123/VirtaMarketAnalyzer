@@ -92,6 +92,11 @@
             <!--<artifactId>spark-mllib_2.11</artifactId>-->
             <!--<version>2.1.0</version>-->
         <!--</dependency>-->
+        <dependency>
+            <groupId>net.jodah</groupId>
+            <artifactId>failsafe</artifactId>
+            <version>1.0.4</version>
+        </dependency>
     </dependencies>
 
     <build>
