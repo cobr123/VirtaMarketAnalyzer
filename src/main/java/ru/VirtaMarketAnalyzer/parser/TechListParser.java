@@ -33,9 +33,6 @@ final public class TechListParser {
     }
 
     public static List<TechUnitType> getTechUnitTypes(final String host,final String realm) throws IOException {
-        if("nika".equalsIgnoreCase(realm)){
-            return null;
-        }
         final Document doc = Downloader.getDoc(host + realm + "/main/globalreport/technology");
         final Elements types = doc.select("select#unittype > option");
 

@@ -82,9 +82,6 @@ public final class Wizard {
     }
 
     private static void collectToJsonTech(final String realm) throws IOException {
-        if ("nika".equalsIgnoreCase(realm)) {
-            return;
-        }
         final String baseDir = Utils.getDir() + tech + File.separator + realm + File.separator;
 
         //типы подразделений для технологий
