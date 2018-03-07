@@ -71,22 +71,28 @@ public final class CityInitParser {
 
     public static List<Country> getCountries(final String host, final String realm) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String json = IOUtils.toString(new URL(host + "api/" + realm + "/main/geo/country/browse?lang=" + lang), Charset.forName("UTF-8"));
-
-        final Gson gson = new Gson();
-        final Type mapType = new TypeToken<Map<String, Map<String, String>>>() {
-        }.getType();
-        final Map<String, Map<String, String>> mapOfCountry = gson.fromJson(json, mapType);
+        final String url = host + "api/" + realm + "/main/geo/country/browse?lang=" + lang;
 
         final List<Country> list = new ArrayList<>();
+        try {
+            final String json = IOUtils.toString(new URL(url), Charset.forName("UTF-8"));
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+            }.getType();
+            final Map<String, Map<String, Object>> mapOfCountry = gson.fromJson(json, mapType);
 
-        for (final String country_id : mapOfCountry.keySet()) {
-            final Map<String, String> country = mapOfCountry.get(country_id);
 
-            final String id = country.get("id");
-            final String caption = country.get("name");
+            for (final String country_id : mapOfCountry.keySet()) {
+                final Map<String, Object> country = mapOfCountry.get(country_id);
 
-            list.add(new Country(id, caption));
+                final String id = country.get("id").toString();
+                final String caption = country.get("name").toString();
+
+                list.add(new Country(id, caption));
+            }
+        } catch (final Exception e) {
+            logger.error(url);
+            throw new IOException(e);
         }
         return list;
     }
