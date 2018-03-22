@@ -189,11 +189,13 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "countries.json", countries);
         final List<Country> countries_en = CityInitParser.getCountries(host_en, realm);
         Utils.writeToGson(baseDir + "countries_en.json", countries_en);
+        logger.info("countries.size() = {}, realm = {}", countries.size(), realm);
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host, realm);
         Utils.writeToGson(baseDir + "regions.json", regions);
         final List<Region> regions_en = CityInitParser.getRegions(host_en, realm);
         Utils.writeToGson(baseDir + "regions_en.json", regions_en);
+        logger.info("regions.size() = {}, realm = {}", regions.size(), realm);
         //города и уровень богатства городов
         final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
         Utils.writeToGson(baseDir + "cities.json", cities);
