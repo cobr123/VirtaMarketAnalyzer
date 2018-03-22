@@ -23,16 +23,18 @@ public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
     static {
-        TrustManager[] trustAllCertificates = new TrustManager[] {
+        TrustManager[] trustAllCertificates = new TrustManager[]{
                 new X509TrustManager() {
                     @Override
                     public X509Certificate[] getAcceptedIssuers() {
                         return null; // Not relevant.
                     }
+
                     @Override
                     public void checkClientTrusted(X509Certificate[] certs, String authType) {
                         // Do nothing. Just allow them all.
                     }
+
                     @Override
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
                         // Do nothing. Just allow them all.
@@ -53,8 +55,7 @@ public final class Downloader {
             sc.init(null, trustAllCertificates, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
-        }
-        catch (GeneralSecurityException e) {
+        } catch (GeneralSecurityException e) {
             throw new ExceptionInInitializerError(e);
         }
     }
@@ -66,7 +67,12 @@ public final class Downloader {
             final String page = File.separator + parts[parts.length - 2] + File.separator + parts[parts.length - 1];
             clearedUrl = referrer.replace("http://", "").replace("https://", "").replace("/", File.separator) + page;
         } else {
-            clearedUrl = url.replace("http://", "").replace("https://", "").replace("/", File.separator);
+            clearedUrl = url
+                    .replace("http://", "")
+                    .replace("https://", "")
+                    .replace("/", File.separator)
+                    .replace("?", File.separator)
+                    .replace("=", File.separator);
         }
         return clearedUrl;
     }
@@ -88,15 +94,19 @@ public final class Downloader {
         return getDoc(url, null);
     }
 
+    public static Document getDoc(final String url, final boolean ignoreContentType) throws IOException {
+        return getDoc(url, null, 99, ignoreContentType);
+    }
+
     public static Document getDoc(final String url, final int maxTriesCnt) throws IOException {
-        return getDoc(url, null, maxTriesCnt);
+        return getDoc(url, null, maxTriesCnt, false);
     }
 
     public static Document getDoc(final String url, final String referrer) throws IOException {
-        return getDoc(url, referrer, 99);
+        return getDoc(url, referrer, 99, false);
     }
 
-    public static Document getDoc(final String url, final String referrer, final int maxTriesCnt) throws IOException {
+    public static Document getDoc(final String url, final String referrer, final int maxTriesCnt, final boolean ignoreContentType) throws IOException {
         final String clearedUrl = getClearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
@@ -118,6 +128,7 @@ public final class Downloader {
                     conn.userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0");
                     conn.maxBodySize(0);
                     conn.timeout(60_000);
+                    conn.ignoreContentType(ignoreContentType);
                     final Document doc = conn.get();
                     Utils.writeFile(fileToSave, doc.outerHtml());
                     return doc;
