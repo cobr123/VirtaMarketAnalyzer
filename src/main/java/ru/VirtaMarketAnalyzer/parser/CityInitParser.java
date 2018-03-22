@@ -48,23 +48,30 @@ public final class CityInitParser {
 
     public static List<Region> getRegions(final String host, final String realm) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String json = IOUtils.toString(new URL(host + "api/" + realm + "/main/geo/region/browse?lang=" + lang), Charset.forName("UTF-8"));
-
-        final Gson gson = new Gson();
-        final Type mapType = new TypeToken<Map<String, Map<String, String>>>() {
-        }.getType();
-        final Map<String, Map<String, String>> mapOfRegions = gson.fromJson(json, mapType);
+        final String url = host + "api/" + realm + "/main/geo/region/browse?lang=" + lang;
 
         final List<Region> list = new ArrayList<>();
-        for (final String region_id : mapOfRegions.keySet()) {
-            final Map<String, String> region = mapOfRegions.get(region_id);
+        try {
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().html();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Map<String, String>>>() {
+            }.getType();
+            final Map<String, Map<String, String>> mapOfRegions = gson.fromJson(json, mapType);
 
-            final String country_id = region.get("country_id");
-            final String id = region.get("id");
-            final String caption = region.get("name");
-            final double incomeTaxRate = Utils.toDouble(region.get("tax"));
+            for (final String region_id : mapOfRegions.keySet()) {
+                final Map<String, String> region = mapOfRegions.get(region_id);
 
-            list.add(new Region(country_id, id, caption, incomeTaxRate));
+                final String country_id = region.get("country_id");
+                final String id = region.get("id");
+                final String caption = region.get("name");
+                final double incomeTaxRate = Utils.toDouble(region.get("tax"));
+
+                list.add(new Region(country_id, id, caption, incomeTaxRate));
+            }
+        } catch (final Exception e) {
+            logger.error(url);
+            throw new IOException(e);
         }
         return list;
     }
@@ -75,7 +82,8 @@ public final class CityInitParser {
 
         final List<Country> list = new ArrayList<>();
         try {
-            final String json = IOUtils.toString(new URL(url), Charset.forName("UTF-8"));
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().html();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();
