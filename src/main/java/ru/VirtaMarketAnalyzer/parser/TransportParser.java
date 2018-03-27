@@ -32,7 +32,7 @@ public final class TransportParser {
         logger.info("countries.size = {}", countries.size());
         final List<Region> regions = CityInitParser.getRegions(host, realm);
         logger.info("regions.size = {}", regions.size());
-        final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
+        final List<City> cities = CityListParser.getCities(host, realm);
         logger.info("cities.size = {}", cities.size());
         final List<Product> materials = ProductInitParser.getManufactureProducts(host, realm);
         logger.info("materials.size = {}", materials.size());

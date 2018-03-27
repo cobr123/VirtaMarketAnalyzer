@@ -147,7 +147,7 @@ public final class Wizard {
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host, realm);
         //города и уровень богатства городов
-        final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
+        final List<City> cities = CityListParser.getCities(host, realm);
         logger.info("cities.size = {}, {}", cities.size(), realm);
         final List<Product> materials = ProductInitParser.getManufactureProducts(host, realm);
         logger.info("materials.size = {}, {}", materials.size(), realm);
@@ -197,9 +197,9 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "regions_en.json", regions_en);
         logger.info("regions.size() = {}, realm = {}", regions.size(), realm);
         //города и уровень богатства городов
-        final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
+        final List<City> cities = CityListParser.getCities(host, realm);
         Utils.writeToGson(baseDir + "cities.json", cities);
-        final List<City> cities_en = CityListParser.fillWealthIndex(host_en, realm, regions);
+        final List<City> cities_en = CityListParser.getCities(host_en, realm);
         Utils.writeToGson(baseDir + "cities_en.json", cities_en);
         logger.info("cities.size() = {}, realm = {}", cities.size(), realm);
 
@@ -306,7 +306,7 @@ public final class Wizard {
         //регионы
         final List<Region> regions = CityInitParser.getRegions(host, realm);
         //города
-        final List<City> cities = CityListParser.fillWealthIndex(host, realm, regions);
+        final List<City> cities = CityListParser.getCities(host, realm);
 
         logger.info("группируем ставки енвд по регионам");
         final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/regionENVD/", regions, materials);
