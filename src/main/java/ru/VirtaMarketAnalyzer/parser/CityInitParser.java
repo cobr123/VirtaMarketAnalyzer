@@ -55,23 +55,23 @@ public final class CityInitParser {
             final Document doc = Downloader.getDoc(url, true);
             final String json = doc.body().html();
             final Gson gson = new Gson();
-            final Type mapType = new TypeToken<Map<String, Map<String, String>>>() {
+            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();
-            final Map<String, Map<String, String>> mapOfRegions = gson.fromJson(json, mapType);
+            final Map<String, Map<String, Object>> mapOfRegions = gson.fromJson(json, mapType);
 
             for (final String region_id : mapOfRegions.keySet()) {
-                final Map<String, String> region = mapOfRegions.get(region_id);
+                final Map<String, Object> region = mapOfRegions.get(region_id);
 
-                final String country_id = region.get("country_id");
-                final String id = region.get("id");
-                final String caption = region.get("name");
-                final double incomeTaxRate = Utils.toDouble(region.get("tax"));
+                final String country_id = region.get("country_id").toString();
+                final String id = region.get("id").toString();
+                final String caption = region.get("name").toString();
+                final double incomeTaxRate = Utils.toDouble(region.get("tax").toString());
 
                 list.add(new Region(country_id, id, caption, incomeTaxRate));
             }
         } catch (final Exception e) {
             logger.error(url);
-            throw new IOException(e);
+            throw e;
         }
         return list;
     }
@@ -100,7 +100,7 @@ public final class CityInitParser {
             }
         } catch (final Exception e) {
             logger.error(url);
-            throw new IOException(e);
+            throw e;
         }
         return list;
     }
