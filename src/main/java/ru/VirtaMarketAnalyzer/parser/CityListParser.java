@@ -112,7 +112,8 @@ public final class CityListParser {
             throw e;
         }
         if (demography == -1) {
-            throw new IOException("Значение демографии не найдено");
+            Downloader.invalidateCache(url);
+            throw new IOException("Значение демографии не найдено, '"+ today +"', " + url);
         }
         return demography;
     }
