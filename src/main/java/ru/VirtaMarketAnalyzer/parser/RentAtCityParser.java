@@ -1,5 +1,7 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -8,6 +10,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.City;
+import ru.VirtaMarketAnalyzer.data.Region;
 import ru.VirtaMarketAnalyzer.data.RentAtCity;
 import ru.VirtaMarketAnalyzer.data.UnitType;
 import ru.VirtaMarketAnalyzer.main.Utils;
@@ -15,6 +18,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
@@ -32,11 +36,11 @@ public final class RentAtCityParser {
         System.out.println("list.size() = " + list.size());
     }
 
-    public static List<RentAtCity> getUnitTypeRent(final String baseUrl, final String realm, final List<City> cities) throws IOException {
+    public static List<RentAtCity> getUnitTypeRent(final String host, final String realm, final List<City> cities) throws IOException {
         return cities.parallelStream()
                 .map(city -> {
                     try {
-                        return getUnitTypeRent(baseUrl, realm, city.getId());
+                        return getUnitTypeRent(host, realm, city.getId());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
                     }
@@ -47,18 +51,30 @@ public final class RentAtCityParser {
                 .collect(toList());
     }
 
-    public static List<RentAtCity> getUnitTypeRent(final String baseUrl, final String realm, final String cityId) throws IOException {
-        final Document doc = Downloader.getDoc(baseUrl + realm + "/main/geo/city/" + cityId + "/rent");
-        final Elements rows = doc.select("table.list > tbody > tr[class]");
+    public static List<RentAtCity> getUnitTypeRent(final String host, final String realm, final String cityId) throws IOException {
+        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
+        final String url = host + "api/" + realm + "/main/geo/city/rent?city_id=" + cityId + "&lang=" + lang;
 
-        return rows.stream()
-                .map(row -> {
-                    final String unitTypeImgSrc = row.select("> td:nth-child(1) > img").attr("src");
-                    final double areaRent = Utils.toDouble(row.select("> td:nth-child(2)").text());
-                    final double workplaceRent = Utils.toDouble(row.select("> td:nth-child(3)").text());
-                    return new RentAtCity(unitTypeImgSrc, cityId, areaRent, workplaceRent);
-                })
-                .collect(toList());
+        final List<RentAtCity> list = new ArrayList<>();
+        try {
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().html();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<List<Map<String, Object>>>() {
+            }.getType();
+            final List<Map<String, Object>> rentList = gson.fromJson(json, mapType);
 
+            for (final Map<String, Object> rent : rentList) {
+                final String unit_class_kind = rent.get("unit_class_kind").toString();
+                final double areaRent = Utils.round2(Utils.toDouble(rent.get("rent_cost").toString()));
+                final double workplaceRent = 0;
+
+                list.add(new RentAtCity("/img/unit_types/" + unit_class_kind + ".gif", cityId, areaRent, workplaceRent));
+            }
+        } catch (final Exception e) {
+            logger.error(url);
+            throw e;
+        }
+        return list;
     }
 }
