@@ -133,7 +133,7 @@ public final class CityListParser {
 
             final Object mapOfBonuses = mapOfBonusAndRestrictions.get("retails");
 
-            if (mapOfBonuses != null) {
+            if (mapOfBonuses != null && !(mapOfBonuses instanceof String)) {
                 final Map<String, Map<String, Object>> mapOfCat = (Map<String, Map<String, Object>>) mapOfBonuses;
                 for (final String category_id : mapOfCat.keySet()) {
                     final Map<String, Object> bonus = mapOfCat.get(category_id);
