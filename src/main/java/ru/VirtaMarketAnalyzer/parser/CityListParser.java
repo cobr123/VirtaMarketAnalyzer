@@ -61,7 +61,7 @@ public final class CityListParser {
                 final String id = city.get("id").toString();
                 final String region_id = city.get("region_id").toString();
                 final String country_id = city.get("country_id").toString();
-                final String caption = city.get("name").toString();
+                final String caption = city.get("city_name").toString();
                 final String wealthIndex = city.get("wealth_level").toString();
                 final String educationIndex = city.get("education").toString();
                 final String averageSalary = city.get("salary").toString();
@@ -133,12 +133,14 @@ public final class CityListParser {
 
             final Object mapOfBonuses = mapOfBonusAndRestrictions.get("retails");
 
-            if (mapOfBonuses != null && !(mapOfBonuses instanceof String)) {
+            if (mapOfBonuses instanceof Map) {
                 final Map<String, Map<String, Object>> mapOfCat = (Map<String, Map<String, Object>>) mapOfBonuses;
                 for (final String category_id : mapOfCat.keySet()) {
                     final Map<String, Object> bonus = mapOfCat.get(category_id);
-                    final String name = bonus.get("name").toString();
-                    mayoralBonuses.add(name);
+                    if(bonus != null && bonus.containsKey("name")) {
+                        final String name = bonus.get("name").toString();
+                        mayoralBonuses.add(name);
+                    }
                 }
             }
         } catch (final Exception e) {
