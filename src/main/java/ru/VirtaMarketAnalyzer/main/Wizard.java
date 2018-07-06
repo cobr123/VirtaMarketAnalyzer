@@ -44,7 +44,7 @@ public final class Wizard {
     public static final String retail_trends = "retail_trends";
     public static final String product_remains_trends = "product_remains_trends";
     public static final String CITY_ELECTRICITY_TARIFF = "city_electricity_tariff";
-    public static final List<String> realms = Arrays.asList("nika", "lien", "mary", "anna", "fast", "olga", "vera");
+    public static final List<String> realms = Arrays.asList("crypto", "nika", "lien", "mary", "anna", "fast", "olga", "vera");
 
 
     public static void main(String[] args) throws IOException, GitAPIException {
@@ -131,11 +131,12 @@ public final class Wizard {
     }
 
     public static void collectToJsonTransport(final String realm) throws IOException, GitAPIException {
-        if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
-        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
+        if ("crypto".equalsIgnoreCase(realm) && todayIs(Calendar.SUNDAY)) {
         } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
+        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
+        } else if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
+        } else if ("vera".equalsIgnoreCase(realm) && todayIs(Calendar.THURSDAY)) {
         } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
-        } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
             return;
@@ -222,11 +223,12 @@ public final class Wizard {
         final List<RentAtCity> rents = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
         Utils.writeToGson(baseDir + "rent.json", rents);
 
-        if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
-        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
+        if ("crypto".equalsIgnoreCase(realm) && todayIs(Calendar.SUNDAY)) {
         } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
+        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
+        } else if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
+        } else if ("vera".equalsIgnoreCase(realm) && todayIs(Calendar.THURSDAY)) {
         } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
-        } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
             return;
