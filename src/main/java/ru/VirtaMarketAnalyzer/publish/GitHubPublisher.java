@@ -246,6 +246,13 @@ final public class GitHubPublisher {
         logger.info("Set<RetailAnalytics>.size = {}", set.size());
     }
 
+    public static void repackRepository() throws IOException, GitAPIException {
+        final Git git = getRepo();
+        logger.info("GC");
+        git.gc().setAggressive(true).call();
+        logger.info("GC done");
+    }
+
     public static void main(String[] args) throws IOException, GitAPIException {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 

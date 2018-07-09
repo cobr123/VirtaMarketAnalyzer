@@ -57,7 +57,8 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
-
+        //gc
+        GitHubPublisher.repackRepository();
 
 //        for (final String realm : realms) {
 //            collectToJsonTransport(realm);
@@ -130,15 +131,24 @@ public final class Wizard {
         return today.get(Calendar.DAY_OF_WEEK) == dayOfWeek;
     }
 
-    public static void collectToJsonTransport(final String realm) throws IOException, GitAPIException {
-        if ("crypto".equalsIgnoreCase(realm) && todayIs(Calendar.SUNDAY)) {
+    public static boolean isParseNeedToday(final String realm) {
+        if ("crypto".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
         } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
         } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
-        } else if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
+        } else if ("olga".equalsIgnoreCase(realm) && todayIs(Calendar.WEDNESDAY)) {
         } else if ("vera".equalsIgnoreCase(realm) && todayIs(Calendar.THURSDAY)) {
-        } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
+        } else if ("lien".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
+        } else if ("nika".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
+        } else if ("olga".equalsIgnoreCase(realm) && todayIs(Calendar.SATURDAY)) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
+            return false;
+        }
+        return true;
+    }
+
+    public static void collectToJsonTransport(final String realm) throws IOException, GitAPIException {
+        if (!isParseNeedToday(realm)) {
             return;
         }
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
@@ -223,14 +233,7 @@ public final class Wizard {
         final List<RentAtCity> rents = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
         Utils.writeToGson(baseDir + "rent.json", rents);
 
-        if ("crypto".equalsIgnoreCase(realm) && todayIs(Calendar.SUNDAY)) {
-        } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
-        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
-        } else if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
-        } else if ("vera".equalsIgnoreCase(realm) && todayIs(Calendar.THURSDAY)) {
-        } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
-        } else if ("fast".equalsIgnoreCase(realm)) {
-        } else {
+        if (!isParseNeedToday(realm)) {
             return;
         }
 
