@@ -19,6 +19,8 @@ import weka.core.Instances;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * Created by cobr123 on 19.01.2016.
@@ -35,15 +37,14 @@ public final class ClassifierToJs {
     }
 
     public static Classifier loadModel(final String path) throws Exception {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(path))) {
+        try (final ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(Paths.get(path)))) {
             return (Classifier) ois.readObject();
         }
     }
 
     public static void saveModel(final Classifier c, final String path) throws Exception {
         Utils.mkdirs(path);
-        try (ObjectOutputStream oos = new ObjectOutputStream(
-                new FileOutputStream(path))) {
+        try (final ObjectOutputStream oos = new ObjectOutputStream(Files.newOutputStream(Paths.get(path)))) {
             oos.writeObject(c);
             oos.flush();
         }

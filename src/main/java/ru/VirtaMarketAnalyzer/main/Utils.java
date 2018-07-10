@@ -54,14 +54,13 @@ public final class Utils {
 
     public static void writeToZip(final String path, final Object obj) throws IOException {
         final File file = Utils.mkdirs(path + ".zip");
-        try (final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(file))) {
+        try (final ZipOutputStream out = new ZipOutputStream(Files.newOutputStream(file.toPath()))) {
             final ZipEntry e = new ZipEntry(new File(path).getName());
             out.putNextEntry(e);
 
             final byte[] data = getGson(obj).getBytes();
             out.write(data, 0, data.length);
             out.closeEntry();
-            out.close();
         }
     }
 
