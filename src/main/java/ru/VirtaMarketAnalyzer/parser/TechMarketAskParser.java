@@ -86,11 +86,11 @@ final public class TechMarketAskParser {
             final List<TechLicenseAskBid> techBids = getTechLicenseAskBids(url3);
 //            logger.info(Utils.getPrettyGson(techBids));
 //            logger.info("techBids.size() = {}", techBids.size());
-            if (techAsks.size() > 0 && techBids.size() == 0) {
+            if (!techAsks.isEmpty() && techBids.isEmpty()) {
                 licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, Collections.emptyList()));
             } else {
                 final List<TechLicenseAskBid> tmp = getAskWoBid(techAsks, techBids);
-                if (tmp.size() > 0) {
+                if (!tmp.isEmpty()) {
                     licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, tmp));
                 }
             }
