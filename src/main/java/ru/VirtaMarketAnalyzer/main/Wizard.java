@@ -57,8 +57,6 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(realms);
-        //gc
-        GitHubPublisher.repackRepository();
 
 //        for (final String realm : realms) {
 //            collectToJsonTransport(realm);

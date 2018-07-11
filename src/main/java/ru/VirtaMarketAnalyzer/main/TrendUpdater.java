@@ -42,6 +42,8 @@ final public class TrendUpdater {
         }
         //публикуем на сайте
         GitHubPublisher.publishTrends(Wizard.realms);
+        //gc
+        GitHubPublisher.repackRepository();
     }
 
     private static void updateTrends(final String realm) throws IOException, GitAPIException {
