@@ -115,7 +115,7 @@ public final class Utils {
         if (text.equals("-")) {
             return "";
         } else {
-            return text.replace("$", "").replace("+", "").replace("%", "").replace("©", "").replaceAll("\\p{L}+\\.?", "").replaceAll("\\p{InCyrillic}+\\.?", "").replaceAll("\\s+", "").trim();
+            return text.replace("$", "").replace("+", "").replace("*", "").replace("%", "").replace("©", "").replaceAll("\\p{L}+\\.?", "").replaceAll("\\p{InCyrillic}+\\.?", "").replaceAll("\\s+", "").trim();
         }
     }
 

@@ -37,7 +37,7 @@ final public class ProductRecipeParser {
         final List<Manufacture> manufactures = new ArrayList<>();
 //        manufactures.add(new Manufacture("423140", "manufactureCategory", "caption"));
 //        manufactures.add(new Manufacture("2425", "manufactureCategory", "caption"));
-        manufactures.add(new Manufacture("2438", "manufactureCategory", "caption", new ArrayList<>()));
+        manufactures.add(new Manufacture("2404", "manufactureCategory", "caption", new ArrayList<>()));
 
         final Map<String, List<ProductRecipe>> result = getProductRecipes(host, realm, manufactures);
         logger.info(Utils.getPrettyGson(result));
@@ -95,7 +95,7 @@ final public class ProductRecipeParser {
                             }
 
                             final List<ManufactureResult> resultProducts = new ArrayList<>();
-                            final Elements results = row.select("> td:nth-child(4) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1)");
+                            final Elements results = row.select("> td:nth-child(5) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1)");
                             int resultIdx = 0;
                             for (final Element result : results) {
                                 final String minProdQty = lastTableRow.select("> td").eq(minProdQtyCellIdx).select("> nobr").text();
@@ -107,10 +107,9 @@ final public class ProductRecipeParser {
                                 result.parent().parent().nextElementSibling().child(0).children().remove();
                                 final String resultQty = result.parent().parent().nextElementSibling().child(0).text();
 //                            logger.info("resultQty = {}", Utils.toDouble(resultQty));
-
-                                String qualityBonus = row.select("> td:nth-child(5)").text();
+                                String qualityBonus = row.select("> td:nth-child(6)").text();
                                 if (results.size() > 1) {
-                                    final Element bonusTD = row.select("> td:nth-child(5) > table > tbody > tr").eq(resultIdx).select("> td").first();
+                                    final Element bonusTD = row.select("> td:nth-child(6) > table > tbody > tr").eq(resultIdx).select("> td").first();
                                     bonusTD.children().remove();
                                     qualityBonus = bonusTD.text();
                                 }
@@ -126,8 +125,9 @@ final public class ProductRecipeParser {
                             if (!"2011".equals(manufacture.getId())) {
                                 equipment = getProduct(host, realm, equipElem);
                             }
+                            final double energyConsumption = Utils.toDouble(row.select("> td:nth-child(4)").text());
 
-                            final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, equipmentPerWorker, inputProducts, resultProducts);
+                            final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, equipmentPerWorker, energyConsumption, inputProducts, resultProducts);
                             recipes.add(recipe);
                         }
                     }
