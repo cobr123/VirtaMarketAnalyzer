@@ -108,12 +108,13 @@ public final class CityListParser {
                 }
             }
         } catch (final Exception e) {
+            Downloader.invalidateCache(url);
             logger.error(url);
             throw e;
         }
         if (demography == -1) {
             Downloader.invalidateCache(url);
-            throw new IOException("Значение демографии не найдено, '"+ today +"', " + url);
+            throw new IOException("Значение демографии не найдено, '" + today + "', " + url);
         }
         return demography;
     }
@@ -137,13 +138,14 @@ public final class CityListParser {
                 final Map<String, Map<String, Object>> mapOfCat = (Map<String, Map<String, Object>>) mapOfBonuses;
                 for (final String category_id : mapOfCat.keySet()) {
                     final Map<String, Object> bonus = mapOfCat.get(category_id);
-                    if(bonus != null && bonus.containsKey("name")) {
+                    if (bonus != null && bonus.containsKey("name")) {
                         final String name = bonus.get("name").toString();
                         mayoralBonuses.add(name);
                     }
                 }
             }
         } catch (final Exception e) {
+            Downloader.invalidateCache(url);
             logger.error(url);
             throw e;
         }
