@@ -23,7 +23,7 @@ import java.util.List;
 public final class TransportParser {
     private static final Logger logger = LoggerFactory.getLogger(TransportParser.class);
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
         final String realm = "olga";

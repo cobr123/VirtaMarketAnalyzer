@@ -4,12 +4,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
-import ru.VirtaMarketAnalyzer.ml.LinearRegressionSummary;
 import ru.VirtaMarketAnalyzer.ml.PrepareAnalitics;
 import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 import ru.VirtaMarketAnalyzer.parser.*;
@@ -21,12 +18,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.PRODUCT_REMAINS_;
-import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
-import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.WEKA;
-import static ru.VirtaMarketAnalyzer.publish.GitHubPublisher.getRepo;
 
 /**
  * Created by cobr123 on 25.04.2015.
@@ -47,7 +39,7 @@ public final class Wizard {
     public static final List<String> realms = Arrays.asList("crypto", "nika", "lien", "mary", "anna", "fast", "olga", "vera");
 
 
-    public static void main(String[] args) throws IOException, GitAPIException {
+    public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
         for (final String realm : Wizard.realms) {
@@ -145,7 +137,7 @@ public final class Wizard {
         return true;
     }
 
-    public static void collectToJsonTransport(final String realm) throws IOException, GitAPIException {
+    public static void collectToJsonTransport(final String realm) throws Exception {
         if (!isParseNeedToday(realm)) {
             return;
         }
@@ -179,7 +171,7 @@ public final class Wizard {
         }
     }
 
-    public static void collectToJsonTradeAtCities(final String realm) throws IOException, GitAPIException {
+    public static void collectToJsonTradeAtCities(final String realm) throws Exception {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
 
@@ -206,7 +198,7 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "regions_en.json", regions_en);
         logger.info("regions.size() = {}, realm = {}", regions.size(), realm);
         //города и уровень богатства городов
-        final List<City> cities = CityListParser.getCities(host, realm);
+        final List<City> cities = Utils.repeatOnErr(() -> CityListParser.getCities(host, realm));
         Utils.writeToGson(baseDir + "cities.json", cities);
         final List<City> cities_en = CityListParser.getCities(host_en, realm);
         Utils.writeToGson(baseDir + "cities_en.json", cities_en);
@@ -278,7 +270,7 @@ public final class Wizard {
     }
 
 
-    public static void collectToJsonIndustries(final String realm) throws IOException, GitAPIException {
+    public static void collectToJsonIndustries(final String realm) throws Exception {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
 
         logger.info("собираем рецепты производства товаров и материалов");

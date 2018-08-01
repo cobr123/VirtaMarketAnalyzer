@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -230,6 +231,17 @@ public final class Utils {
         return Math.round(num * 100.0) / 100.0;
     }
 
+    public static <T> T repeatOnErr(final Callable<T> func) throws Exception {
+        try {
+            return func.call();
+        } catch (final Exception e) {
+            logger.error(e.getLocalizedMessage(), e);
+            Utils.waitSecond(1);
+            return func.call();
+        }
+    }
+
+
     private static class Prefix<T> {
         final T value;
         final Prefix<T> parent;
@@ -294,6 +306,7 @@ public final class Utils {
             return null;
         }
         Gson gson = new Gson();
-        return gson.fromJson(json, new TypeToken<T>(){}.getType());
+        return gson.fromJson(json, new TypeToken<T>() {
+        }.getType());
     }
 }

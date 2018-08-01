@@ -5,15 +5,10 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.safety.Whitelist;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.City;
-import ru.VirtaMarketAnalyzer.data.Region;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
@@ -26,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by cobr123 on 25.04.2015.
@@ -35,14 +28,14 @@ import java.util.stream.Stream;
 public final class CityListParser {
     private static final Logger logger = LoggerFactory.getLogger(CityListParser.class);
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 
         final List<City> list = CityListParser.getCities(Wizard.host, "olga");
         System.out.println(list.size());
     }
 
-    public static List<City> getCities(final String host, final String realm) throws IOException {
+    public static List<City> getCities(final String host, final String realm) throws Exception {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
         final String url = host + "api/" + realm + "/main/geo/city/browse?lang=" + lang;
 
@@ -66,8 +59,8 @@ public final class CityListParser {
                 final String educationIndex = city.get("education").toString();
                 final String averageSalary = city.get("salary").toString();
                 final String population = city.get("population").toString();
-                final int demography = CityListParser.getDemography(host, realm, city_id);
-                final List<String> mayoralBonuses = CityListParser.getMayoralBonuses(host, realm, city_id);
+                final int demography = Utils.repeatOnErr(() -> CityListParser.getDemography(host, realm, city_id));
+                final List<String> mayoralBonuses = Utils.repeatOnErr(() -> CityListParser.getMayoralBonuses(host, realm, city_id));
 
                 list.add(new City(country_id, region_id, id, caption
                         , Utils.toDouble(wealthIndex)
