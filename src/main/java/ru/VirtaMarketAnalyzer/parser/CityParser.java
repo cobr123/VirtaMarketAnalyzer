@@ -75,7 +75,7 @@ public final class CityParser {
                 .map(city -> new CityProduct(city, product, host, realm).getTradeAtCity(countriesDutyList, regions))
                 .collect(Collectors.groupingBy(TradeAtCityBuilder::getCityId, Collectors.groupingBy(TradeAtCityBuilder::getProductCategoryId)));
 
-        return grpByCityByCatId.keySet().stream()
+        return grpByCityByCatId.keySet().parallelStream()
                 .map(cityId -> {
                     final Map<String, List<TradeAtCityBuilder>> grpByCatId = grpByCityByCatId.get(cityId);
                     return grpByCatId.keySet().stream()
