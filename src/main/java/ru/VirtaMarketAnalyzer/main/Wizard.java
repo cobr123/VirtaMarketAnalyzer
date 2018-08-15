@@ -42,13 +42,20 @@ public final class Wizard {
     public static void main(String[] args) throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
 
+        final List<String> parsedRealms = new ArrayList<>();
         for (final String realm : Wizard.realms) {
-            collectToJsonTradeAtCities(realm);
-            collectToJsonIndustries(realm);
-            collectToJsonTech(realm);
+            try {
+                collectToJsonTradeAtCities(realm);
+                collectToJsonIndustries(realm);
+                collectToJsonTech(realm);
+                parsedRealms.add(realm);
+            } catch (final Exception e) {
+                //видимо на этом реалме пересчета в этот день не было
+                logger.error(e.getLocalizedMessage(), e);
+            }
         }
         //публикуем на сайте
-        GitHubPublisher.publishRetail(realms);
+        GitHubPublisher.publishRetail(parsedRealms);
 
 //        for (final String realm : realms) {
 //            collectToJsonTransport(realm);
