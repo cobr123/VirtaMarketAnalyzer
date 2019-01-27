@@ -21,18 +21,18 @@ public final class MajorSellInCity {
     @SerializedName("b")
     private final double brand;
 
-    final private transient String unitUrl;
+    final private transient String unitId;
     final private transient String countryId;
     final private transient String regionId;
     final private transient String townId;
     final private transient String productId;
 
-    public MajorSellInCity(final String productId, final String countryId, final String regionId, final String townId, final String unitUrl, final long shopSize, final String townDistrict, final double sellVolume, final double price, final double quality, final double brand) {
+    public MajorSellInCity(final String productId, final String countryId, final String regionId, final String townId, final String unitId, final long shopSize, final String townDistrict, final double sellVolume, final double price, final double quality, final double brand) {
         this.productId = productId;
         this.countryId = countryId;
         this.regionId = regionId;
         this.townId = townId;
-        this.unitUrl = unitUrl;
+        this.unitId = unitId;
         this.shopSize = shopSize;
         this.townDistrict = townDistrict;
         this.sellVolume = sellVolume;
@@ -57,8 +57,8 @@ public final class MajorSellInCity {
         return townId;
     }
 
-    public String getUnitUrl() {
-        return unitUrl;
+    public String getUnitId() {
+        return unitId;
     }
 
     public long getShopSize() {

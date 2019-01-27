@@ -83,4 +83,8 @@ public final class City {
     public int getPopulation() {
         return population;
     }
+
+    public String getGeo() {
+        return getCountryId() + "/" + getRegionId() + "/" + getId();
+    }
 }

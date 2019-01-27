@@ -17,20 +17,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CityParserTest {
 
-//    @Test
-//    void collectByTradeAtCitiesTest() throws IOException {
-//        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-//        final String realm = "olga";
-//        final String url = Wizard.host + realm + "/main/geo/countrydutylist/";
-//        final List<Country> countries = new ArrayList<>();
-//        countries.add(new Country("2931", "Россия"));
-//        final List<City> cities = new ArrayList<>();
-//        final City city = new City("3010", "3023", "3055", "Николаев", 10, 0, 0, 0, 0, null);
-//        cities.add(city);
-//        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, realm);
-//        final List<Region> regions = CityInitParser.getRegions(Wizard.host, realm);
-//        final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(Wizard.host, realm, countries);
-//        final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(Wizard.host, realm, cities, products.get(0), countriesDutyList, regions);
-//        assertFalse(stats.isEmpty());
-//    }
+    @Test
+    void collectByTradeAtCitiesTest() throws IOException {
+        final String realm = "olga";
+        final List<Country> countries = new ArrayList<>();
+        countries.add(new Country("2931", "Россия"));
+        final List<City> cities = new ArrayList<>();
+        final City city = new City("2931", "2932", "2933", "Москва", 10, 0, 0, 0, 0, null);
+        cities.add(city);
+        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, realm);
+        final List<Region> regions = CityInitParser.getRegions(Wizard.host, realm);
+        final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(Wizard.host, realm, countries);
+        final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(Wizard.host, realm, cities, products.get(0), countriesDutyList, regions);
+        assertFalse(stats.isEmpty());
+    }
 }

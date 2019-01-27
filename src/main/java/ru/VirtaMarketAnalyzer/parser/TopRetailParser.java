@@ -38,7 +38,7 @@ public final class TopRetailParser {
                 .map(msic -> {
                             Shop shop = null;
                             try {
-                                shop = ShopParser.parse(realm, msic.getProductId(), msic.getCountryId(), msic.getRegionId(), msic.getTownId(), msic.getUnitUrl(), productsByImgSrc);
+                                shop = ShopParser.parse(realm, msic.getProductId(), msic.getCountryId(), msic.getRegionId(), msic.getTownId(), Wizard.host + realm + "/main/unit/view/" + msic.getUnitId(), productsByImgSrc);
                             } catch (final Exception e) {
                                 logger.error(e.getLocalizedMessage(), e);
                             }
