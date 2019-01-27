@@ -1,5 +1,7 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -15,6 +17,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,4 +77,35 @@ final public class CityElectricityTariffParser {
         }
         return list;
     }
+
+//    public static List<CityElectricityTariff> getCityElectricityTariffList(final String host, final String realm, final City city) throws IOException {
+//        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
+//        final String url = host + "api/" + realm + "/main/geo/region/energy?lang=" + lang + "region_id=" + city.getRegionId();
+//
+//        final List<CityElectricityTariff> list = new ArrayList<>();
+//        try {
+//            final Document doc = Downloader.getDoc(url, true);
+//            final String json = doc.body().html();
+//            final Gson gson = new Gson();
+//            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+//            }.getType();
+//            final Map<String, Map<String, Object>> mapOfCountry = gson.fromJson(json, mapType);
+//
+//
+//            for (final String country_id : mapOfCountry.keySet()) {
+//                final Map<String, Object> country = mapOfCountry.get(country_id);
+//                final List<Object> productList = (List<Object>) country.get("products");
+//
+//                final String productId = country.get("id").toString();
+//                final String productCategory = country.get("industry_name").toString();
+//                final double electricityTariff = Utils.toDouble(country.get("energy_tariff").toString());
+//
+//                list.add(new CityElectricityTariff(city.getId(), productCategory, productId, electricityTariff));
+//            }
+//        } catch (final Exception e) {
+//            logger.error(url);
+//            throw e;
+//        }
+//        return list;
+//    }
 }

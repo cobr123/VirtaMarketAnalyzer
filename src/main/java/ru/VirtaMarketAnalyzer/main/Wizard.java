@@ -317,7 +317,7 @@ public final class Wizard {
         final List<City> cities = CityListParser.getCities(host, realm);
 
         logger.info("группируем ставки енвд по регионам");
-        final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host + realm + "/main/geo/regionENVD/", regions, materials);
+        final Map<String, List<RegionCTIE>> allRegionsCTIEList = RegionCTIEParser.getAllRegionsCTIEList(host, realm, regions);
         for (final Map.Entry<String, List<RegionCTIE>> entry : allRegionsCTIEList.entrySet()) {
             Utils.writeToGson(baseDir + "region_ctie" + File.separator + entry.getKey() + ".json", entry.getValue());
         }

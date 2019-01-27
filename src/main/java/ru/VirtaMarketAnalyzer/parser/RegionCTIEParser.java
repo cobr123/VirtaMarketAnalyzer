@@ -1,11 +1,8 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
@@ -14,8 +11,8 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -25,22 +22,10 @@ import static java.util.stream.Collectors.groupingBy;
 final public class RegionCTIEParser {
     private static final Logger logger = LoggerFactory.getLogger(RegionCTIEParser.class);
 
-    public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final String url = Wizard.host + "olga/main/geo/regionENVD/";
-        final List<Region> regions = new ArrayList<>();
-        regions.add(new Region("2931", "2961", "Far East", 30));
-        final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, "olga");
-        logger.info(Utils.getPrettyGson(materials));
-        final Map<String, List<RegionCTIE>> allRegionsCTIEList = getAllRegionsCTIEList(url, regions, materials);
-        logger.info(Utils.getPrettyGson(allRegionsCTIEList));
-        logger.info("\n" + materials.size() + " = " + allRegionsCTIEList.get("2961").size());
-    }
-
-    public static Map<String, List<RegionCTIE>> getAllRegionsCTIEList(final String url, final List<Region> regions, final List<Product> materials) throws IOException {
+    public static Map<String, List<RegionCTIE>> getAllRegionsCTIEList(final String host, final String realm, final List<Region> regions) {
         return regions.stream().map(region -> {
             try {
-                return getRegionCTIEList(url, region, materials);
+                return getRegionCTIEList(host, realm, region);
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
@@ -50,38 +35,31 @@ final public class RegionCTIEParser {
                 .collect(groupingBy(RegionCTIE::getRegionId));
     }
 
-    public static List<RegionCTIE> getRegionCTIEList(final String url, final Region region, final List<Product> materials) throws IOException {
-        final Document doc = Downloader.getDoc(url + region.getId());
-        final Elements imgElems = doc.select("table.list > tbody > tr > td > img");
-        return imgElems.stream().map(el -> {
-            try {
-                return getRegionCTIEList(el, region, materials);
-            } catch (Exception e) {
-                logger.info(url + region.getId());
-                logger.error(e.getLocalizedMessage(), e);
-            }
-            return null;
-        })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
+    public static List<RegionCTIE> getRegionCTIEList(final String host, final String realm, final Region region) throws IOException {
+        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
+        final String url = host + "api/" + realm + "/main/geo/region/envd?lang=" + lang + "&region_id=" + region.getId();
 
-    public static RegionCTIE getRegionCTIEList(final Element elem, final Region region, final List<Product> materials) throws Exception {
-        final Optional<Product> product = materials.stream().filter(p -> p.getImgUrl().equalsIgnoreCase(elem.attr("src"))).findFirst();
-        if (!product.isPresent()) {
-            throw new Exception("Не найден продукт с изображением '" + elem.attr("src") + "'");
-        }
-        final String productId = product.get().getId();
+        final List<RegionCTIE> list = new ArrayList<>();
         try {
-            final Elements child = elem.parent().nextElementSibling().nextElementSibling().children();
-            if (child != null) {
-                child.remove();
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().html();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+            }.getType();
+            final Map<String, Map<String, Object>> infoAndDataMap = gson.fromJson(json, mapType);
+            final Map<String, Object> dataMap = infoAndDataMap.get("data");
+
+            for (final String productId : dataMap.keySet()) {
+                final Map<String, Object> city = (Map<String, Object>) dataMap.get(productId);
+
+                final int rate = Utils.toInt(city.get("tax").toString());
+
+                list.add(new RegionCTIE(region.getId(), productId, rate));
             }
         } catch (final Exception e) {
-            logger.error("html = {}", elem.outerHtml());
+            logger.error(url);
             throw e;
         }
-        final int rate = Utils.toInt(elem.parent().nextElementSibling().nextElementSibling().text());
-        return new RegionCTIE(region.getId(), productId, rate);
+        return list;
     }
 }
