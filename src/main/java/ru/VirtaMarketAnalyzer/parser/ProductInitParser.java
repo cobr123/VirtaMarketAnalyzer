@@ -1,50 +1,68 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.ProductCategory;
+import ru.VirtaMarketAnalyzer.data.Region;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 24.04.2015.
  */
 public final class ProductInitParser {
     private static final Logger logger = LoggerFactory.getLogger(ProductInitParser.class);
-    final static Pattern productPattern = Pattern.compile("\\{id\\s+:\\s+'([^']+)',\\s+catid\\s+:\\s+'([^']+)',\\s+symbol\\s+:\\s+'([^']+)',\\s+name\\s+:\\s+\"([^\"]+)\"\\},");
-
-    public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
-
-        System.out.println(Utils.getPrettyGson(getTradingProducts(Wizard.host, "olga")));
-//        System.out.println(Utils.getPrettyGson(getTradeProductCategories(Wizard.host, "olga")));
-//        System.out.println(Utils.getPrettyGson(getTradeProductCategories(Wizard.host_en, "olga")));
-//        System.out.println(Utils.getPrettyGson(getManufactureProductCategories(Wizard.host, "olga")));
-//        System.out.println(Utils.getPrettyGson(getManufactureProductCategories(Wizard.host_en, "olga")));
-    }
 
     public static List<Product> getTradingProducts(final String host, final String realm) throws IOException {
-        final List<ProductCategory> productCategories = getTradeProductCategories(host, realm);
-        return get(host, realm, "/main/globalreport/marketing/by_trade_at_cities", productCategories);
+        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
+        final String url = host + "api/" + realm + "/main/product/goods?lang=" + lang;
+        return getProducts(url);
     }
 
     public static List<Product> getManufactureProducts(final String host, final String realm) throws IOException {
-        final List<ProductCategory> productCategories = getManufactureProductCategories(host, realm);
-        return get(host, realm, "/main/globalreport/manufacture", productCategories);
+        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
+        final String url = host + "api/" + realm + "/main/product/browse?lang=" + lang;
+        return getProducts(url);
+    }
+
+    private static List<Product> getProducts(final String url) throws IOException {
+        final List<Product> list = new ArrayList<>();
+        try {
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().html();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+            }.getType();
+            final Map<String, Map<String, Object>> mapOfRegions = gson.fromJson(json, mapType);
+
+            for (final String region_id : mapOfRegions.keySet()) {
+                final Map<String, Object> region = mapOfRegions.get(region_id);
+
+                final String productCategory = region.get("product_category_name").toString();
+                final String productCategoryID = region.get("product_category_id").toString();
+                final String id = region.get("id").toString();
+                final String caption = region.get("name").toString();
+                final String symbol = region.get("symbol").toString();
+
+                list.add(new Product(productCategory, id, caption, productCategoryID, symbol));
+            }
+        } catch (final Exception e) {
+            logger.error(url);
+            throw e;
+        }
+        return list;
     }
 
     public static Product getTradingProduct(final String host, final String realm, final String id) throws IOException {
@@ -55,69 +73,20 @@ public final class ProductInitParser {
         return getManufactureProducts(host, realm).stream().filter(product -> product.getId().equals(id)).findFirst().get();
     }
 
-    public static List<Product> get(final String host, final String realm, final String path, final List<ProductCategory> productCategories) throws IOException {
-        List<Product> products = getInternal(host, realm, path, productCategories);
-        if(products.isEmpty()){
-            Downloader.invalidateCache(host + realm + path);
-            products = getInternal(host, realm, path, productCategories);
-        }
-        if(products.isEmpty()){
-            throw new IOException("Не удалось получить список товаров");
-        }
-        return products;
-    }
-    private static List<Product> getInternal(final String host, final String realm, final String path, final List<ProductCategory> productCategories) throws IOException {
-        final Document doc = Downloader.getDoc(host + realm + path);
-        final List<Product> products = new ArrayList<>();
-
-        final Elements scripts = doc.select("script");
-        for (final Element script : scripts) {
-            if (!script.html().isEmpty()) {
-                final Matcher m = productPattern.matcher(script.html());
-
-                while (m.find()) {
-                    final String id = m.group(1);
-                    final String productCategoryID = m.group(2);
-                    final String productCategory = productCategories.stream().filter(pc -> pc.getId().equals(productCategoryID)).findFirst().get().getCaption();
-                    final String symbol = m.group(3);
-                    final String caption = m.group(4);
-                    products.add(new Product(productCategory, id, caption, productCategoryID, symbol));
-                }
-            }
-        }
-        return products;
-    }
-
     public static List<ProductCategory> getTradeProductCategories(final String host, final String realm) throws IOException {
-        return getProductCategories(host, realm, "/main/globalreport/marketing/by_trade_at_cities");
+        return getTradingProducts(host, realm)
+                .stream()
+                .map(p -> new ProductCategory(p.getProductCategoryID(), p.getCaption()))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     public static List<ProductCategory> getManufactureProductCategories(final String host, final String realm) throws IOException {
-        return getProductCategories(host, realm, "/main/globalreport/manufacture");
+        return getManufactureProducts(host, realm)
+                .stream()
+                .map(p -> new ProductCategory(p.getProductCategoryID(), p.getCaption()))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
-    public static List<ProductCategory> getProductCategories(final String host, final String realm, final String path) throws IOException {
-        List<ProductCategory> productCategories = getProductCategoriesInternal(host, realm, path);
-        if(productCategories.isEmpty()){
-            Downloader.invalidateCache(host + realm + path);
-            productCategories = getProductCategoriesInternal(host, realm, path);
-        }
-        if(productCategories.isEmpty()){
-            throw new IOException("Не удалось получить список категорий товаров");
-        }
-        return productCategories;
-    }
-    private static List<ProductCategory> getProductCategoriesInternal(final String host, final String realm, final String path) throws IOException {
-        final Document doc = Downloader.getDoc(host + realm + path);
-        final List<ProductCategory> list = new ArrayList<>();
-
-        final Elements ops = doc.select("#__product_category_list > option");
-
-        for (final Element op : ops) {
-            final String id = op.val();
-            final String caption = op.text();
-            list.add(new ProductCategory(id, caption));
-        }
-        return list;
-    }
 }

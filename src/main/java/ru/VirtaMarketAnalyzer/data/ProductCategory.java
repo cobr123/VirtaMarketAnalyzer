@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Objects;
+
 /**
  * Created by cobr123 on 25.04.2015.
  */
@@ -22,5 +24,19 @@ public final class ProductCategory {
 
     public String getId() {
         return id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final ProductCategory that = (ProductCategory) o;
+        return getId().equals(that.getId()) &&
+                getCaption().equals(that.getCaption());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getCaption());
     }
 }
