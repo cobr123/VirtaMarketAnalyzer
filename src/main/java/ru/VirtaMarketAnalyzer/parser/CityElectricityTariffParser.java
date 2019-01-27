@@ -26,17 +26,6 @@ import static java.util.stream.Collectors.groupingBy;
 final public class CityElectricityTariffParser {
     private static final Logger logger = LoggerFactory.getLogger(CityElectricityTariffParser.class);
 
-    public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-        final String realm = "olga";
-        final List<City> cities = new ArrayList<>();
-        final City city = new City("3010", "3023", "3055", "Николаев", 10, 0, 0, 0, 0, null);
-        cities.add(city);
-        final Map<String, List<CityElectricityTariff>> allCityElectricityTariffList = getAllCityElectricityTariffList(Wizard.host, realm, cities);
-        logger.info(Utils.getPrettyGson(allCityElectricityTariffList));
-        logger.info("" + allCityElectricityTariffList.get("3868").size());
-    }
-
     public static Map<String, List<CityElectricityTariff>> getAllCityElectricityTariffList(final String host, final String realm, final List<City> cities) throws IOException {
         return cities.stream().map(city -> {
             try {
