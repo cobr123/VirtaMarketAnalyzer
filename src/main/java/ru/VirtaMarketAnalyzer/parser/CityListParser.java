@@ -28,13 +28,6 @@ import java.util.Map;
 public final class CityListParser {
     private static final Logger logger = LoggerFactory.getLogger(CityListParser.class);
 
-    public static void main(final String[] args) throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-
-        final List<City> list = CityListParser.getCities(Wizard.host, "olga");
-        System.out.println(list.size());
-    }
-
     public static List<City> getCities(final String host, final String realm) throws Exception {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
         final String url = host + "api/" + realm + "/main/geo/city/browse?lang=" + lang;

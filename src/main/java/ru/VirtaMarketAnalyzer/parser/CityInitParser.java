@@ -32,20 +32,6 @@ import java.util.Map;
 public final class CityInitParser {
     private static final Logger logger = LoggerFactory.getLogger(CityInitParser.class);
 
-    public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-//        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/globalreport/marketing/by_trade_at_cities/");
-//
-//        final Elements options = doc.select("option");
-//        //System.out.println(list.outerHtml());
-//        options.stream().filter(opt -> opt.attr("value").matches("/\\d+/\\d+/\\d+")).forEach(opt -> {
-//            logger.info(opt.text());
-//            logger.info(opt.attr("value"));
-//        });
-        System.out.println(Utils.getGson(getCountries(Wizard.host, "olga")));
-        System.out.println(Utils.getGson(getRegions(Wizard.host, "olga")));
-    }
-
     public static List<Region> getRegions(final String host, final String realm) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
         final String url = host + "api/" + realm + "/main/geo/region/browse?lang=" + lang;

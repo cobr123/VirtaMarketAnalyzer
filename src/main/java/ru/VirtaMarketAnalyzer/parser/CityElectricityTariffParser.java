@@ -58,7 +58,7 @@ final public class CityElectricityTariffParser {
                 .collect(Collectors.toList());
     }
 
-    public static List<CityElectricityTariff> getCityElectricityTariffList(final Element elem, final City city) throws Exception {
+    private static List<CityElectricityTariff> getCityElectricityTariffList(final Element elem, final City city) throws Exception {
         final List<CityElectricityTariff> list = new ArrayList<>();
         final String productCategory = elem.text();
         final double electricityTariff = Utils.toDouble(Utils.getFirstBySep(elem.nextElementSibling().nextElementSibling().text(), "/"));
