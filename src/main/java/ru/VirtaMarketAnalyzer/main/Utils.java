@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.function.Supplier;
@@ -140,6 +141,12 @@ public final class Utils {
                     final String[] data = clear.split("/");
                     return Double.valueOf(data[0]) / Double.valueOf(data[1]);
                 } else {
+                    try {
+                        final DecimalFormat format = new DecimalFormat("#.##");
+                        return format.parse(clear).doubleValue();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return Double.valueOf(clear);
                 }
             }
