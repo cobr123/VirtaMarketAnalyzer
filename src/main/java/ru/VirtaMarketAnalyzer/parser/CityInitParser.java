@@ -47,7 +47,7 @@ public final class CityInitParser {
                 list.add(new Region(country_id, id, caption, incomeTaxRate));
             }
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         return list;
@@ -76,7 +76,7 @@ public final class CityInitParser {
                 list.add(new Country(id, caption));
             }
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         return list;

@@ -57,7 +57,7 @@ final public class RegionCTIEParser {
                 list.add(new RegionCTIE(region.getId(), productId, rate));
             }
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         return list;

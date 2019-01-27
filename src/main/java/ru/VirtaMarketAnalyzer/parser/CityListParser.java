@@ -65,7 +65,7 @@ public final class CityListParser {
                 ));
             }
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         return list;
@@ -95,7 +95,7 @@ public final class CityListParser {
             }
         } catch (final Exception e) {
             Downloader.invalidateCache(url);
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         if (demography == -1) {
@@ -132,7 +132,7 @@ public final class CityListParser {
             }
         } catch (final Exception e) {
             Downloader.invalidateCache(url);
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         return mayoralBonuses;

@@ -103,7 +103,7 @@ final public class CityElectricityTariffParser {
 //                list.add(new CityElectricityTariff(city.getId(), productCategory, productId, electricityTariff));
 //            }
 //        } catch (final Exception e) {
-//            logger.error(url);
+//            logger.error(url + "&format=debug");
 //            throw e;
 //        }
 //        return list;

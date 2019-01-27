@@ -72,7 +72,7 @@ public final class RentAtCityParser {
                 list.add(new RentAtCity("/img/unit_types/" + unit_class_kind + ".gif", cityId, areaRent, workplaceRent));
             }
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         return list;

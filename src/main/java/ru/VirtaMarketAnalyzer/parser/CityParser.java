@@ -144,7 +144,7 @@ public final class CityParser {
             }
             builder.setMajorSellInCityList(majorSellInCityList);
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
     }
@@ -173,7 +173,7 @@ public final class CityParser {
                 }
             }
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
     }
@@ -237,7 +237,7 @@ public final class CityParser {
             }
             builder.setMarketIdx(marketIdx);
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
     }

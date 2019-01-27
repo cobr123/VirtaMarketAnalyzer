@@ -59,7 +59,7 @@ public final class ProductInitParser {
                 list.add(new Product(productCategory, id, caption, productCategoryID, symbol));
             }
         } catch (final Exception e) {
-            logger.error(url);
+            logger.error(url + "&format=debug");
             throw e;
         }
         return list;
