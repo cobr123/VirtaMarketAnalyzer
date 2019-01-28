@@ -15,28 +15,21 @@ class ProductInitParserTest {
     @Test
     void getTradingProductsTest() throws IOException {
         final String realm = "olga";
-        final List<Product> list = ProductInitParser.getTradingProducts(Wizard.host, realm);
-        assertFalse(list.isEmpty());
+        final List<Product> listProduct = ProductInitParser.getTradingProducts(Wizard.host, realm);
+        final List<ProductCategory> listProductCategory = ProductInitParser.getTradeProductCategories(Wizard.host, realm);
+        assertFalse(listProduct.isEmpty());
+        assertFalse(listProductCategory.isEmpty());
+        assertTrue(listProduct.size() > listProductCategory.size());
     }
 
     @Test
     void getManufactureProductsTest() throws IOException {
         final String realm = "olga";
-        final List<Product> list = ProductInitParser.getManufactureProducts(Wizard.host, realm);
-        assertFalse(list.isEmpty());
+        final List<Product> listProduct = ProductInitParser.getManufactureProducts(Wizard.host, realm);
+        final List<ProductCategory> listProductCategory = ProductInitParser.getManufactureProductCategories(Wizard.host, realm);
+        assertFalse(listProduct.isEmpty());
+        assertFalse(listProductCategory.isEmpty());
+        assertTrue(listProduct.size() > listProductCategory.size());
     }
 
-    @Test
-    void getTradeProductCategoriesTest() throws IOException {
-        final String realm = "olga";
-        final List<ProductCategory> list = ProductInitParser.getTradeProductCategories(Wizard.host, realm);
-        assertFalse(list.isEmpty());
-    }
-
-    @Test
-    void getManufactureProductCategoriesTest() throws IOException {
-        final String realm = "olga";
-        final List<ProductCategory> list = ProductInitParser.getManufactureProductCategories(Wizard.host, realm);
-        assertFalse(list.isEmpty());
-    }
 }

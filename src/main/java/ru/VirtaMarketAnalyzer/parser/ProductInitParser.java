@@ -76,7 +76,7 @@ public final class ProductInitParser {
     public static List<ProductCategory> getTradeProductCategories(final String host, final String realm) throws IOException {
         return getTradingProducts(host, realm)
                 .stream()
-                .map(p -> new ProductCategory(p.getProductCategoryID(), p.getCaption()))
+                .map(p -> new ProductCategory(p.getProductCategoryID(), p.getProductCategory()))
                 .distinct()
                 .collect(Collectors.toList());
     }
@@ -84,7 +84,7 @@ public final class ProductInitParser {
     public static List<ProductCategory> getManufactureProductCategories(final String host, final String realm) throws IOException {
         return getManufactureProducts(host, realm)
                 .stream()
-                .map(p -> new ProductCategory(p.getProductCategoryID(), p.getCaption()))
+                .map(p -> new ProductCategory(p.getProductCategoryID(), p.getProductCategory()))
                 .distinct()
                 .collect(Collectors.toList());
     }
