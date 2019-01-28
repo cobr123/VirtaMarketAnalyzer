@@ -2,9 +2,6 @@ package ru.VirtaMarketAnalyzer.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +50,15 @@ public final class CityListParser {
                 final String averageSalary = city.get("salary").toString();
                 final String population = city.get("population").toString();
                 final int demography = Utils.repeatOnErr(() -> CityListParser.getDemography(host, realm, city_id));
-                final List<String> mayoralBonuses = Utils.repeatOnErr(() -> CityListParser.getMayoralBonuses(host, realm, city_id));
+                final List<String> mayoralBonuses = new ArrayList<>();
+                final int retail_count = Utils.toInt(city.get("retail_count").toString());
+                if (retail_count > 0) {
+                    final Map<String, Object> mapOfCat = (Map<String, Object>) city.get("retails");
+                    for (final String category_id : mapOfCat.keySet()) {
+                        final String name = mapOfCat.get(category_id).toString();
+                        mayoralBonuses.add(name);
+                    }
+                }
 
                 list.add(new City(country_id, region_id, id, caption
                         , Utils.toDouble(wealthIndex)
@@ -103,39 +108,6 @@ public final class CityListParser {
             throw new IOException("Значение демографии не найдено, '" + today + "', " + url);
         }
         return demography;
-    }
-
-    public static List<String> getMayoralBonuses(final String host, final String realm, final String city_id) throws IOException {
-        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String url = host + "api/" + realm + "/main/geo/city/bonus?city_id=" + city_id + "&lang=" + lang;
-
-        final List<String> mayoralBonuses = new ArrayList<>();
-        try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
-            final Gson gson = new Gson();
-            final Type mapType = new TypeToken<Map<String, Object>>() {
-            }.getType();
-            final Map<String, Object> mapOfBonusAndRestrictions = gson.fromJson(json, mapType);
-
-            final Object mapOfBonuses = mapOfBonusAndRestrictions.get("retails");
-
-            if (mapOfBonuses instanceof Map) {
-                final Map<String, Map<String, Object>> mapOfCat = (Map<String, Map<String, Object>>) mapOfBonuses;
-                for (final String category_id : mapOfCat.keySet()) {
-                    final Map<String, Object> bonus = mapOfCat.get(category_id);
-                    if (bonus != null && bonus.containsKey("name")) {
-                        final String name = bonus.get("name").toString();
-                        mayoralBonuses.add(name);
-                    }
-                }
-            }
-        } catch (final Exception e) {
-            Downloader.invalidateCache(url);
-            logger.error(url + "&format=debug");
-            throw e;
-        }
-        return mayoralBonuses;
     }
 
 }
