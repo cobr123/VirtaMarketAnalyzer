@@ -115,6 +115,8 @@ public final class Utils {
     public static String clearNumber(final String text) {
         if (text.equals("-")) {
             return "";
+        } else if (text.toUpperCase().contains("E-") || text.toUpperCase().contains("E+")) {
+            return text.replace("$", "").replace("+", "").replace("*", "").replace("%", "").replace("©", "").replaceAll("\\s+", "").trim();
         } else {
             return text.replace("$", "").replace("+", "").replace("*", "").replace("%", "").replace("©", "").replaceAll("\\p{L}+\\.?", "").replaceAll("\\p{InCyrillic}+\\.?", "").replaceAll("\\s+", "").trim();
         }

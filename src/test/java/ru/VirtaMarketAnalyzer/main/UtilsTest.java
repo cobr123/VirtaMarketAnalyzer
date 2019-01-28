@@ -17,4 +17,9 @@ class UtilsTest {
             Utils.toDouble("4,90");
         });
     }
+
+    @Test
+    void toDoubleTestE() {
+        assertEquals(Utils.toDouble("5.74448529411765e-07"), 5.74448529411765e-07);
+    }
 }
