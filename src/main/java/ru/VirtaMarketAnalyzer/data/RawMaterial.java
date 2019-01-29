@@ -27,6 +27,14 @@ public final class RawMaterial {
         this.quantity = quantity;
     }
 
+    public RawMaterial(final Product product, final int quantity) {
+        this.productCategory = product.getProductCategory();
+        this.imgUrl = product.getImgUrl();
+        this.id = product.getId();
+        this.caption = product.getCaption();
+        this.quantity = quantity;
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
