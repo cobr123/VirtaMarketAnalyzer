@@ -17,9 +17,9 @@ public final class RawMaterial {
     @SerializedName("c")
     final private String caption;
     @SerializedName("q")
-    final private int quantity;
+    final private double quantity;
 
-    public RawMaterial(final String productCategory, final String imgUrl, final String id, final String caption, final int quantity) {
+    public RawMaterial(final String productCategory, final String imgUrl, final String id, final String caption, final double quantity) {
         this.productCategory = productCategory;
         this.imgUrl = imgUrl;
         this.id = id;
@@ -27,7 +27,7 @@ public final class RawMaterial {
         this.quantity = quantity;
     }
 
-    public RawMaterial(final Product product, final int quantity) {
+    public RawMaterial(final Product product, final double quantity) {
         this.productCategory = product.getProductCategory();
         this.imgUrl = product.getImgUrl();
         this.id = product.getId();
@@ -76,7 +76,7 @@ public final class RawMaterial {
         return productCategory;
     }
 
-    public int getQuantity() {
+    public double getQuantity() {
         return quantity;
     }
 }
