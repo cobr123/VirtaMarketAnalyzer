@@ -23,7 +23,7 @@ public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
     static {
-        TrustManager[] trustAllCertificates = new TrustManager[]{
+        final TrustManager[] trustAllCertificates = new TrustManager[]{
                 new X509TrustManager() {
                     @Override
                     public X509Certificate[] getAcceptedIssuers() {
@@ -42,7 +42,7 @@ public final class Downloader {
                 }
         };
 
-        HostnameVerifier trustAllHostnames = new HostnameVerifier() {
+        final HostnameVerifier trustAllHostnames = new HostnameVerifier() {
             @Override
             public boolean verify(String hostname, SSLSession session) {
                 return true; // Just allow them all.
@@ -51,7 +51,7 @@ public final class Downloader {
 
         try {
             System.setProperty("jsse.enableSNIExtension", "false");
-            SSLContext sc = SSLContext.getInstance("SSL");
+            final SSLContext sc = SSLContext.getInstance("SSL");
             sc.init(null, trustAllCertificates, new SecureRandom());
             HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
             HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
