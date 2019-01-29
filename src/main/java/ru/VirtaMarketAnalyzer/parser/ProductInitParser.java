@@ -17,6 +17,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -66,11 +67,19 @@ public final class ProductInitParser {
     }
 
     public static Product getTradingProduct(final String host, final String realm, final String id) throws IOException {
-        return getTradingProducts(host, realm).stream().filter(product -> product.getId().equals(id)).findFirst().get();
+        final Optional<Product> productOpt = getTradingProducts(host, realm).stream().filter(product -> product.getId().equals(id)).findFirst();
+        if (!productOpt.isPresent()) {
+            throw new IllegalArgumentException("Не найден розничный продукт с id '" + id + "'");
+        }
+        return productOpt.get();
     }
 
     public static Product getManufactureProduct(final String host, final String realm, final String id) throws IOException {
-        return getManufactureProducts(host, realm).stream().filter(product -> product.getId().equals(id)).findFirst().get();
+        final Optional<Product> productOpt = getManufactureProducts(host, realm).stream().filter(product -> product.getId().equals(id)).findFirst();
+        if (!productOpt.isPresent()) {
+            throw new IllegalArgumentException("Не найден продукт с id '" + id + "'");
+        }
+        return productOpt.get();
     }
 
     public static List<ProductCategory> getTradeProductCategories(final String host, final String realm) throws IOException {
