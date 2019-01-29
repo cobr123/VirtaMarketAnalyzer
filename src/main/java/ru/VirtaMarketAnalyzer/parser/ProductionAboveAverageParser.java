@@ -45,7 +45,7 @@ public final class ProductionAboveAverageParser {
 //        final List<Product> products = ProductInitParser.getManufactureProducts(host, realm);
 //        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", products);
 
-        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host + realm + "/main/globalreport/marketing/by_products/", productsForRemains);
+        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host, realm, productsForRemains);
         //System.out.println(Utils.getPrettyGson(productRemains));
 
         logger.info("getManufactures");
@@ -88,7 +88,7 @@ public final class ProductionAboveAverageParser {
             , final List<Manufacture> manufactures
             , final List<TechUnitType> techList
     ) throws IOException {
-        if("nika".equalsIgnoreCase(realm)){
+        if ("nika".equalsIgnoreCase(realm)) {
             return null;
         }
         final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm, techList);
@@ -335,8 +335,8 @@ public final class ProductionAboveAverageParser {
                 , techLvl
                 , maxWorkplacesCount
                 , !productRemains.getOrDefault(productRecipe.getResultProducts().get(0).getProductID(), new ArrayList<>())
-                    .stream()
-                    .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[0] / prodQual[0])
+                .stream()
+                .anyMatch(r -> r.getRemain() >= 0 && r.getPrice() / r.getQuality() <= exps / prodQuantity[0] / prodQual[0])
         ));
         if (productRecipe.getResultProducts().size() == 3) {
             //Нефтеперегонка
