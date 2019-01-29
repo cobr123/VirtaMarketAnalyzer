@@ -21,6 +21,7 @@ class ServiceInitParserTest {
         assertFalse(unitTypesRu.isEmpty());
         assertFalse(unitTypesEn.isEmpty());
         assertEquals(unitTypesRu.size(), unitTypesEn.size());
+        assertEquals(unitTypesRu.size(), 8);
         assertFalse(unitTypesRu.get(0).getSpecializations().isEmpty());
         assertFalse(unitTypesEn.get(0).getSpecializations().isEmpty());
         assertFalse(unitTypesRu.get(0).getSpecializations().get(0).getRawMaterials().isEmpty());

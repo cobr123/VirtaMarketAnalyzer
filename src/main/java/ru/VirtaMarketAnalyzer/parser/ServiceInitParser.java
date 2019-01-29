@@ -41,8 +41,12 @@ public final class ServiceInitParser {
             for (final String idx : mapOfUnitTypes.keySet()) {
                 final Map<String, Object> unitType = mapOfUnitTypes.get(idx);
 
-                if ("Services sector".equalsIgnoreCase(unitType.get("industry_name").toString())
-                        || "Сфера услуг".equalsIgnoreCase(unitType.get("industry_name").toString())
+                if ("service_light".equalsIgnoreCase(unitType.get("kind").toString())
+                        || "educational".equalsIgnoreCase(unitType.get("kind").toString())
+                        || "restaurant".equalsIgnoreCase(unitType.get("kind").toString())
+                        || "repair".equalsIgnoreCase(unitType.get("kind").toString())
+                        || "medicine".equalsIgnoreCase(unitType.get("kind").toString())
+                        || "it".equalsIgnoreCase(unitType.get("kind").toString())
                 ) {
                     final String id = unitType.get("id").toString();
                     final String caption = unitType.get("name").toString();
