@@ -219,13 +219,14 @@ public final class Wizard {
         logger.info("products.size() = {}, realm = {}", products.size(), realm);
         saveProductImg(products);
 
-//        logger.info("получаем список доступных сервисов");
-//        final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(host, realm);
-//        Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
-//        final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
-//        Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
-//        logger.info("service_unit_types.size() = {}, realm = {}", unitTypes.size(), realm);
-//        saveUnitTypeImg(unitTypes);
+        logger.info("получаем список доступных сервисов");
+        final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(host, realm);
+        Utils.writeToGson(serviceBaseDir + "service_unit_types.json", unitTypes);
+        logger.info("service_unit_types.size() = {}, realm = {}", unitTypes.size(), realm);
+        final List<UnitType> unitTypes_en = ServiceInitParser.getServiceUnitTypes(host_en, realm);
+        Utils.writeToGson(serviceBaseDir + "service_unit_types_en.json", unitTypes_en);
+        logger.info("service_unit_types_en.size() = {}, realm = {}", unitTypes_en.size(), realm);
+        saveUnitTypeImg(unitTypes);
         logger.info("собираем данные о стоимости аренды в городах");
         final List<RentAtCity> rents = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
         Utils.writeToGson(baseDir + "rent.json", rents);
