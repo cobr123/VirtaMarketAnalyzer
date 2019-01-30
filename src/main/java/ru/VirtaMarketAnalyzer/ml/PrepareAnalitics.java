@@ -19,7 +19,7 @@ public final class PrepareAnalitics {
             , final Product product
             , final List<City> cities
     ) {
-        final Map<String, List<Shop>> shopBy = shops.parallelStream().collect(Collectors.groupingBy(Shop::getCountryRegionTownIds));
+        final Map<String, List<Shop>> shopBy = shops.parallelStream().collect(Collectors.groupingBy(Shop::getGeo));
 
         return getRetailAnalitincsByProduct(product, shopBy, stats, cities);
     }
@@ -31,7 +31,7 @@ public final class PrepareAnalitics {
     ) {
         final Map<String, List<TradeAtCity>> statsBy = stats.parallelStream()
                 .filter(tradeAtCity -> tradeAtCity.getProductId().equals(product.getId()))
-                .collect(Collectors.groupingBy(TradeAtCity::getCountryRegionTownIds));
+                .collect(Collectors.groupingBy(TradeAtCity::getGeo));
         final List<RetailAnalytics> retailAnalitincs = new ArrayList<>();
 
         for (final Map.Entry<String, List<TradeAtCity>> entry : statsBy.entrySet()) {
@@ -57,7 +57,7 @@ public final class PrepareAnalitics {
                                             shop.getNotoriety(),
                                             shop.getVisitorsCount(),
                                             shop.getServiceLevel(),
-                                            shopProduct.getSellVolume(),
+                                            shopProduct.getSellVolumeAsNumber(),
                                             shopProduct.getPrice(),
                                             shopProduct.getQuality(),
                                             shopProduct.getBrand(),

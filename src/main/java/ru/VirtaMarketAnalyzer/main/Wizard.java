@@ -254,11 +254,13 @@ public final class Wizard {
             final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product, countriesDutyList, regions);
             Utils.writeToGson(baseDir + "tradeAtCity_" + product.getId() + ".json", stats);
 
-//            logger.info("собираем данные из магазинов");
-//            final List<Shop> shops = TopRetailParser.getShopList(realm, stats, products);
-//            logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
-//            final List<RetailAnalytics> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, product, cities);
-//            Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + product.getId() + ".json", retailAnalytics);
+            logger.info("собираем данные из магазинов");
+            final List<Shop> shops = TopRetailParser.getShopList(host, realm, stats, product);
+            logger.info("shops.size() = {}", shops.size());
+            logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
+            final List<RetailAnalytics> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, product, cities);
+            logger.info("retailAnalytics.size() = {}", retailAnalytics.size());
+            Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + product.getId() + ".json", retailAnalytics);
         }
 //        logger.info("группируем данные о сервисах по городам");
 //        for (final UnitType ut : unitTypes) {

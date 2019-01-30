@@ -65,7 +65,6 @@ public final class CityParser {
             , List<CountryDutyList>> countriesDutyList
             , final List<Region> regions
     ) throws Exception {
-        final String url = host + realm + "/main/globalreport/marketing/by_trade_at_cities/";
         final TradeAtCityBuilder builder = new TradeAtCityBuilder();
 
         builder.setProductId(product.getId());
@@ -79,6 +78,7 @@ public final class CityParser {
         builder.setAverageSalary(city.getAverageSalary());
 
         if (countriesDutyList != null) {
+            final String url = host + realm + "/main/globalreport/marketing/by_trade_at_cities/";
             if (!countriesDutyList.containsKey(city.getCountryId())) {
                 throw new Exception("Не найдены таможенные пошлины для страны " + url.replace("/main/globalreport/marketing/by_trade_at_cities/", "/main/geo/countrydutylist/") + city.getCountryId());
             }

@@ -63,7 +63,7 @@ public final class RetailAnalytics {
 
     public RetailAnalytics(final String productId, final String productCategory, final int shopSize, final String townDistrict, final int departmentCount,
                            final double notoriety, final String visitorsCount, final String serviceLevel,
-                           final String sellVolume, final double price, final double quality, final double brand, final double marketShare,
+                           final long sellVolumeAsNumber, final double price, final double quality, final double brand, final double marketShare,
                            final double wealthIndex, final double educationIndex, final double averageSalary,
                            final String marketIdx, final long marketVolume, final int sellerCnt, final double localPercent,
                            final double localPrice, final double localQuality, final int demography) {
@@ -75,7 +75,8 @@ public final class RetailAnalytics {
         this.notoriety = notoriety;
         this.visitorsCount = visitorsCount;
         this.serviceLevel = serviceLevel;
-        this.sellVolume = sellVolume;
+        this.sellVolume = String.valueOf(sellVolumeAsNumber);
+        this.sellVolumeAsNumber = sellVolumeAsNumber;
         this.price = price;
         this.quality = quality;
         this.brand = brand;
@@ -89,7 +90,6 @@ public final class RetailAnalytics {
         this.localPercent = localPercent;
         this.localPrice = localPrice;
         this.localQuality = localQuality;
-        this.sellVolumeAsNumber = calcSellVolumeAsNumber();
         this.demography = demography;
     }
 
@@ -139,7 +139,11 @@ public final class RetailAnalytics {
         this.localPercent = ra.localPercent;
         this.localPrice = ra.localPrice;
         this.localQuality = ra.localQuality;
-        this.sellVolumeAsNumber = calcSellVolumeAsNumber();
+        if (ra.sellVolumeAsNumber == 0) {
+            this.sellVolumeAsNumber = ra.calcSellVolumeAsNumber();
+        } else {
+            this.sellVolumeAsNumber = ra.sellVolumeAsNumber;
+        }
         this.date = ra.date;
         this.demography = ra.demography;
     }
@@ -251,7 +255,7 @@ public final class RetailAnalytics {
         return serviceLevel;
     }
 
-//    public String getSellVolume() {
+    //    public String getSellVolume() {
 //        return sellVolume;
 //    }
     public double getSellVolumeNumber() {

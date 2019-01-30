@@ -45,6 +45,10 @@ public final class MajorSellInCity {
         return productId;
     }
 
+    public String getGeo() {
+        return getCountryId() + "/" + getRegionId() + "/" + getTownId();
+    }
+
     public String getCountryId() {
         return countryId;
     }

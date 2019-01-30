@@ -18,10 +18,12 @@ public final class ShopProduct {
     private final double brand;
     @SerializedName("ms")
     private final double marketShare;
+    transient final private long sellVolumeAsNumber;
 
-    public ShopProduct(final String productId, final String sellVolume, final double price, final double quality, final double brand, final double marketShare) {
+    public ShopProduct(final String productId, final long sellVolumeAsNumber, final double price, final double quality, final double brand, final double marketShare) {
         this.productId = productId;
-        this.sellVolume = sellVolume;
+        this.sellVolume = String.valueOf(sellVolumeAsNumber);
+        this.sellVolumeAsNumber = sellVolumeAsNumber;
         this.price = price;
         this.quality = quality;
         this.brand = brand;
@@ -34,6 +36,10 @@ public final class ShopProduct {
 
     public String getSellVolume() {
         return sellVolume;
+    }
+
+    public long getSellVolumeAsNumber() {
+        return sellVolumeAsNumber;
     }
 
     public double getPrice() {

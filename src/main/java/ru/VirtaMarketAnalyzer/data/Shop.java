@@ -45,8 +45,8 @@ public final class Shop {
         this.shopProducts = shopProducts;
     }
 
-    public String getCountryRegionTownIds() {
-        return countryId + "|" + regionId + "|" + townId;
+    public String getGeo() {
+        return getCountryId() + "/" + getRegionId() + "/" + getTownId();
     }
 
     public String getCountryId() {

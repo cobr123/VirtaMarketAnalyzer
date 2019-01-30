@@ -210,8 +210,8 @@ public final class TradeAtCity {
                 .toHashCode();
     }
 
-    public String getCountryRegionTownIds() {
-        return countryId + "|" + regionId + "|" + townId;
+    public String getGeo() {
+        return getCountryId() + "/" + getRegionId() + "/" + getTownId();
     }
 
     public String getTownCaption() {
