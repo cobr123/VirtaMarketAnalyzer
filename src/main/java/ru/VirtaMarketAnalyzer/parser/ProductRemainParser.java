@@ -24,7 +24,7 @@ public final class ProductRemainParser {
     private static final Logger logger = LoggerFactory.getLogger(ProductRemainParser.class);
 
     public static Map<String, List<ProductRemain>> getRemains(final String host, final String realm, final List<Product> materials) throws IOException {
-        return materials.stream()
+        return materials.parallelStream()
                 .map(material -> {
                     try {
                         return getRemains(host, realm, material);
@@ -61,22 +61,22 @@ public final class ProductRemainParser {
                     companyName = city.get("company_name").toString();
                 }
                 final String unitID = city.get("unit_id").toString();
-                int total = 0;
+                long total = 0;
                 if (city.get("quantity") != null) {
-                    total = Utils.toInt(city.get("quantity").toString());
+                    total = Utils.toLong(city.get("quantity").toString());
                 }
-                int remain = 0;
+                long remain = 0;
                 if (city.get("free_for_buy") != null) {
-                    remain = Utils.toInt(city.get("free_for_buy").toString());
+                    remain = Utils.toLong(city.get("free_for_buy").toString());
                 }
                 final double quality = Utils.toDouble(city.get("quality").toString());
                 double price = 0;
                 if (city.get("price") != null) {
                     price = Utils.toDouble(city.get("price").toString());
                 }
-                double maxOrder = 0;
+                long maxOrder = 0;
                 if (city.get("max_qty") != null) {
-                    maxOrder = Utils.toInt(city.get("max_qty").toString());
+                    maxOrder = Utils.toLong(city.get("max_qty").toString());
                 }
                 final ProductRemain.MaxOrderType maxOrderType = (maxOrder > 0) ? ProductRemain.MaxOrderType.L : ProductRemain.MaxOrderType.U;
 
