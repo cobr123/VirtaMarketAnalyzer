@@ -77,11 +77,11 @@ public final class Downloader {
         return clearedUrl;
     }
 
-    public static void invalidateCache(final String url) throws IOException {
+    public static void invalidateCache(final String url) {
         invalidateCache(url, "");
     }
 
-    public static void invalidateCache(final String url, final String referrer) throws IOException {
+    public static void invalidateCache(final String url, final String referrer) {
         final String clearedUrl = getClearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);

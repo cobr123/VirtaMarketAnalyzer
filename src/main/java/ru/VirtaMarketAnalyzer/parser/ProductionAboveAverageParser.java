@@ -34,7 +34,7 @@ public final class ProductionAboveAverageParser {
         final List<Product> productsForHistory = new ArrayList<>();
         //продукт
         productsForHistory.add(ProductInitParser.getManufactureProduct(host, realm, "422718"));
-        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", productsForHistory);
+        final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host, realm, productsForHistory);
         //ингридиенты для поиска остатков
         final List<Product> productsForRemains = new ArrayList<>();
         productsForRemains.add(ProductInitParser.getManufactureProduct(host, realm, "370073"));
