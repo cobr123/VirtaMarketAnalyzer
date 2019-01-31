@@ -111,7 +111,7 @@ public final class CityParser {
 
         try {
             final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
+            final String json = doc.body().text();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<List<Map<String, Object>>>() {
             }.getType();
@@ -162,7 +162,7 @@ public final class CityParser {
 
         try {
             final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
+            final String json = doc.body().text();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<List<Map<String, Object>>>() {
             }.getType();
@@ -191,7 +191,7 @@ public final class CityParser {
 
         try {
             final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
+            final String json = doc.body().text();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Object>>() {
             }.getType();

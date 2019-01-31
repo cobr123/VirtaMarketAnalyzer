@@ -42,7 +42,7 @@ final public class RegionCTIEParser {
         final List<RegionCTIE> list = new ArrayList<>();
         try {
             final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
+            final String json = doc.body().text();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();

@@ -32,7 +32,7 @@ public final class CityListParser {
         final List<City> list = new ArrayList<>();
         try {
             final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
+            final String json = doc.body().text();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();
@@ -84,7 +84,7 @@ public final class CityListParser {
         int demography = -1;
         try {
             final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
+            final String json = doc.body().text();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<List<Map<String, Object>>>() {
             }.getType();

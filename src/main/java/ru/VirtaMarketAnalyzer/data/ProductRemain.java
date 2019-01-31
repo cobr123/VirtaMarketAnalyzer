@@ -33,11 +33,11 @@ public final class ProductRemain {
     @SerializedName("mot")
     final private MaxOrderType maxOrderType;
     @SerializedName("mo")
-    final private double maxOrder;
+    final private long maxOrder;
 
     transient private Date date;
 
-    public ProductRemain(final String productID, final String companyName, final String unitID, final long total, final long remain, final double quality, final double price, final MaxOrderType maxOrderType, final double maxOrder) {
+    public ProductRemain(final String productID, final String companyName, final String unitID, final long total, final long remain, final double quality, final double price, final MaxOrderType maxOrderType, final long maxOrder) {
         this.productID = productID;
         this.companyName = companyName;
         this.unitID = unitID;
@@ -100,7 +100,7 @@ public final class ProductRemain {
         return total;
     }
 
-    public double getRemain() {
+    public long getRemain() {
         return remain;
     }
 
@@ -112,7 +112,7 @@ public final class ProductRemain {
         return price;
     }
 
-    public double getMaxOrder() {
+    public long getMaxOrder() {
         return maxOrder;
     }
 
@@ -120,7 +120,7 @@ public final class ProductRemain {
         return maxOrderType;
     }
 
-    public double getRemainByMaxOrderType() {
+    public long getRemainByMaxOrderType() {
         return (getMaxOrderType() == MaxOrderType.L && getRemain() > getMaxOrder()) ? getMaxOrder() : getRemain();
     }
 

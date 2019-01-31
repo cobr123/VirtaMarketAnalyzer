@@ -32,7 +32,7 @@ public final class ShopParser {
 
         try {
             final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().html();
+            final String json = doc.body().text();
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Object>>() {
             }.getType();
