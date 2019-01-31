@@ -94,8 +94,8 @@ public final class Downloader {
         return getDoc(url, null);
     }
 
-    public static Document getDoc(final String url, final boolean ignoreContentType) throws IOException {
-        return getDoc(url, null, 99, ignoreContentType);
+    public static Document getDoc(final String url, final boolean isJsonContentType) throws IOException {
+        return getDoc(url, null, 99, isJsonContentType);
     }
 
     public static Document getDoc(final String url, final int maxTriesCnt) throws IOException {
@@ -106,9 +106,9 @@ public final class Downloader {
         return getDoc(url, referrer, 99, false);
     }
 
-    public static Document getDoc(final String url, final String referrer, final int maxTriesCnt, final boolean ignoreContentType) throws IOException {
+    public static Document getDoc(final String url, final String referrer, final int maxTriesCnt, final boolean isJsonContentType) throws IOException {
         final String clearedUrl = getClearedUrl(url, referrer);
-        final String fileToSave = Utils.getDir() + clearedUrl + ".html";
+        final String fileToSave = Utils.getDir() + clearedUrl + ((isJsonContentType) ? ".json" : ".html");
         final File file = new File(fileToSave);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
             logger.trace("Взят из кэша: {}", file.getAbsolutePath());
@@ -128,9 +128,13 @@ public final class Downloader {
                     conn.userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0");
                     conn.maxBodySize(0);
                     conn.timeout(60_000);
-                    conn.ignoreContentType(ignoreContentType);
+                    conn.ignoreContentType(isJsonContentType);
                     final Document doc = conn.get();
-                    Utils.writeFile(fileToSave, doc.outerHtml());
+                    if (isJsonContentType) {
+                        Utils.writeFile(fileToSave, doc.text());
+                    } else {
+                        Utils.writeFile(fileToSave, doc.outerHtml());
+                    }
                     return doc;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
