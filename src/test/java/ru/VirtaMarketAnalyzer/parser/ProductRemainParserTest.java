@@ -24,5 +24,6 @@ class ProductRemainParserTest {
         final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(Wizard.host, realm, materials);
         assertFalse(productRemains.isEmpty());
         assertTrue(productRemains.size() <= materials.size());
+        assertTrue(productRemains.values().stream().anyMatch(l -> !l.isEmpty()));
     }
 }

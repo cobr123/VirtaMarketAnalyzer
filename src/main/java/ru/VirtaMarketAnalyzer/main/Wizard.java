@@ -329,30 +329,31 @@ public final class Wizard {
         for (final Map.Entry<String, List<CityElectricityTariff>> entry : cityElectricityTariffList.entrySet()) {
             Utils.writeToGson(baseDir + CITY_ELECTRICITY_TARIFF + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-//        logger.info("собираем данные о доступных товарах на оптовом рынке");
-//        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host, realm, materials);
-//        //сохраняем их в json
-//        for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
-//            Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
-//        }
-//        if (!"nika".equalsIgnoreCase(realm) && !"fast".equalsIgnoreCase(realm)) {
-//            logger.info("собираем данные о среднем качестве товаров");
-//            final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host + realm + "/main/globalreport/product_history/", materials);
-//            Utils.writeToGson(baseDir + "product_history.json", productHistory);
-//            logger.info("собираем товары которые можно произвести с качеством выше среднего");
-//            final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
-//            final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes, manufactures, techList);
-//            final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en, manufactures, techList);
-//            logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
-//            Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
-//            Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
-//            logger.info("запоминаем дату обновления данных");
-//            final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
-//            Utils.writeToGson(baseDir + "production_above_average_updateDate.json", new UpdateDate(df.format(new Date())));
-//        }
-//        logger.info("запоминаем дату обновления данных");
-//        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
-//        Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        logger.info("собираем данные о доступных товарах на оптовом рынке");
+        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host, realm, materials);
+        //сохраняем их в json
+        for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
+            Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
+        }
+        if (!"nika".equalsIgnoreCase(realm) && !"fast".equalsIgnoreCase(realm)) {
+            logger.info("собираем данные о среднем качестве товаров");
+            final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host, realm, materials);
+            Utils.writeToGson(baseDir + "product_history.json", productHistory);
+            logger.info("собираем товары которые можно произвести с качеством выше среднего");
+            final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
+            final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes, manufactures, techList);
+            final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en, manufactures, techList);
+            logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
+            logger.info("productionAboveAverage_en.size = {}", productionAboveAverage_en.size());
+            Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
+            Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
+            logger.info("запоминаем дату обновления данных");
+            final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+            Utils.writeToGson(baseDir + "production_above_average_updateDate.json", new UpdateDate(df.format(new Date())));
+        }
+        logger.info("запоминаем дату обновления данных");
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
 
