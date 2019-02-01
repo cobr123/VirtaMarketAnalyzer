@@ -105,6 +105,9 @@ public final class ServiceAtCityParser {
             , final List<RentAtCity> rents
     ) throws IOException {
         final ServiceMetrics serviceMetrics = getServiceMetrics(host, realm, city, service);
+        if (serviceMetrics == null) {
+            return null;
+        }
         final Map<String, Double> percentBySpec = getPercentBySpec(host, realm, city, service);
 
         final double incomeTaxRate = (regions == null) ? 0 : regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
@@ -157,7 +160,7 @@ public final class ServiceAtCityParser {
         return cities.parallelStream().map(city -> {
             try {
                 return get(host, realm, city, service, regions, tradingProductsId, rents);
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
             return null;
@@ -177,6 +180,11 @@ public final class ServiceAtCityParser {
             }.getType();
             final Map<String, Object> mapOfMetrics = gson.fromJson(json, mapType);
 
+            if (mapOfMetrics.get("turn_id") == null) {
+                logger.info("Не найден turn_id. {}&format=debug", url);
+                logger.info("{}{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", host, realm, city.getGeo(), service.getId());
+                return null;
+            }
             final String turnId = mapOfMetrics.get("turn_id").toString();
             final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
             final long sales = Utils.toLong(mapOfMetrics.get("sales").toString());
