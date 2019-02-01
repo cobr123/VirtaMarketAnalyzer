@@ -78,10 +78,11 @@ public final class ServiceInitParser {
             for (final String idx : mapOfUnitTypes.keySet()) {
                 final Map<String, Object> unitType = mapOfUnitTypes.get(idx);
 
+                final String id = unitType.get("id").toString();
                 final String caption = unitType.get("name").toString();
                 final String equipment_product_id = unitType.get("equipment_product_id").toString();
 
-                list.add(new UnitTypeSpec(caption, getProduct(host, realm, equipment_product_id), getRawMaterials(host, realm, unitType)));
+                list.add(new UnitTypeSpec(id, caption, getProduct(host, realm, equipment_product_id), getRawMaterials(host, realm, unitType)));
             }
         } catch (final Exception e) {
             logger.error(url + "&format=debug");

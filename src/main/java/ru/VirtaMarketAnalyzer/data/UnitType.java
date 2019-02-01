@@ -16,7 +16,6 @@ public final class UnitType {
     final private String imgUrl;
     @SerializedName("s")
     final private List<UnitTypeSpec> specializations;
-    private String unitTypeImgSrc;
 
     public UnitType(final String id, final String caption, final String imgUrl, final List<UnitTypeSpec> specializations) {
         this.id = id;

@@ -263,22 +263,24 @@ public final class Wizard {
             logger.info("retailAnalytics.size() = {}", retailAnalytics.size());
             Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + product.getId() + ".json", retailAnalytics);
         }
-//        logger.info("группируем данные о сервисах по городам");
-//        for (final UnitType ut : unitTypes) {
-//            final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut, regions, rents);
-//            Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + ".json", serviceAtCity);
-//        }
-//        for (final UnitType ut : unitTypes_en) {
-//            final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities_en, ut, regions_en, rents);
-//            Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
-//        }
+        logger.info("группируем данные о сервисах по городам");
+        for (final UnitType ut : unitTypes) {
+            final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, ut, regions, rents);
+            Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + ".json", serviceAtCity);
+            logger.info("{}{}/main/globalreport/marketing?unit_type_id={}#by-service", host, realm, ut.getId());
+        }
+        for (final UnitType ut : unitTypes_en) {
+            final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities_en, ut, regions_en, rents);
+            Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
+            logger.info("{}{}/main/globalreport/marketing?unit_type_id={}#by-service", host_en, realm, ut.getId());
+        }
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
-//        Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
 

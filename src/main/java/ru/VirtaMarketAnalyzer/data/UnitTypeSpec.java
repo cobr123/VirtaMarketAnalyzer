@@ -8,6 +8,8 @@ import java.util.List;
  * Created by cobr123 on 26.02.2016.
  */
 public final class UnitTypeSpec {
+    @SerializedName("i")
+    final private String id;
     @SerializedName("c")
     final private String caption;
     @SerializedName("e")
@@ -15,10 +17,15 @@ public final class UnitTypeSpec {
     @SerializedName("rm")
     final private List<RawMaterial> rawMaterials;
 
-    public UnitTypeSpec(final String caption, final Product equipment, final List<RawMaterial> rawMaterials) {
+    public UnitTypeSpec(final String id, final String caption, final Product equipment, final List<RawMaterial> rawMaterials) {
+        this.id = id;
         this.caption = caption;
         this.equipment = equipment;
         this.rawMaterials = rawMaterials;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getCaption() {

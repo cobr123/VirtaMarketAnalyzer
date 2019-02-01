@@ -1,9 +1,7 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import com.google.gson.annotations.SerializedName;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -13,7 +11,9 @@ import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
+import javax.rmi.CORBA.Util;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,35 +22,6 @@ import java.util.stream.Collectors;
  */
 public final class ServiceAtCityParser {
     private static final Logger logger = LoggerFactory.getLogger(ServiceAtCityParser.class);
-
-    public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
-        final String host = Wizard.host;
-        final String realm = "olga";
-        final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0,0,0, null);
-        final List<City> cities = new ArrayList<>();
-        cities.add(city);
-
-        final List<UnitTypeSpec> specializations = new ArrayList<>();
-        final List<RawMaterial> rawMaterials = new ArrayList<>();
-        specializations.add(new UnitTypeSpec("Фитнес", ProductInitParser.getTradingProduct(host, realm, "15337"), rawMaterials));
-        final UnitType service = new UnitType("348207", "Фитнес-центр", "", specializations);
-        final List<RentAtCity> rentAtCity = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
-        final List<ServiceAtCity> serviceAtCity = get(host, realm, cities, service, null,rentAtCity);
-        logger.info(Utils.getPrettyGson(serviceAtCity));
-
-//        final List<UnitTypeSpec> specializations = new ArrayList<>();
-//        final List<RawMaterial> rawMaterials = new ArrayList<>();
-//        rawMaterials.add(new RawMaterial("", "", "15742", "Картофель", 1));
-//        rawMaterials.add(new RawMaterial("", "", "15747", "Масло", 1));
-//        rawMaterials.add(new RawMaterial("", "", "1506", "Хлеб", 1));
-//        rawMaterials.add(new RawMaterial("", "", "1490", "Мясо", 1));
-//        rawMaterials.add(new RawMaterial("", "", "1503", "Прохладительные напитки", 1));
-//        specializations.add(new UnitTypeSpec("Фастфуд", new Product("","","373198","Ресторанное оборудование"), rawMaterials));
-//        final UnitType service = new UnitType("373265", "Ресторан", "", specializations);
-//        final List<ServiceAtCity> serviceAtCity = get(Wizard.host, realm, cities, service, null);
-//        logger.info(Utils.getPrettyGson(serviceAtCity));
-    }
 
     private static ServiceSpecRetail addRetailStatByProduct(final String host, final String realm, final String productID, final City city) {
         try {
@@ -133,29 +104,10 @@ public final class ServiceAtCityParser {
             , final UnitType service
             , final List<Region> regions
             , final Set<String> tradingProductsId
-            ,final List<RentAtCity> rents
+            , final List<RentAtCity> rents
     ) throws IOException {
-        final String fullUrl = host + realm + "/main/globalreport/marketing/by_service/" + service.getId() + "/" + city.getCountryId() + "/" + city.getRegionId() + "/" + city.getId();
-        final Document doc = Downloader.getDoc(fullUrl);
-        final Element table = doc.select("table.grid").first();
-
-        if (table == null) {
-            Downloader.invalidateCache(fullUrl);
-            throw new IOException("На странице '" + fullUrl + "' не найдена таблица с классом grid");
-        }
-
-        final double marketDevelopmentIndex = Utils.toDouble(table.select(" > tbody > tr > td:nth-child(1) > b").text());
-        final long volume = Utils.toLong(table.select(" > tbody > tr > td:nth-child(2) > b").text());
-        final int subdivisionsCnt = Utils.toInt(table.select(" > tbody > tr > td:nth-child(3) > b").text());
-        final long companiesCnt = Utils.toLong(table.select(" > tbody > tr > td:nth-child(4) > b").text());
-        final double price = Utils.toDouble(table.select(" > tbody > tr > td:nth-child(5) > b").text());
-        final Map<String, Double> percentBySpec = new HashMap<>();
-        table.nextElementSibling().select(" > tbody > tr:nth-child(2) > td:nth-child(2) > table > tbody > tr > td:nth-child(3)").stream()
-                .forEach(element -> {
-                    final String key = element.text();
-                    final Double val = Utils.toDouble(element.nextElementSibling().nextElementSibling().text());
-                    percentBySpec.put(key, val);
-                });
+        final ServiceMetrics serviceMetrics = getServiceMetrics(host, realm, city, service);
+        final Map<String, Double> percentBySpec = getPercentBySpec(host, realm, city, service);
 
         final double incomeTaxRate = (regions == null) ? 0 : regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
 
@@ -179,11 +131,11 @@ public final class ServiceAtCityParser {
         return new ServiceAtCity(city.getCountryId()
                 , city.getRegionId()
                 , city.getId()
-                , volume
-                , price
-                , subdivisionsCnt
-                , companiesCnt
-                , marketDevelopmentIndex
+                , serviceMetrics.getSales()
+                , serviceMetrics.getPrice()
+                , serviceMetrics.getUnitCount()
+                , serviceMetrics.getCompanyCount()
+                , Utils.round2(serviceMetrics.getRevenuePerRetail() * 100.0)
                 , percentBySpec
                 , city.getWealthIndex()
                 , incomeTaxRate
@@ -199,7 +151,7 @@ public final class ServiceAtCityParser {
             , final List<City> cities
             , final UnitType service
             , final List<Region> regions
-            ,final List<RentAtCity> rents
+            , final List<RentAtCity> rents
     ) throws IOException {
         //получаем список доступных розничных товаров
         final Set<String> tradingProductsId = ProductInitParser.getTradingProducts(host, realm).stream().map(Product::getId).collect(Collectors.toSet());
@@ -212,5 +164,60 @@ public final class ServiceAtCityParser {
             }
             return null;
         }).collect(Collectors.toList());
+    }
+
+    private static ServiceMetrics getServiceMetrics(final String host, final String realm, final City city, final UnitType service) throws IOException {
+        //TODO: &produce_id=422835
+        final String url = host + "api/" + realm + "/main/marketing/report/service/metrics?geo=" + city.getGeo() + "&unit_type_id=" + service.getId();
+        try {
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().text();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Object>>() {
+            }.getType();
+            final Map<String, Object> mapOfMetrics = gson.fromJson(json, mapType);
+
+            final String turnId = mapOfMetrics.get("turn_id").toString();
+            final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
+            final long sales = Utils.toLong(mapOfMetrics.get("sales").toString());
+            final int unitCount = Utils.toInt(mapOfMetrics.get("unit_count").toString());
+            final int companyCount = Utils.toInt(mapOfMetrics.get("company_count").toString());
+            final double revenuePerRetail = Utils.toDouble(mapOfMetrics.get("revenue_per_retail").toString());
+            final String name = mapOfMetrics.get("name").toString();
+            final String symbol = mapOfMetrics.get("symbol").toString();
+            final String specialization = mapOfMetrics.get("specialization").toString();
+
+            return new ServiceMetrics(turnId, price, sales, unitCount, companyCount, revenuePerRetail, name, symbol, specialization);
+        } catch (final Exception e) {
+            logger.error(url + "&format=debug");
+            throw e;
+        }
+    }
+
+    private static Map<String, Double> getPercentBySpec(final String host, final String realm, final City city, final UnitType service) throws IOException {
+        final Map<String, Double> percentBySpec = new HashMap<>();
+        //TODO: &produce_id=422835
+        final String url = host + "api/" + realm + "/main/marketing/report/service/specializations?geo=" + city.getGeo() + "&unit_type_id=" + service.getId();
+        try {
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().text();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+            }.getType();
+            final Map<String, Map<String, Object>> mapOfMetrics = gson.fromJson(json, mapType);
+
+            for (final String idx : mapOfMetrics.keySet()) {
+                final Map<String, Object> metrics = mapOfMetrics.get(idx);
+
+                final String caption = metrics.get("name").toString();
+                final double marketPerc = Utils.toDouble(metrics.get("market_size").toString());
+
+                percentBySpec.put(caption, marketPerc);
+            }
+        } catch (final Exception e) {
+            logger.error(url + "&format=debug");
+            throw e;
+        }
+        return percentBySpec;
     }
 }
