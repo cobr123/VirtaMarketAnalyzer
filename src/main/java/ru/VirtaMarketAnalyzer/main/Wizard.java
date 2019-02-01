@@ -346,8 +346,8 @@ public final class Wizard {
             final List<TechUnitType> techList = TechListParser.getTechUnitTypes(Wizard.host, realm);
             final List<ProductionAboveAverage> productionAboveAverage = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes, manufactures, techList);
             final List<ProductionAboveAverage> productionAboveAverage_en = ProductionAboveAverageParser.calc(host, realm, productHistory, productRemains, productRecipes_en, manufactures, techList);
-            logger.info("productionAboveAverage.size = {}", productionAboveAverage.size());
-            logger.info("productionAboveAverage_en.size = {}", productionAboveAverage_en.size());
+            logger.info("productionAboveAverage.size = {}, realm = {}", productionAboveAverage.size(), realm);
+            logger.info("productionAboveAverage_en.size = {}, realm = {}", productionAboveAverage_en.size(), realm);
             Utils.writeToGsonZip(baseDir + "production_above_average.json", productionAboveAverage);
             Utils.writeToGsonZip(baseDir + "production_above_average_en.json", productionAboveAverage_en);
             logger.info("запоминаем дату обновления данных");
