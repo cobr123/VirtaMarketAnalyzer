@@ -251,6 +251,7 @@ public final class Wizard {
         for (int i = 0; i < products.size(); i++) {
             logger.info("{} / {} собираем данные продаж товаров в городах", i + 1, products.size());
             final Product product = products.get(i);
+            logger.info("{}{}/main/globalreport/marketing?product_id={}#by-trade-at-cities", host, realm, product.getId());
             final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product, countriesDutyList, regions);
             Utils.writeToGson(baseDir + "tradeAtCity_" + product.getId() + ".json", stats);
 
