@@ -3,7 +3,6 @@ package ru.VirtaMarketAnalyzer.parser;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
@@ -11,7 +10,6 @@ import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
-import javax.rmi.CORBA.Util;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -163,7 +161,9 @@ public final class ServiceAtCityParser {
                 logger.error(e.getLocalizedMessage(), e);
             }
             return null;
-        }).collect(Collectors.toList());
+        })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     private static ServiceMetrics getServiceMetrics(final String host, final String realm, final City city, final UnitType service) throws IOException {
