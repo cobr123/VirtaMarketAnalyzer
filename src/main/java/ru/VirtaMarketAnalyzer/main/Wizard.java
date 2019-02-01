@@ -338,7 +338,7 @@ public final class Wizard {
         for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
             Utils.writeToGson(baseDir + "product_remains_" + entry.getKey() + ".json", entry.getValue());
         }
-        if (!"nika".equalsIgnoreCase(realm) && !"fast".equalsIgnoreCase(realm)) {
+        if (!"fast".equalsIgnoreCase(realm)) {
             logger.info("собираем данные о среднем качестве товаров");
             final List<ProductHistory> productHistory = ProductHistoryParser.getHistory(host, realm, materials);
             Utils.writeToGson(baseDir + "product_history.json", productHistory);
