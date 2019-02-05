@@ -37,28 +37,28 @@ public final class ShopParser {
             final Type mapType = new TypeToken<Map<String, Object>>() {
             }.getType();
             final Map<String, Object> mapOfMetrics = gson.fromJson(json, mapType);
-            if (mapOfMetrics.get("district_name") != null) {
-                final TradeAtCity stat = stats.stream().filter(msc -> msc.getGeo().equals(majorSellInCity.getGeo())).findFirst().get();
-                final List<ShopProduct> shopProducts = new ArrayList<>();
-                final double marketShare = Utils.round2(majorSellInCity.getSellVolume() / (double) stat.getVolume() * 100.0);
-                shopProducts.add(new ShopProduct(product.getId(), (long) majorSellInCity.getSellVolume(), majorSellInCity.getPrice(), majorSellInCity.getQuality(), majorSellInCity.getBrand(), marketShare));
 
-                final String townDistrict = mapOfMetrics.get("district_name").toString();
-                final int shopSize = Utils.toInt(mapOfMetrics.get("trading_square").toString());
-                final int departmentCount = Utils.toInt(mapOfMetrics.get("section_count").toString());
-                final double notoriety = Utils.round2(Utils.toDouble(mapOfMetrics.get("fame").toString()) * 100.0);
-                final String visitorsCount = mapOfMetrics.get("customers_count").toString();
-                final String serviceLevel = getServiceLevel(host, realm, majorSellInCity.getUnitId());
+            final TradeAtCity stat = stats.stream().filter(msc -> msc.getGeo().equals(majorSellInCity.getGeo())).findFirst().get();
+            final List<ShopProduct> shopProducts = new ArrayList<>();
+            final double marketShare = Utils.round2(majorSellInCity.getSellVolume() / (double) stat.getVolume() * 100.0);
+            shopProducts.add(new ShopProduct(product.getId(), (long) majorSellInCity.getSellVolume(), majorSellInCity.getPrice(), majorSellInCity.getQuality(), majorSellInCity.getBrand(), marketShare));
 
-                return new Shop(majorSellInCity.getCountryId(), majorSellInCity.getRegionId(), majorSellInCity.getTownId()
-                        , shopSize, townDistrict, departmentCount, notoriety, visitorsCount, serviceLevel, shopProducts
-                );
+            final int shopSize = Utils.toInt(mapOfMetrics.get("square").toString());
+            int departmentCount = 1;
+            if (mapOfMetrics.get("section_count") != null) {
+                departmentCount = Utils.toInt(mapOfMetrics.get("section_count").toString());
             }
+            final double notoriety = Utils.round2(Utils.toDouble(mapOfMetrics.get("fame").toString()) * 100.0);
+            final String visitorsCount = mapOfMetrics.get("customers_count").toString();
+            final String serviceLevel = getServiceLevel(host, realm, majorSellInCity.getUnitId());
+
+            return new Shop(majorSellInCity.getCountryId(), majorSellInCity.getRegionId(), majorSellInCity.getTownId()
+                    , shopSize, majorSellInCity.getTownDistrict(), departmentCount, notoriety, visitorsCount, serviceLevel, shopProducts
+            );
         } catch (final IOException e) {
             logger.error(url + "&format=debug");
             throw e;
         }
-        return null;
     }
 
     private static String getServiceLevel(final String host, final String realm, final String unitId) {

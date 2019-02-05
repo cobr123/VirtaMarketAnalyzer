@@ -119,30 +119,34 @@ public final class CityParser {
 
             final List<MajorSellInCity> majorSellInCityList = new ArrayList<>();
             for (final Map<String, Object> mapOfMetrics : listOfMapOfMetrics) {
-                if (mapOfMetrics.get("district_name") != null) {
-                    final String unitId = mapOfMetrics.get("unit_id").toString();
-                    final long shopSize = Utils.toLong(mapOfMetrics.get("shop_size").toString());
-                    final String cityDistrict = mapOfMetrics.get("district_name").toString();
-                    final double sellVolume = Utils.toDouble(mapOfMetrics.get("qty").toString());
-                    final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
-                    final double quality = Utils.toDouble(mapOfMetrics.get("quality").toString());
-                    final double brand = Utils.toDouble(mapOfMetrics.get("brand").toString());
-                    majorSellInCityList.add(
-                            new MajorSellInCity(
-                                    product.getId(),
-                                    city.getCountryId(),
-                                    city.getRegionId(),
-                                    city.getId(),
-                                    unitId,
-                                    shopSize,
-                                    cityDistrict,
-                                    sellVolume,
-                                    price,
-                                    quality,
-                                    brand
-                            )
-                    );
+                String cityDistrict = "";
+                if (mapOfMetrics.get("district_name") == null) {
+                    //заправки
+                } else {
+                    //магазины
+                    cityDistrict = mapOfMetrics.get("district_name").toString();
                 }
+                final String unitId = mapOfMetrics.get("unit_id").toString();
+                final long shopSize = Utils.toLong(mapOfMetrics.get("shop_size").toString());
+                final double sellVolume = Utils.toDouble(mapOfMetrics.get("qty").toString());
+                final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
+                final double quality = Utils.toDouble(mapOfMetrics.get("quality").toString());
+                final double brand = Utils.toDouble(mapOfMetrics.get("brand").toString());
+                majorSellInCityList.add(
+                        new MajorSellInCity(
+                                product.getId(),
+                                city.getCountryId(),
+                                city.getRegionId(),
+                                city.getId(),
+                                unitId,
+                                shopSize,
+                                cityDistrict,
+                                sellVolume,
+                                price,
+                                quality,
+                                brand
+                        )
+                );
             }
             builder.setMajorSellInCityList(majorSellInCityList);
         } catch (final Exception e) {
