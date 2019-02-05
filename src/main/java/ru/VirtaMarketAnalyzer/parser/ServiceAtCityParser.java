@@ -180,22 +180,24 @@ public final class ServiceAtCityParser {
             }.getType();
             final Map<String, Object> mapOfMetrics = gson.fromJson(json, mapType);
 
-            if (mapOfMetrics.get("turn_id") == null) {
-                logger.info("Не найден turn_id. {}&format=debug", url);
-                logger.info("{}{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", host, realm, city.getGeo(), service.getId());
-                return null;
-            }
-            final String turnId = mapOfMetrics.get("turn_id").toString();
-            final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
-            final long sales = Utils.toLong(mapOfMetrics.get("sales").toString());
-            final int unitCount = Utils.toInt(mapOfMetrics.get("unit_count").toString());
-            final int companyCount = Utils.toInt(mapOfMetrics.get("company_count").toString());
-            final double revenuePerRetail = Utils.toDouble(mapOfMetrics.get("revenue_per_retail").toString());
             final String name = mapOfMetrics.get("name").toString();
             final String symbol = mapOfMetrics.get("symbol").toString();
             final String specialization = mapOfMetrics.get("specialization").toString();
 
-            return new ServiceMetrics(turnId, price, sales, unitCount, companyCount, revenuePerRetail, name, symbol, specialization);
+            if (mapOfMetrics.get("turn_id") == null) {
+                logger.info("Не найден turn_id. {}&format=debug", url);
+                logger.info("{}{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", host, realm, city.getGeo(), service.getId());
+                return new ServiceMetrics("", 0, 0, 0, 0, 0, name, symbol, specialization);
+            } else {
+                final String turnId = mapOfMetrics.get("turn_id").toString();
+                final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
+                final long sales = Utils.toLong(mapOfMetrics.get("sales").toString());
+                final int unitCount = Utils.toInt(mapOfMetrics.get("unit_count").toString());
+                final int companyCount = Utils.toInt(mapOfMetrics.get("company_count").toString());
+                final double revenuePerRetail = Utils.toDouble(mapOfMetrics.get("revenue_per_retail").toString());
+
+                return new ServiceMetrics(turnId, price, sales, unitCount, companyCount, revenuePerRetail, name, symbol, specialization);
+            }
         } catch (final Exception e) {
             logger.error(url + "&format=debug");
             throw e;

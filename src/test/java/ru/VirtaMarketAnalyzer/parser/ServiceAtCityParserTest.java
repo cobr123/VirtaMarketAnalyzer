@@ -33,4 +33,20 @@ class ServiceAtCityParserTest {
         final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, service, null, rentAtCity);
         assertFalse(serviceAtCity.isEmpty());
     }
+
+    @Test
+    void getEmptyTurnIdTest() throws IOException {
+        //Не найден turn_id
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
+        final String host = Wizard.host;
+        final String realm = "anna";
+        final City city = new City("2931", "2961", "424013", "Масейо", 10, 0, 0, 0, 0, null);
+        final List<City> cities = new ArrayList<>();
+        cities.add(city);
+
+        final UnitType service = new UnitType("422825", "Авторемонтная мастерская", "", new ArrayList<>());
+        final List<RentAtCity> rentAtCity = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
+        final List<ServiceAtCity> serviceAtCity = ServiceAtCityParser.get(host, realm, cities, service, null, rentAtCity);
+        assertFalse(serviceAtCity.isEmpty());
+    }
 }
