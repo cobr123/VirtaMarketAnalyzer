@@ -39,8 +39,13 @@ public final class ProductRemainParser {
     }
 
     public static List<ProductRemain> getRemains(final String host, final String realm, final Product material) throws IOException {
+        return getRemains(host, realm, material, 1);
+    }
+
+    private static List<ProductRemain> getRemains(final String host, final String realm, final Product material, final int page) throws IOException {
 //        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String url = host + "api/" + realm + "/main/marketing/report/trade/offers?product_id=" + material.getId();
+        final int pageSize = 10_000;
+        final String url = host + "api/" + realm + "/main/marketing/report/trade/offers?product_id=" + material.getId() + "&pagesize=" + pageSize + "&pagenum=" + page;
 
         final List<ProductRemain> list = new ArrayList<>();
         try {
@@ -50,6 +55,7 @@ public final class ProductRemainParser {
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();
             final Map<String, Map<String, Object>> infoAndDataMap = gson.fromJson(json, mapType);
+            final Map<String, Object> infoMap = infoAndDataMap.get("info");
             final Map<String, Object> dataMap = infoAndDataMap.get("data");
 
             for (final String idx : dataMap.keySet()) {
@@ -81,6 +87,10 @@ public final class ProductRemainParser {
                 final ProductRemain.MaxOrderType maxOrderType = (maxOrder > 0) ? ProductRemain.MaxOrderType.L : ProductRemain.MaxOrderType.U;
 
                 list.add(new ProductRemain(productId, companyName, unitID, total, remain, quality, price, maxOrderType, maxOrder));
+            }
+            final int count = Utils.toInt(infoMap.get("count").toString());
+            if (count > pageSize * page) {
+                list.addAll(getRemains(host, realm, material, page + 1));
             }
         } catch (final Exception e) {
             logger.error(url + "&format=debug");
