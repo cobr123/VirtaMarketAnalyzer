@@ -185,8 +185,8 @@ public final class ServiceAtCityParser {
             final String specialization = mapOfMetrics.get("specialization").toString();
 
             if (mapOfMetrics.get("turn_id") == null) {
-                logger.info("Не найден turn_id. {}&format=debug", url);
-                logger.info("{}{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", host, realm, city.getGeo(), service.getId());
+                logger.trace("Не найден turn_id. {}&format=debug", url);
+                logger.trace("{}{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", host, realm, city.getGeo(), service.getId());
                 return new ServiceMetrics("", 0, 0, 0, 0, 0, name, symbol, specialization);
             } else {
                 final String turnId = mapOfMetrics.get("turn_id").toString();
