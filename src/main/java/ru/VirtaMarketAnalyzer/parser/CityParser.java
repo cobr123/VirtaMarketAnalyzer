@@ -23,15 +23,10 @@ import static java.util.stream.Collectors.toList;
 public final class CityParser {
     private static final Logger logger = LoggerFactory.getLogger(CityParser.class);
 
-    public static List<TradeAtCity> collectByTradeAtCities(final String host, final String realm
-            , final List<City> cities
-            , final Product product
-            , final Map<String, List<CountryDutyList>> countriesDutyList
-            , final List<Region> regions
-    ) {
+    public static List<TradeAtCity> collectByTradeAtCities(final String host, final String realm, final List<City> cities, final Product product) {
         final Map<String, Map<String, List<TradeAtCityBuilder>>> grpByCityByCatId = cities
                 .parallelStream()
-                .map(city -> new CityProduct(city, product, host, realm).getTradeAtCity(countriesDutyList, regions))
+                .map(city -> new CityProduct(city, product, host, realm).getTradeAtCity())
                 .collect(Collectors.groupingBy(TradeAtCityBuilder::getCityId, Collectors.groupingBy(TradeAtCityBuilder::getProductCategoryId)));
 
         return grpByCityByCatId.keySet().parallelStream()
@@ -56,14 +51,23 @@ public final class CityParser {
                 .collect(toList());
     }
 
+    public static Map<String, List<TradeAtCity>> get(
+            final String host,
+            final String realm,
+            final City city,
+            final List<Product> products
+    ) {
+        return products
+                .parallelStream()
+                .map(product -> new CityProduct(city, product, host, realm).getTradeAtCity().build())
+                .collect(Collectors.groupingBy(TradeAtCity::getProductId));
+    }
+
     public static TradeAtCityBuilder get(
-            final String host
-            , final String realm
-            , final City city
-            , final Product product
-            , final Map<String
-            , List<CountryDutyList>> countriesDutyList
-            , final List<Region> regions
+            final String host,
+            final String realm,
+            final City city,
+            final Product product
     ) throws Exception {
         final TradeAtCityBuilder builder = new TradeAtCityBuilder();
 
@@ -77,21 +81,16 @@ public final class CityParser {
         builder.setEducationIndex(city.getEducationIndex());
         builder.setAverageSalary(city.getAverageSalary());
 
-        if (countriesDutyList != null) {
-            final String url = host + realm + "/main/globalreport/marketing/by_trade_at_cities/";
-            if (!countriesDutyList.containsKey(city.getCountryId())) {
-                throw new Exception("Не найдены таможенные пошлины для страны " + url.replace("/main/globalreport/marketing/by_trade_at_cities/", "/main/geo/countrydutylist/") + city.getCountryId());
-            }
-            final Optional<CountryDutyList> importTaxPercent = countriesDutyList.get(city.getCountryId())
-                    .stream().filter(cdl -> cdl.getProductId().equals(product.getId())).findFirst();
+        final List<CountryDutyList> countriesDutyList = CountryDutyListParser.getCountryDutyList(host, realm, city.getCountryId());
+        final Optional<CountryDutyList> importTaxPercent = countriesDutyList.stream().filter(cdl -> cdl.getProductId().equals(product.getId())).findFirst();
 
-            if (!importTaxPercent.isPresent()) {
-                throw new Exception("Не найдены таможенные пошлины для продукта '" + product.getCaption() + "', id = '" + product.getId() + "', " + url.replace("/main/globalreport/marketing/by_trade_at_cities/", "/main/geo/countrydutylist/") + city.getCountryId());
-            }
-            builder.setImportTaxPercent(importTaxPercent.get().getImportTaxPercent());
-            final double incomeTaxRate = regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
-            builder.setIncomeTaxRate(incomeTaxRate);
+        if (!importTaxPercent.isPresent()) {
+            throw new Exception("Не найдены таможенные пошлины для продукта '" + product.getCaption() + "', id = '" + product.getId() + "', " + host + realm + "/main/geo/countrydutylist/" + city.getCountryId());
         }
+        builder.setImportTaxPercent(importTaxPercent.get().getImportTaxPercent());
+        final Region region = CityInitParser.getRegion(host, realm, city.getRegionId());
+        final double incomeTaxRate = region.getIncomeTaxRate();
+        builder.setIncomeTaxRate(incomeTaxRate);
 
         addMetrics(host, realm, city, product, builder);
         addLocalShare(host, realm, city, product, builder);

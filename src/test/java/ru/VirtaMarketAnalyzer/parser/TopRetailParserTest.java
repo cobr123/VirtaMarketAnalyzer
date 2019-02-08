@@ -21,14 +21,10 @@ class TopRetailParserTest {
         final String realm = "olga";
         final String host = Wizard.host;
         final Product product = ProductInitParser.getTradingProduct(host, realm, "423863");
-        final List<Region> regions = CityInitParser.getRegions(host, realm);
-        final List<Country> countries = new ArrayList<>();
-        countries.add(new Country("2931", "Россия"));
         final List<City> cities = new ArrayList<>();
         final City city = new City("2931", "2932", "2933", "Москва", 10, 0, 0, 0, 0, null);
         cities.add(city);
-        final Map<String, List<CountryDutyList>> countriesDutyList = CountryDutyListParser.getAllCountryDutyList(host, realm, countries);
-        final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product, countriesDutyList, regions);
+        final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product);
         assertFalse(stats.isEmpty());
         assertTrue(stats.stream().anyMatch(l -> !l.getMajorSellInCityList().isEmpty()));
         //заправки

@@ -28,7 +28,7 @@ final public class CountryDutyListParser {
     public static Map<String, List<CountryDutyList>> getAllCountryDutyList(final String host, final String realm, final List<Country> countries) {
         return countries.stream().map(country -> {
             try {
-                return getCountryDutyList(host, realm, country);
+                return getCountryDutyList(host, realm, country.getId());
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
@@ -39,9 +39,9 @@ final public class CountryDutyListParser {
                 .collect(groupingBy(CountryDutyList::getCountryId));
     }
 
-    public static List<CountryDutyList> getCountryDutyList(final String host, final String realm, final Country country) throws IOException {
+    public static List<CountryDutyList> getCountryDutyList(final String host, final String realm, final String countryId) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String url = host + "api/" + realm + "/main/geo/country/duty?lang=" + lang + "&country_id=" + country.getId();
+        final String url = host + "api/" + realm + "/main/geo/country/duty?lang=" + lang + "&country_id=" + countryId;
 
         final List<CountryDutyList> list = new ArrayList<>();
         try {
@@ -60,7 +60,7 @@ final public class CountryDutyListParser {
                 final int importTaxPercent = Utils.toInt(city.get("import").toString());
                 final double indicativePrice = Utils.toDouble(city.get("min_cost").toString());
 
-                list.add(new CountryDutyList(country.getId(), productId, exportTaxPercent, importTaxPercent, indicativePrice));
+                list.add(new CountryDutyList(countryId, productId, exportTaxPercent, importTaxPercent, indicativePrice));
             }
         } catch (final Exception e) {
             logger.error(url + "&format=debug");

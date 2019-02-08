@@ -35,11 +35,11 @@ final public class CityProduct {
         return product;
     }
 
-    public TradeAtCityBuilder getTradeAtCity(final Map<String, List<CountryDutyList>> countriesDutyList, final List<Region> regions) {
+    public TradeAtCityBuilder getTradeAtCity() {
         final int maxTriesCnt = 3;
         for (int tries = 1; tries <= maxTriesCnt; ++tries) {
             try {
-                return CityParser.get(host, realm, getCity(), getProduct(), countriesDutyList, regions);
+                return CityParser.get(host, realm, getCity(), getProduct());
             } catch (final Exception e) {
                 logger.error("Ошибка при запросе, попытка #{} из {}", tries, maxTriesCnt);
                 logger.error("Ошибка: ", e);
