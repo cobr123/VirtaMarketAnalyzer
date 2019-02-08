@@ -26,6 +26,10 @@ public final class CityListParser {
     private static final Logger logger = LoggerFactory.getLogger(CityListParser.class);
 
     public static List<City> getCities(final String host, final String realm) throws Exception {
+        return getCities(host, realm, true);
+    }
+
+    public static List<City> getCities(final String host, final String realm, final Boolean withDemography) throws Exception {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
         final String url = host + "api/" + realm + "/main/geo/city/browse?lang=" + lang;
 
@@ -49,7 +53,10 @@ public final class CityListParser {
                 final String educationIndex = city.get("education").toString();
                 final String averageSalary = city.get("salary").toString();
                 final String population = city.get("population").toString();
-                final int demography = Utils.repeatOnErr(() -> CityListParser.getDemography(host, realm, city_id));
+                int demography = 0;
+                if (withDemography) {
+                    demography = Utils.repeatOnErr(() -> CityListParser.getDemography(host, realm, city_id));
+                }
                 final List<String> mayoralBonuses = new ArrayList<>();
                 final int retail_count = Utils.toInt(city.get("retail_count").toString());
                 if (retail_count > 0) {
