@@ -16,12 +16,22 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by cobr123 on 24.04.2015.
  */
 public final class CityInitParser {
     private static final Logger logger = LoggerFactory.getLogger(CityInitParser.class);
+
+    public static Region getRegion(final String host, final String realm, final String id) throws IOException {
+        final Optional<Region> regionOpt = getRegions(host, realm).stream().filter(region -> region.getId().equals(id)).findFirst();
+        if (!regionOpt.isPresent()) {
+            throw new IllegalArgumentException("Не найден регион с id '" + id + "'");
+        }
+        return regionOpt.get();
+
+    }
 
     public static List<Region> getRegions(final String host, final String realm) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
