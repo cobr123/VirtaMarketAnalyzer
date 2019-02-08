@@ -18,6 +18,7 @@ import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -35,6 +36,8 @@ public final class Wizard {
     public static final String tech = "tech";
     public static final String retail_trends = "retail_trends";
     public static final String product_remains_trends = "product_remains_trends";
+    public static final String trade_guide = "trade_guide";
+    public static final String by_product_category_id = "by_product_category_id";
     public static final String CITY_ELECTRICITY_TARIFF = "city_electricity_tariff";
     public static final List<String> realms = Arrays.asList("crypto", "nika", "lien", "mary", "anna", "fast", "olga", "vera");
 
@@ -181,6 +184,7 @@ public final class Wizard {
     public static void collectToJsonTradeAtCities(final String realm) throws Exception {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
+        final String tradeGuideBaseDir = Utils.getDir() + trade_guide + File.separator + realm + File.separator;
 
         final File baseDirFile = new File(baseDir);
         if (baseDirFile.exists()) {
@@ -252,7 +256,7 @@ public final class Wizard {
         products.parallelStream()
                 .forEach(product -> {
                     try {
-                        final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product, countriesDutyList, regions);
+                        final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product);
                         TopRetailParser.getShopList(host, realm, stats, product);
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
@@ -262,7 +266,7 @@ public final class Wizard {
             logger.info("{} / {} собираем данные продаж товаров в городах", i + 1, products.size());
             final Product product = products.get(i);
             logger.info("{}{}/main/globalreport/marketing?product_id={}#by-trade-at-cities", host, realm, product.getId());
-            final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product, countriesDutyList, regions);
+            final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product);
             Utils.writeToGson(baseDir + "tradeAtCity_" + product.getId() + ".json", stats);
 
             logger.info("собираем данные из магазинов");
@@ -283,6 +287,12 @@ public final class Wizard {
             final List<ServiceAtCity> serviceAtCity_en = ServiceAtCityParser.get(host_en, realm, cities_en, ut, regions_en, rents);
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
             logger.info("{}{}/main/globalreport/marketing?unit_type_id={}#by-service", host_en, realm, ut.getId());
+        }
+        logger.info("генерируем торговый гид");
+        final List<ProductCategory> productCategories = ProductInitParser.getTradeProductCategories(host, realm);
+        for (final ProductCategory productCategory : productCategories) {
+            final List<TradeGuide> tradeGuides = TradeGuideParser.genTradeGuide(host, realm, productCategory);
+            Utils.writeToGsonZip(tradeGuideBaseDir + by_product_category_id + File.separator + productCategory.getId() + ".json", tradeGuides);
         }
 
 //        ищем формулу для объема продаж в рознице

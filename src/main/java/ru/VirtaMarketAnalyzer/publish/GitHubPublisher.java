@@ -49,6 +49,7 @@ final public class GitHubPublisher {
         copyToLocalRepo(Wizard.by_service, realms);
         copyToLocalRepo(Wizard.industry, realms);
         copyToLocalRepo(Wizard.tech, realms);
+        copyToLocalRepo(Wizard.trade_guide, realms);
         final String pattern = ".";
         logger.info("git add " + pattern);
         git.add().addFilepattern(pattern).call();
