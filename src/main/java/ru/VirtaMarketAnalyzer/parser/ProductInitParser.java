@@ -32,6 +32,12 @@ public final class ProductInitParser {
         return getProducts(url);
     }
 
+    public static List<Product> getTradingProducts(final String host, final String realm, final ProductCategory productCategory) throws IOException {
+        return getTradingProducts(host, realm).stream()
+                .filter(p -> p.getProductCategoryID().equals(productCategory.getId()))
+                .collect(Collectors.toList());
+    }
+
     public static List<Product> getManufactureProducts(final String host, final String realm) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
         final String url = host + "api/" + realm + "/main/product/browse?lang=" + lang;
