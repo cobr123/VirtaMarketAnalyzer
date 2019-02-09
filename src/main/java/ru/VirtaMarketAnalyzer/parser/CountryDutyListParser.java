@@ -79,4 +79,17 @@ final public class CountryDutyListParser {
         return opt.get();
     }
 
+    public static double addDuty(final String host, final String realm, final String fromCountryId, final String toCountryId, final String productId, final double price) throws IOException {
+        if (fromCountryId.equals(toCountryId)) {
+            return price;
+        } else {
+            final CountryDutyList cdlFrom = getCountryDuty(host, realm, fromCountryId, productId);
+            final double dutyFrom = Math.max(price, cdlFrom.getIndicativePrice()) * (cdlFrom.getExportTaxPercent() / 100.0);
+
+            final CountryDutyList cdlTo = getCountryDuty(host, realm, toCountryId, productId);
+            final double dutyTo = Math.max(price, cdlTo.getIndicativePrice()) * (cdlTo.getImportTaxPercent() / 100.0);
+            return price + dutyFrom + dutyTo;
+        }
+    }
+
 }
