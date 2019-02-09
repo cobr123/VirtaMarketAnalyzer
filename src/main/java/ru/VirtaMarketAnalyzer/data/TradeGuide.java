@@ -17,15 +17,26 @@ final public class TradeGuide {
     @SerializedName("tgp")
     final private List<TradeGuideProduct> tradeGuideProduct;
 
-    public TradeGuide(
-            final String countryId,
-            final String regionId,
-            final String townId,
-            final List<TradeGuideProduct> tradeGuideProduct
-    ) {
-        this.countryId = countryId;
-        this.regionId = regionId;
-        this.townId = townId;
+    public TradeGuide(final City city, final List<TradeGuideProduct> tradeGuideProduct) {
+        this.countryId = city.getCountryId();
+        this.regionId = city.getRegionId();
+        this.townId = city.getId();
         this.tradeGuideProduct = tradeGuideProduct;
+    }
+
+    public String getCountryId() {
+        return countryId;
+    }
+
+    public String getRegionId() {
+        return regionId;
+    }
+
+    public String getTownId() {
+        return townId;
+    }
+
+    public List<TradeGuideProduct> getTradeGuideProduct() {
+        return tradeGuideProduct;
     }
 }
