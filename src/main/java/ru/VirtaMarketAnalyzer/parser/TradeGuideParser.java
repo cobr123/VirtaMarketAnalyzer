@@ -75,8 +75,9 @@ final public class TradeGuideParser {
         for (final ProductRemain pr : productRemainsFiltered) {
             final double maxProductRemainVolume = Math.min(pr.getRemainByMaxOrderType(), maxVolume - volume);
             final double priceWithDuty = CountryDutyListParser.addDuty(host, realm, pr.getCountryId(), stat.getCountryId(), pr.getProductID(), pr.getPrice());
+            final double transportCost = CountryDutyListParser.getTransportCost(host, realm, pr.getTownId(), stat.getTownId(), pr.getProductID());
             quality = merge(quality, volume, pr.getQuality(), maxProductRemainVolume);
-            buyPrice = merge(buyPrice, volume, priceWithDuty, maxProductRemainVolume);
+            buyPrice = merge(buyPrice, volume, priceWithDuty + transportCost, maxProductRemainVolume);
             volume += maxProductRemainVolume;
             if (volume >= maxVolume) {
                 break;

@@ -92,4 +92,28 @@ final public class CountryDutyListParser {
         }
     }
 
+    public static double getTransportCost(final String host, final String realm, final String fromCityId, final String toCityId, final String productId) throws IOException {
+//        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
+        final String url = host + "api/" + realm + "/main/geo/transport?city_id=" + fromCityId + "&product_id=" + productId + "&geo=0/0/" + toCityId;
+
+        try {
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().text();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+            }.getType();
+            final Map<String, Map<String, Object>> infoAndDataMap = gson.fromJson(json, mapType);
+            final Map<String, Object> dataMap = infoAndDataMap.get("data");
+
+            for (final String idx : dataMap.keySet()) {
+                final Map<String, Object> data = (Map<String, Object>) dataMap.get(idx);
+                return Utils.toDouble(data.get("transport_cost").toString());
+            }
+        } catch (final Exception e) {
+            Downloader.invalidateCache(url);
+            logger.error(url + "&format=debug");
+            throw e;
+        }
+        throw new IOException("Не найдена цена транспортировки.");
+    }
 }
