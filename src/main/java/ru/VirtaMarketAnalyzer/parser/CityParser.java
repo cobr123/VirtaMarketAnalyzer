@@ -51,7 +51,7 @@ public final class CityParser {
                 .collect(toList());
     }
 
-    public static Map<String, List<TradeAtCity>> get(
+    public static List<TradeAtCity> get(
             final String host,
             final String realm,
             final City city,
@@ -60,7 +60,7 @@ public final class CityParser {
         return products
                 .parallelStream()
                 .map(product -> new CityProduct(city, product, host, realm).getTradeAtCity().build())
-                .collect(Collectors.groupingBy(TradeAtCity::getProductId));
+                .collect(toList());
     }
 
     public static TradeAtCityBuilder get(
