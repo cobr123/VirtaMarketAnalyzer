@@ -92,7 +92,7 @@ final public class TradeGuideParser {
             sellPrice = Utils.round2(stat.getLocalPrice() * 1.5);
         }
         final RegionCTIE regionCTIE = RegionCTIEParser.getRegionCTIE(host, realm, stat.getRegionId(), stat.getProductId());
-        double incomeAfterTax = 0;
+        double incomeAfterTax;
         if (sellPrice > buyPrice) {
             incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice) * (regionCTIE.getRate() / 100.0));
         } else {
