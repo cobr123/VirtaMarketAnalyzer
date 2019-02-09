@@ -10,8 +10,10 @@ final public class TradeGuideProduct {
     final private String productId;
     @SerializedName("q")
     final private double quality;
-    @SerializedName("p")
-    final private double price;
+    @SerializedName("bp")
+    final private double buyPrice;
+    @SerializedName("sp")
+    final private double sellPrice;
     @SerializedName("v")
     final private long volume;
     @SerializedName("iat")
@@ -20,13 +22,15 @@ final public class TradeGuideProduct {
     public TradeGuideProduct(
             final String productId,
             final double quality,
-            final double price,
+            final double buyPrice,
+            final double sellPrice,
             final long volume,
             final double incomeAfterTax
     ) {
         this.productId = productId;
         this.quality = quality;
-        this.price = price;
+        this.buyPrice = buyPrice;
+        this.sellPrice = sellPrice;
         this.volume = volume;
         this.incomeAfterTax = incomeAfterTax;
     }
