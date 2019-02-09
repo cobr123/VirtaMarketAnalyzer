@@ -62,6 +62,8 @@ public final class ProductRemainParser {
                 final Map<String, Object> city = (Map<String, Object>) dataMap.get(idx);
 
                 final String productId = city.get("product_id").toString();
+                final String countryId = city.get("country_id").toString();
+                final String regionId = city.get("region_id").toString();
                 final String cityId = city.get("city_id").toString();
                 String companyName = "";
                 if (city.get("company_name") != null) {
@@ -87,7 +89,7 @@ public final class ProductRemainParser {
                 }
                 final ProductRemain.MaxOrderType maxOrderType = (maxOrder > 0) ? ProductRemain.MaxOrderType.L : ProductRemain.MaxOrderType.U;
 
-                list.add(new ProductRemain(productId, companyName, unitID, cityId, total, remain, quality, price, maxOrderType, maxOrder));
+                list.add(new ProductRemain(productId, companyName, unitID, countryId, regionId, cityId, total, remain, quality, price, maxOrderType, maxOrder));
             }
             final int count = Utils.toInt(infoMap.get("count").toString());
             if (count > pageSize * page) {

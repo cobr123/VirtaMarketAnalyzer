@@ -22,6 +22,10 @@ public final class ProductRemain {
     final private String productID;
     @SerializedName("ui")
     final private String unitID;
+    @SerializedName("ci")
+    final private String countryId;
+    @SerializedName("ri")
+    final private String regionId;
     @SerializedName("ti")
     final private String townId;
     @SerializedName("t")
@@ -39,10 +43,25 @@ public final class ProductRemain {
 
     transient private Date date;
 
-    public ProductRemain(final String productID, final String companyName, final String unitID, final String townId, final long total, final long remain, final double quality, final double price, final MaxOrderType maxOrderType, final long maxOrder) {
+    public ProductRemain(
+            final String productID,
+            final String companyName,
+            final String unitID,
+            final String countryId,
+            final String regionId,
+            final String townId,
+            final long total,
+            final long remain,
+            final double quality,
+            final double price,
+            final MaxOrderType maxOrderType,
+            final long maxOrder
+    ) {
         this.productID = productID;
         this.companyName = companyName;
         this.unitID = unitID;
+        this.countryId = countryId;
+        this.regionId = regionId;
         this.townId = townId;
         this.total = total;
         this.remain = remain;
@@ -133,6 +152,14 @@ public final class ProductRemain {
 
     public void setDate(final Date date) {
         this.date = date;
+    }
+
+    public String getCountryId() {
+        return countryId;
+    }
+
+    public String getRegionId() {
+        return regionId;
     }
 
     public String getTownId() {
