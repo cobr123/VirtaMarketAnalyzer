@@ -63,6 +63,7 @@ final public class CountryDutyListParser {
                 list.add(new CountryDutyList(countryId, productId, exportTaxPercent, importTaxPercent, indicativePrice));
             }
         } catch (final Exception e) {
+            Downloader.invalidateCache(url);
             logger.error(url + "&format=debug");
             throw e;
         }
