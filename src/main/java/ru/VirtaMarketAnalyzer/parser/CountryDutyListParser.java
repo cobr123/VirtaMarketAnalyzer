@@ -70,4 +70,13 @@ final public class CountryDutyListParser {
         return list;
     }
 
+    public static CountryDutyList getCountryDuty(final String host, final String realm, final String countryId, final String productId) throws IOException {
+        final Optional<CountryDutyList> opt = getCountryDutyList(host, realm, countryId).stream()
+                .filter(v -> v.getProductId().equals(productId)).findFirst();
+        if (!opt.isPresent()) {
+            throw new IllegalArgumentException("Не найдены ставки пошлины для продукта с id '" + productId + "' в стране с id '" + countryId + "'");
+        }
+        return opt.get();
+    }
+
 }
