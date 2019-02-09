@@ -88,9 +88,9 @@ final public class TradeGuideParser {
         } else if (quality - 10.0 > stat.getLocalQuality()) {
             sellPrice = Utils.round2(stat.getLocalPrice() * 1.5);
         }
-        final RegionCTIE regionCTIE = RegionCTIEParser.getRegionCTIE(host, realm, stat.getRegionId(), stat.getProductId());
         double incomeAfterTax;
         if (sellPrice > buyPrice) {
+            final RegionCTIE regionCTIE = RegionCTIEParser.getRegionCTIE(host, realm, stat.getRegionId(), stat.getProductId());
             incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice) * (regionCTIE.getRate() / 100.0));
         } else {
             incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice));
