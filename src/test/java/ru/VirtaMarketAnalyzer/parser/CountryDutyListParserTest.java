@@ -47,7 +47,9 @@ class CountryDutyListParserTest {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         //Нукус (Узбекистан) -> Великие Луки (Россия, Северо-Запад)
         //Двигатель
-        final double transportCost = CountryDutyListParser.getTransportCost(Wizard.host, "olga", "310400", "331870", "1473");
-        assertEquals(29, transportCost);
+        final double transportCost1 = CountryDutyListParser.getTransportCost(Wizard.host, "olga", "310400", "331870", "1473");
+        final double transportCost2 = CountryDutyListParser.getTransportCost(Wizard.host, "olga", "331870", "310400", "1473");
+        assertEquals(29, transportCost1);
+        assertEquals(transportCost1, transportCost2);
     }
 }
