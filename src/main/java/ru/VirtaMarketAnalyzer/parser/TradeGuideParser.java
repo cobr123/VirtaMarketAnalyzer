@@ -6,10 +6,7 @@ import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -65,9 +62,9 @@ final public class TradeGuideParser {
     ) throws IOException {
         final double localPqr = stat.getLocalPrice() / stat.getLocalQuality();
         final List<ProductRemain> productRemainsFiltered = productRemains.stream()
-                .filter(pr -> pr.getPrice() / pr.getQuality() <= localPqr && pr.getRemainByMaxOrderType() > 0)
+                .filter(pr -> pr.getRemainByMaxOrderType() > 0 && pr.getPrice() / pr.getQuality() <= localPqr)
+                .sorted(Comparator.comparingDouble(o -> o.getPrice() / o.getQuality()))
                 .collect(Collectors.toList());
-        productRemainsFiltered.sort((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1);
         final long maxVolume = Math.round(stat.getVolume() * 0.1);
         double quality = 0;
         double buyPrice = 0;
