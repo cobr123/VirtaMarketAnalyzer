@@ -50,7 +50,9 @@ final public class TradeGuideParser {
         final List<TradeGuideProduct> tradeGuideProduct = new ArrayList<>();
         final List<TradeAtCity> stats = CityParser.get(host, realm, city, products);
         for (final TradeAtCity stat : stats) {
-            tradeGuideProduct.add(genTradeGuideProduct(host, realm, stat, productRemains.getOrDefault(stat.getProductId(), new ArrayList<>())));
+            if (stat.getLocalPercent() >= 10) {
+                tradeGuideProduct.add(genTradeGuideProduct(host, realm, stat, productRemains.getOrDefault(stat.getProductId(), new ArrayList<>())));
+            }
         }
         return new TradeGuide(city, tradeGuideProduct);
     }
