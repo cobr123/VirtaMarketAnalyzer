@@ -25,7 +25,7 @@ final public class RegionCTIEParser {
     public static Map<String, List<RegionCTIE>> getAllRegionsCTIEList(final String host, final String realm, final List<Region> regions) {
         return regions.stream().map(region -> {
             try {
-                return getRegionCTIEList(host, realm, region);
+                return getRegionCTIEList(host, realm, region.getId());
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
@@ -35,9 +35,9 @@ final public class RegionCTIEParser {
                 .collect(groupingBy(RegionCTIE::getRegionId));
     }
 
-    public static List<RegionCTIE> getRegionCTIEList(final String host, final String realm, final Region region) throws IOException {
+    public static List<RegionCTIE> getRegionCTIEList(final String host, final String realm, final String regionId) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String url = host + "api/" + realm + "/main/geo/region/envd?lang=" + lang + "&region_id=" + region.getId();
+        final String url = host + "api/" + realm + "/main/geo/region/envd?lang=" + lang + "&region_id=" + regionId;
 
         final List<RegionCTIE> list = new ArrayList<>();
         try {
@@ -54,12 +54,21 @@ final public class RegionCTIEParser {
 
                 final int rate = Utils.toInt(city.get("tax").toString());
 
-                list.add(new RegionCTIE(region.getId(), productId, rate));
+                list.add(new RegionCTIE(regionId, productId, rate));
             }
         } catch (final Exception e) {
             logger.error(url + "&format=debug");
             throw e;
         }
         return list;
+    }
+
+    public static RegionCTIE getRegionCTIE(final String host, final String realm, final String regionId, final String productId) throws IOException {
+        final Optional<RegionCTIE> opt = getRegionCTIEList(host, realm, regionId).stream()
+                .filter(v -> v.getProductId().equals(productId)).findFirst();
+        if (!opt.isPresent()) {
+            throw new IllegalArgumentException("Не найдены налоговые ставки для продукта с id '" + productId + "' в регионе с id '" + regionId + "'");
+        }
+        return opt.get();
     }
 }
