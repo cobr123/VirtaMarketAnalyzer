@@ -59,11 +59,6 @@ public final class Wizard {
         //публикуем на сайте
         GitHubPublisher.publishRetail(parsedRealms);
 
-//        for (final String realm : realms) {
-//            collectToJsonTransport(realm);
-//        }
-//        //публикуем на сайте
-//        GitHubPublisher.publishRetail(realms);
 /*
         if (todayIs(Calendar.SUNDAY)) {
             //собираем данные со всех реалмов и продуктов
@@ -144,40 +139,6 @@ public final class Wizard {
             return false;
         }
         return true;
-    }
-
-    public static void collectToJsonTransport(final String realm) throws Exception {
-        if (!isParseNeedToday(realm)) {
-            return;
-        }
-        final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
-
-        //страны
-        final List<Country> countries = CityInitParser.getCountries(host, realm);
-        //регионы
-        final List<Region> regions = CityInitParser.getRegions(host, realm);
-        //города и уровень богатства городов
-        final List<City> cities = CityListParser.getCities(host, realm);
-        logger.info("cities.size = {}, {}", cities.size(), realm);
-        final List<Product> materials = ProductInitParser.getManufactureProducts(host, realm);
-        logger.info("materials.size = {}, {}", materials.size(), realm);
-
-        logger.info("парсим транспортные расходы, {}, {}", materials.size() * cities.size(), realm);
-        TransportParser.setRowsOnPage(host, realm, Math.max(400, cities.size()), cities.get(0), materials.get(0));
-
-        for (int i = 0; i < materials.size(); i++) {
-            logger.info("{} / {}", i + 1, materials.size());
-            final Product material = materials.get(i);
-            cities.parallelStream()
-                    .forEach(cityFrom -> {
-                        try {
-                            final List<Transport> list = TransportParser.parseTransport(host, realm, cities, cityFrom, material);
-                            Utils.writeToGsonZip(baseDir + "transport" + File.separator + material.getId() + File.separator + "from" + File.separator + cityFrom.getId() + ".json", list);
-                        } catch (final IOException e) {
-                            logger.error(e.getLocalizedMessage(), e);
-                        }
-                    });
-        }
     }
 
     public static void collectToJsonTradeAtCities(final String realm) throws Exception {
