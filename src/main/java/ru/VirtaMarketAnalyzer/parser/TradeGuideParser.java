@@ -3,7 +3,10 @@ package ru.VirtaMarketAnalyzer.parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
+import ru.VirtaMarketAnalyzer.main.Utils;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,12 +25,13 @@ final public class TradeGuideParser {
     ) throws Exception {
         final List<City> cities = CityListParser.getCities(host, realm, false);
         final List<Product> products = ProductInitParser.getTradingProducts(host, realm, productCategory);
+        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host, realm, products);
 
-        return cities.stream()
+        return cities.parallelStream()
                 .map(city -> {
                     try {
-                        return genTradeGuide(host, realm, city, products);
-                    } catch (final Exception e) {
+                        return genTradeGuide(host, realm, city, products, productRemains);
+                    } catch (IOException e) {
                         logger.error(e.getLocalizedMessage(), e);
                     }
                     return null;
@@ -40,11 +44,61 @@ final public class TradeGuideParser {
             final String host,
             final String realm,
             final City city,
-            final List<Product> products
-    ) throws Exception {
-        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host, realm, products);
-        final Map<String, List<TradeAtCity>> stats = CityParser.get(host, realm, city, products);
-        return null;
+            final List<Product> products,
+            final Map<String, List<ProductRemain>> productRemains
+    ) throws IOException {
+        final List<TradeGuideProduct> tradeGuideProduct = new ArrayList<>();
+        final List<TradeAtCity> stats = CityParser.get(host, realm, city, products);
+        for (final TradeAtCity stat : stats) {
+            tradeGuideProduct.add(genTradeGuideProduct(host, realm, stat, productRemains.getOrDefault(stat.getProductId(), new ArrayList<>())));
+        }
+        return new TradeGuide(city, tradeGuideProduct);
+    }
+
+    public static TradeGuideProduct genTradeGuideProduct(
+            final String host,
+            final String realm,
+            final TradeAtCity stat,
+            final List<ProductRemain> productRemains
+    ) throws IOException {
+        final double localPqr = stat.getLocalPrice() / stat.getLocalQuality();
+        final List<ProductRemain> productRemainsFiltered = productRemains.stream()
+                .filter(pr -> pr.getPrice() / pr.getQuality() <= localPqr && pr.getRemainByMaxOrderType() > 0)
+                .collect(Collectors.toList());
+        productRemainsFiltered.sort((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1);
+        final long maxVolume = Math.round(stat.getVolume() * 0.1);
+        double quality = 0;
+        double buyPrice = 0;
+        long volume = 0;
+        for (final ProductRemain pr : productRemainsFiltered) {
+            final double maxProductRemainVolume = Math.min(pr.getRemainByMaxOrderType(), maxVolume - volume);
+            quality = merge(quality, volume, pr.getQuality(), maxProductRemainVolume);
+            buyPrice = merge(buyPrice, volume, pr.getPrice(), maxProductRemainVolume);
+            volume += maxProductRemainVolume;
+            if (volume >= maxVolume) {
+                break;
+            }
+        }
+        double sellPrice = stat.getLocalPrice();
+        if (quality - 30.0 > stat.getLocalQuality()) {
+            sellPrice = Utils.round2(stat.getLocalPrice() * 2.5);
+        } else if (quality - 20.0 > stat.getLocalQuality()) {
+            sellPrice = Utils.round2(stat.getLocalPrice() * 2.0);
+        } else if (quality - 10.0 > stat.getLocalQuality()) {
+            sellPrice = Utils.round2(stat.getLocalPrice() * 1.5);
+        }
+        final RegionCTIE regionCTIE = RegionCTIEParser.getRegionCTIE(host, realm, stat.getRegionId(), stat.getProductId());
+        double incomeAfterTax = 0;
+        if (sellPrice > buyPrice) {
+            incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice) * (regionCTIE.getRate() / 100.0));
+        } else {
+            incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice));
+        }
+        return new TradeGuideProduct(stat.getProductId(), quality, buyPrice, sellPrice, volume, incomeAfterTax);
+    }
+
+    private static double merge(double quality1, double volume1, double quality2, double volume2) {
+        return Utils.round2((quality1 * volume1) / (volume1 + volume2) + (quality2 * volume2) / (volume1 + volume2));
     }
 
 }
