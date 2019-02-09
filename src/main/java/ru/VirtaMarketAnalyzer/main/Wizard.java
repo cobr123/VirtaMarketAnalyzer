@@ -328,10 +328,11 @@ public final class Wizard {
             final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
             Utils.writeToGson(baseDir + "production_above_average_updateDate.json", new UpdateDate(df.format(new Date())));
         }
-        logger.info("генерируем торговый гид");
+        logger.info("генерируем торговый гид, {}", realm);
         final List<ProductCategory> productCategories = ProductInitParser.getTradeProductCategories(host, realm);
-        for (final ProductCategory productCategory : productCategories) {
-            logger.info("{}, {}", realm, productCategory.getCaption());
+        for (int i = 0; i < productCategories.size(); i++) {
+            final ProductCategory productCategory = productCategories.get(i);
+            logger.info("{} / {}, {}", i + 1, productCategories.size(), productCategory.getCaption());
             final List<TradeGuide> tradeGuides = TradeGuideParser.genTradeGuide(host, realm, productCategory);
             Utils.writeToGsonZip(tradeGuideBaseDir + by_product_category_id + File.separator + productCategory.getId() + ".json", tradeGuides);
         }
