@@ -31,7 +31,7 @@ final public class TradeGuideParser {
                 .map(city -> {
                     try {
                         return genTradeGuide(host, realm, city, products, productRemains);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
                     }
                     return null;
@@ -51,7 +51,7 @@ final public class TradeGuideParser {
             final City city,
             final List<Product> products,
             final Map<String, List<ProductRemain>> productRemains
-    ) throws IOException {
+    ) throws Exception {
         final List<TradeGuideProduct> tradeGuideProduct = new ArrayList<>();
         final List<TradeAtCity> stats = CityParser.get(host, realm, city, products);
         for (final TradeAtCity stat : stats) {
@@ -76,7 +76,7 @@ final public class TradeGuideParser {
             final String realm,
             final TradeAtCity stat,
             final List<ProductRemain> productRemains
-    ) throws IOException {
+    ) throws Exception {
         final double localPqr = stat.getLocalPrice() / stat.getLocalQuality();
         final List<ProductRemain> productRemainsFiltered = productRemains.stream()
                 .filter(pr -> pr.getRemainByMaxOrderType() > 0 && pr.getPrice() / pr.getQuality() <= localPqr)
@@ -89,7 +89,7 @@ final public class TradeGuideParser {
         for (final ProductRemain pr : productRemainsFiltered) {
             final double maxProductRemainVolume = Math.min(pr.getRemainByMaxOrderType(), maxVolume - volume);
             final double priceWithDuty = CountryDutyListParser.addDuty(host, realm, pr.getCountryId(), stat.getCountryId(), pr.getProductID(), pr.getPrice());
-            final double transportCost = CountryDutyListParser.getTransportCost(host, realm, pr.getTownId(), stat.getTownId(), pr.getProductID());
+            final double transportCost = Utils.repeatOnErr(() -> CountryDutyListParser.getTransportCost(host, realm, pr.getTownId(), stat.getTownId(), pr.getProductID()));
             quality = merge(quality, volume, pr.getQuality(), maxProductRemainVolume);
             buyPrice = merge(buyPrice, volume, priceWithDuty + transportCost, maxProductRemainVolume);
             volume += maxProductRemainVolume;
