@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 final public class TradeGuideParser {
     private static final Logger logger = LoggerFactory.getLogger(TradeGuideParser.class);
 
+    /**
+     * Создает розничный гид по одной категории товаров для всех городов
+     */
     public static List<TradeGuide> genTradeGuide(
             final String host,
             final String realm,
@@ -37,6 +40,11 @@ final public class TradeGuideParser {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Создает розничный гид по одной категории товаров для одного города.
+     * Только если местных больше или равно 10%.
+     * Только если хотя бы один продукт прибыльный.
+     */
     public static TradeGuide genTradeGuide(
             final String host,
             final String realm,
@@ -59,6 +67,10 @@ final public class TradeGuideParser {
         }
     }
 
+    /**
+     * Считает прибыльность товара для одного города.
+     * Максимальный объем продаж 10% рынка.
+     */
     public static TradeGuideProduct genTradeGuideProduct(
             final String host,
             final String realm,
