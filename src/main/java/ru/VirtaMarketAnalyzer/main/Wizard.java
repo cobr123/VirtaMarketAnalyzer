@@ -144,6 +144,7 @@ public final class Wizard {
     public static void collectToJsonTradeAtCities(final String realm) throws Exception {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
+        final String tradeGuideBaseDir = Utils.getDir() + trade_guide + File.separator + realm + File.separator;
 
         final File baseDirFile = new File(baseDir);
         if (baseDirFile.exists()) {
@@ -247,6 +248,14 @@ public final class Wizard {
             Utils.writeToGson(serviceBaseDir + "serviceAtCity_" + ut.getId() + "_en.json", serviceAtCity_en);
             logger.info("{}{}/main/globalreport/marketing?unit_type_id={}#by-service", host_en, realm, ut.getId());
         }
+        logger.info("генерируем торговый гид, {}", realm);
+        final List<ProductCategory> productCategories = ProductInitParser.getTradeProductCategories(host, realm);
+        for (int i = 0; i < productCategories.size(); i++) {
+            final ProductCategory productCategory = productCategories.get(i);
+            logger.info("{} / {}, {}", i + 1, productCategories.size(), productCategory.getCaption());
+            final List<TradeGuide> tradeGuides = TradeGuideParser.genTradeGuide(host, realm, productCategory);
+            Utils.writeToGsonZip(tradeGuideBaseDir + by_product_category_id + File.separator + productCategory.getId() + ".json", tradeGuides);
+        }
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
@@ -254,12 +263,12 @@ public final class Wizard {
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        Utils.writeToGson(tradeGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
 
     public static void collectToJsonIndustries(final String realm) throws Exception {
         final String baseDir = Utils.getDir() + industry + File.separator + realm + File.separator;
-        final String tradeGuideBaseDir = Utils.getDir() + trade_guide + File.separator + realm + File.separator;
 
         logger.info("собираем рецепты производства товаров и материалов");
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host, realm);
@@ -328,18 +337,9 @@ public final class Wizard {
             final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
             Utils.writeToGson(baseDir + "production_above_average_updateDate.json", new UpdateDate(df.format(new Date())));
         }
-        logger.info("генерируем торговый гид, {}", realm);
-        final List<ProductCategory> productCategories = ProductInitParser.getTradeProductCategories(host, realm);
-        for (int i = 0; i < productCategories.size(); i++) {
-            final ProductCategory productCategory = productCategories.get(i);
-            logger.info("{} / {}, {}", i + 1, productCategories.size(), productCategory.getCaption());
-            final List<TradeGuide> tradeGuides = TradeGuideParser.genTradeGuide(host, realm, productCategory);
-            Utils.writeToGsonZip(tradeGuideBaseDir + by_product_category_id + File.separator + productCategory.getId() + ".json", tradeGuides);
-        }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
-        Utils.writeToGson(tradeGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
 
