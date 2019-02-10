@@ -51,7 +51,12 @@ final public class TradeGuideParser {
                 tradeGuideProduct.add(genTradeGuideProduct(host, realm, stat, productRemains.getOrDefault(stat.getProductId(), new ArrayList<>())));
             }
         }
-        return new TradeGuide(city, tradeGuideProduct);
+        final boolean positiveExists = tradeGuideProduct.stream().anyMatch(i -> i.getIncomeAfterTax() > 0);
+        if (positiveExists) {
+            return new TradeGuide(city, tradeGuideProduct);
+        } else {
+            return null;
+        }
     }
 
     public static TradeGuideProduct genTradeGuideProduct(
