@@ -34,4 +34,28 @@ final public class TradeGuideProduct {
         this.volume = volume;
         this.incomeAfterTax = incomeAfterTax;
     }
+
+    public String getProductId() {
+        return productId;
+    }
+
+    public double getQuality() {
+        return quality;
+    }
+
+    public double getBuyPrice() {
+        return buyPrice;
+    }
+
+    public double getSellPrice() {
+        return sellPrice;
+    }
+
+    public long getVolume() {
+        return volume;
+    }
+
+    public double getIncomeAfterTax() {
+        return incomeAfterTax;
+    }
 }
