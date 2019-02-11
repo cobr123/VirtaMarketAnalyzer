@@ -76,9 +76,8 @@ final public class TradeGuideParser {
             final TradeAtCity stat,
             final List<ProductRemain> productRemains
     ) throws Exception {
-        final double localPqr = stat.getLocalPrice() / stat.getLocalQuality();
         final List<ProductRemain> productRemainsFiltered = productRemains.stream()
-                .filter(pr -> pr.getRemainByMaxOrderType() > 0 && pr.getPrice() / pr.getQuality() <= localPqr)
+                .filter(pr -> pr.getRemainByMaxOrderType() > 0 && pr.getQuality() >= stat.getLocalQuality())
                 .sorted(Comparator.comparingDouble(o -> o.getPrice() / o.getQuality()))
                 .collect(Collectors.toList());
         final long maxVolume = Math.round(stat.getVolume() * 0.1);
