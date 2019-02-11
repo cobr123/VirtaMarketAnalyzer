@@ -76,6 +76,7 @@ final public class TradeGuideParser {
             final TradeAtCity stat,
             final List<ProductRemain> productRemains
     ) throws Exception {
+        final List<String> suppliersUnitIds = new ArrayList<>();
         final List<ProductRemain> productRemainsFiltered = productRemains.stream()
                 .filter(pr -> pr.getRemainByMaxOrderType() > 0 && pr.getQuality() >= stat.getLocalQuality())
                 .sorted(Comparator.comparingDouble(o -> o.getPrice() / o.getQuality()))
@@ -85,6 +86,7 @@ final public class TradeGuideParser {
         double buyPrice = 0;
         long volume = 0;
         for (final ProductRemain pr : productRemainsFiltered) {
+            suppliersUnitIds.add(pr.getUnitID());
             final double maxProductRemainVolume = Math.min(pr.getRemainByMaxOrderType(), maxVolume - volume);
             final double priceWithDuty = CountryDutyListParser.addDuty(host, realm, pr.getCountryId(), stat.getCountryId(), pr.getProductID(), pr.getPrice());
             final double transportCost = Utils.repeatOnErr(() -> CountryDutyListParser.getTransportCost(host, realm, pr.getTownId(), stat.getTownId(), pr.getProductID()));
@@ -108,7 +110,7 @@ final public class TradeGuideParser {
             final Region region = CityInitParser.getRegion(host, realm, stat.getRegionId());
             incomeAfterTax = Utils.round2(incomeAfterTax * (1.0 - region.getIncomeTaxRate() / 100.0));
         }
-        return new TradeGuideProduct(stat.getProductId(), quality, buyPrice, sellPrice, volume, incomeAfterTax);
+        return new TradeGuideProduct(stat.getProductId(), quality, buyPrice, sellPrice, volume, incomeAfterTax, suppliersUnitIds);
     }
 
     private static double merge(double quality1, double volume1, double quality2, double volume2) {

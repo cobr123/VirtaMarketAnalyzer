@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by cobr123 on 08.02.2019.
  */
@@ -18,6 +20,8 @@ final public class TradeGuideProduct {
     final private long volume;
     @SerializedName("iat")
     final private double incomeAfterTax;
+    @SerializedName("sui")
+    final private List<String> suppliersUnitIds;
 
     public TradeGuideProduct(
             final String productId,
@@ -25,7 +29,8 @@ final public class TradeGuideProduct {
             final double buyPrice,
             final double sellPrice,
             final long volume,
-            final double incomeAfterTax
+            final double incomeAfterTax,
+            final List<String> suppliersUnitIds
     ) {
         this.productId = productId;
         this.quality = quality;
@@ -33,6 +38,7 @@ final public class TradeGuideProduct {
         this.sellPrice = sellPrice;
         this.volume = volume;
         this.incomeAfterTax = incomeAfterTax;
+        this.suppliersUnitIds = suppliersUnitIds;
     }
 
     public String getProductId() {
@@ -57,5 +63,9 @@ final public class TradeGuideProduct {
 
     public double getIncomeAfterTax() {
         return incomeAfterTax;
+    }
+
+    public List<String> getSuppliersUnitIds() {
+        return suppliersUnitIds;
     }
 }
