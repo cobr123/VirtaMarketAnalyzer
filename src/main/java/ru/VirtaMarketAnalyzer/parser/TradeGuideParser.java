@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Utils;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -107,8 +106,8 @@ final public class TradeGuideParser {
         }
         double incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice));
         if (sellPrice > buyPrice) {
-            final RegionCTIE regionCTIE = RegionCTIEParser.getRegionCTIE(host, realm, stat.getRegionId(), stat.getProductId());
-            incomeAfterTax = Utils.round2(incomeAfterTax * (1.0 - regionCTIE.getRate() / 100.0));
+            final Region region = CityInitParser.getRegion(host, realm, stat.getRegionId());
+            incomeAfterTax = Utils.round2(incomeAfterTax * (1.0 - region.getIncomeTaxRate() / 100.0));
         }
         return new TradeGuideProduct(stat.getProductId(), quality, buyPrice, sellPrice, volume, incomeAfterTax);
     }
