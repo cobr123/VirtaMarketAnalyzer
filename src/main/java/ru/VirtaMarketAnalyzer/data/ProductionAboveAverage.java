@@ -83,4 +83,12 @@ public final class ProductionAboveAverage {
     public List<ProductRemain> getIngredientsRemain() {
         return ingredientsRemain;
     }
+
+    public long getMaxWorkplacesCount() {
+        return maxWorkplacesCount;
+    }
+
+    public boolean isCheaperThenMarket() {
+        return cheaperThenMarket;
+    }
 }
