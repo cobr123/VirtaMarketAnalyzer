@@ -242,7 +242,7 @@ public final class ProductionAboveAverageParser {
             resultQty[i] = productRecipe.getResultProducts().get(i).getResultQty();
         }
 
-        final double work_quant = 10000.0;
+        final double work_quant = 1000.0;
         final double work_salary = 300.0;
 
         //квалификация работников
