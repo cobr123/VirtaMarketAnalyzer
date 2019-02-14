@@ -38,7 +38,7 @@ public final class Wizard {
     public static final String trade_guide = "trade_guide";
     public static final String by_product_category_id = "by_product_category_id";
     public static final String CITY_ELECTRICITY_TARIFF = "city_electricity_tariff";
-    public static final List<String> realms = Arrays.asList("crypto", "nika", "lien", "mary", "anna", "fast", "olga", "vera");
+    public static final List<String> realms = Arrays.asList("nika", "lien", "mary", "anna", "fast", "olga", "vera");
 
 
     public static void main(String[] args) throws Exception {
@@ -126,8 +126,7 @@ public final class Wizard {
     }
 
     public static boolean isParseNeedToday(final String realm) {
-        if ("crypto".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
-        } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
+        if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
         } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
         } else if ("olga".equalsIgnoreCase(realm) && todayIs(Calendar.WEDNESDAY)) {
         } else if ("vera".equalsIgnoreCase(realm) && todayIs(Calendar.THURSDAY)) {
