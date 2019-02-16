@@ -9,6 +9,12 @@ import java.util.List;
  * Created by cobr123 on 14.02.2019.
  */
 final public class ProductionForRetail {
+    @SerializedName("ci")
+    final private String countryId;
+    @SerializedName("ri")
+    final private String regionId;
+    @SerializedName("ti")
+    final private String townId;
     @SerializedName("mi")
     final private String manufactureID;
     @SerializedName("s")
@@ -41,6 +47,10 @@ final public class ProductionForRetail {
         this.ingredientsRemain = paa.getIngredientsRemain();
         this.cheaperThenMarket = paa.isCheaperThenMarket();
 
+        this.countryId = stat.getCountryId();
+        this.regionId = stat.getRegionId();
+        this.townId = stat.getTownId();
+
         if (quality - 30.0 > stat.getLocalQuality()) {
             sellPrice = Utils.round2(stat.getLocalPrice() * 2.5);
         } else if (quality - 20.0 > stat.getLocalQuality()) {
@@ -50,6 +60,22 @@ final public class ProductionForRetail {
         } else {
             sellPrice = stat.getLocalPrice();
         }
+    }
+
+    public String getCountryId() {
+        return countryId;
+    }
+
+    public String getRegionId() {
+        return regionId;
+    }
+
+    public String getTownId() {
+        return townId;
+    }
+
+    public String getGeo() {
+        return getCountryId() + "/" + getRegionId() + "/" + getTownId();
     }
 
     public String getManufactureID() {
