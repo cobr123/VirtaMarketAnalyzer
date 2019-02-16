@@ -25,9 +25,12 @@ class ProductionForRetailParserTest {
         final Product product = ProductInitParser.getTradingProduct(Wizard.host, realm, "422897");
         final List<ProductionForRetail> productionsForRetail = ProductionForRetailParser.genProductionForRetail(Wizard.host, realm, product);
         assertFalse(productionsForRetail.isEmpty());
-        final ProductionForRetail productionForRetail = productionsForRetail.get(productionsForRetail.size() - 1);
-        logger.info(Utils.getPrettyGson(productionForRetail));
-        logger.info("https://virtonomica.ru/{}/main/globalreport/marketing?geo={}&product_id={}#by-trade-at-cities", realm, productionForRetail.getGeo(), productionForRetail.getProductID());
+        final ProductionForRetail productionForRetail1 = productionsForRetail.get(0);
+        logger.info(Utils.getPrettyGson(productionForRetail1));
+        logger.info("https://virtonomica.ru/{}/main/globalreport/marketing?geo={}&product_id={}#by-trade-at-cities", realm, productionForRetail1.getGeo(), productionForRetail1.getProductID());
+        final ProductionForRetail productionForRetail2 = productionsForRetail.get(productionsForRetail.size() - 1);
+        logger.info(Utils.getPrettyGson(productionForRetail2));
+        logger.info("https://virtonomica.ru/{}/main/globalreport/marketing?geo={}&product_id={}#by-trade-at-cities", realm, productionForRetail2.getGeo(), productionForRetail2.getProductID());
         logger.info("size = {}", productionsForRetail.size());
     }
 }
