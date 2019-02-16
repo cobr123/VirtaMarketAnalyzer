@@ -116,7 +116,7 @@ final public class ProductionForRetailParser {
         final City productionCity = CityListParser.getCity(host, realm, "310400", false);
         //оставляем по 3 лучших для каждого уровня технологии для каждого товара
         return StreamEx.cartesianProduct(materials)
-                .limit(1)
+                .limit(10)
                 .map(mats -> {
                     try {
                         return ProductionAboveAverageParser.calcResult(host, realm, productRecipe, mats, techLvl, 0, productRemains, productionCity);
@@ -137,7 +137,7 @@ final public class ProductionForRetailParser {
                     }
                 })
                 .filter(Objects::nonNull)
-                .filter(o -> o.getIncomeAfterTax() > 0)
+                .filter(o -> o.getIncomeAfterTax() > o.getCost() * 0.1)
                 .sorted(Comparator.comparingDouble(ProductionForRetail::getIncomeAfterTax).reversed())
                 .limit(3)
                 .collect(toList());
