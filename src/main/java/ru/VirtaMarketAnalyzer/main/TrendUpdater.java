@@ -183,7 +183,7 @@ final public class TrendUpdater {
                 .filter(pr -> pr.getRemain() > 0)
                 .filter(pr -> pr.getRemain() != Long.MAX_VALUE)
                 .collect(Collectors.toList());
-        ;
+
         final double remain = productRemainFiltered.stream()
                 .mapToDouble(ProductRemain::getRemainByMaxOrderType)
                 .sum();
@@ -199,7 +199,7 @@ final public class TrendUpdater {
         final List<ProductRemain> productRemainOthersFiltered = productRemainFiltered.stream()
                 .filter(pr -> pr.getRemainByMaxOrderType() <= remain * 0.05)
                 .collect(Collectors.toList());
-        ;
+
         final double totalOthers = productRemainOthersFiltered.stream()
                 .mapToDouble(ProductRemain::getTotal)
                 .sum();
