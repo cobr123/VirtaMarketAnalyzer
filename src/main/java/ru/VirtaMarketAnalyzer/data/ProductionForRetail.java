@@ -2,6 +2,8 @@ package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
 import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.parser.CityInitParser;
+import ru.VirtaMarketAnalyzer.parser.CountryDutyListParser;
 
 import java.util.List;
 
@@ -27,8 +29,12 @@ final public class ProductionForRetail {
     final private double quality;
     @SerializedName("c")
     final private double cost;
+    @SerializedName("bp")
+    final private double buyPrice;
     @SerializedName("sp")
     final private double sellPrice;
+    @SerializedName("iat")
+    final private double incomeAfterTax;
     @SerializedName("tl")
     final private double techLvl;
     @SerializedName("ir")
@@ -36,11 +42,11 @@ final public class ProductionForRetail {
     @SerializedName("ctm")
     final private boolean cheaperThenMarket;
 
-    public ProductionForRetail(final TradeAtCity stat, final ProductionAboveAverage paa) {
+    public ProductionForRetail(final String host, final String realm, final TradeAtCity stat, final ProductionAboveAverage paa, final City productionCity) throws Exception {
         this.manufactureID = paa.getManufactureID();
         this.specialization = paa.getSpecialization();
         this.productID = paa.getProductID();
-        this.volume = paa.getVolume();
+        this.volume = Math.round(stat.getVolume() * Math.min(stat.getLocalPercent(), 10));
         this.quality = paa.getQuality();
         this.cost = paa.getCost();
         this.techLvl = paa.getTechLvl();
@@ -59,6 +65,16 @@ final public class ProductionForRetail {
             sellPrice = Utils.round2(stat.getLocalPrice() * 1.5);
         } else {
             sellPrice = stat.getLocalPrice();
+        }
+        final double priceWithDuty = CountryDutyListParser.addDuty(host, realm, productionCity.getCountryId(), stat.getCountryId(), paa.getProductID(), (sellPrice + cost) / 2.0);
+        final double transportCost = Utils.repeatOnErr(() -> CountryDutyListParser.getTransportCost(host, realm, productionCity.getId(), stat.getTownId(), paa.getProductID()));
+        buyPrice = priceWithDuty + transportCost;
+
+        if (sellPrice > buyPrice) {
+            final Region region = CityInitParser.getRegion(host, realm, stat.getRegionId());
+            incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice) * (1.0 - region.getIncomeTaxRate() / 100.0));
+        } else {
+            incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice));
         }
     }
 
@@ -104,6 +120,10 @@ final public class ProductionForRetail {
 
     public double getSellPrice() {
         return sellPrice;
+    }
+
+    public double getIncomeAfterTax() {
+        return incomeAfterTax;
     }
 
     public double getTechLvl() {
