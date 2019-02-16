@@ -118,6 +118,10 @@ final public class ProductionForRetail {
         return cost;
     }
 
+    public double getBuyPrice() {
+        return buyPrice;
+    }
+
     public double getSellPrice() {
         return sellPrice;
     }
