@@ -39,6 +39,7 @@ final public class ProductionForRetailParser {
                 .map(city -> genProductionForCity(host, realm, city, product, techLvls, productRemains, productRecipes.get(product.getId())))
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
+                .sorted(Comparator.comparingDouble(ProductionForRetail::getIncomeAfterTax).reversed())
                 .collect(Collectors.toList());
     }
 
@@ -77,13 +78,20 @@ final public class ProductionForRetailParser {
 
         final List<ProductionForRetail> result = new ArrayList<>();
         final TradeAtCity stat = new CityProduct(city, product, host, realm).getTradeAtCity().build();
-        if(stat.getLocalPercent() > 0) {
+        if (stat.getLocalPercent() > 0) {
             final List<List<ProductRemain>> materials = ProductionAboveAverageParser.getProductRemain(productRecipe, productRemains);
 
             for (int i = 0; i <= 3; ++i) {
                 final double minQuality = stat.getLocalQuality() + 10.0 * i;
                 final List<ProductionForRetail> tmp = IntStream.rangeClosed(1, maxTechLvl)
-                        .mapToObj(lvl -> calcByRecipe(host, realm, stat, materials, productRecipe, lvl, minQuality, productRemains))
+                        .mapToObj(lvl -> {
+                            try {
+                                return calcByRecipe(host, realm, stat, materials, productRecipe, lvl, minQuality, productRemains);
+                            } catch (Exception e) {
+                                logger.error(e.getLocalizedMessage(), e);
+                                return null;
+                            }
+                        })
                         .filter(Objects::nonNull)
                         .flatMap(Collection::stream)
                         .collect(toList());
@@ -103,17 +111,26 @@ final public class ProductionForRetailParser {
             final int techLvl,
             final double minQuality,
             final Map<String, List<ProductRemain>> productRemains
-    ) {
+    ) throws Exception {
+        //Узбекистан - Нукус
+        final City productionCity = CityListParser.getCity(host, realm, "310400", false);
         //оставляем по 3 лучших для каждого уровня технологии для каждого товара
         return StreamEx.cartesianProduct(materials)
-                .limit(100_000)
-                .map(mats -> ProductionAboveAverageParser.calcResult(productRecipe, mats, techLvl, 0, productRemains))
+                .limit(1)
+                .map(mats -> {
+                    try {
+                        return ProductionAboveAverageParser.calcResult(host, realm, productRecipe, mats, techLvl, 0, productRemains, productionCity);
+                    } catch (Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .filter(paa -> paa.getQuality() >= minQuality && paa.getProductID().equals(stat.getProductId()))
-                .sorted((o1, o2) -> (o1.getCost() / o1.getQuality() > o2.getCost() / o2.getQuality()) ? 1 : -1)
                 .map(ppa -> {
                     try {
-                        return new ProductionForRetail(host, realm, stat, ppa);
+                        return new ProductionForRetail(host, realm, stat, ppa, productionCity);
                     } catch (Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
                         return null;
@@ -121,7 +138,7 @@ final public class ProductionForRetailParser {
                 })
                 .filter(Objects::nonNull)
                 .filter(o -> o.getIncomeAfterTax() > 0)
-                .sorted(Comparator.comparingDouble(ProductionForRetail::getIncomeAfterTax))
+                .sorted(Comparator.comparingDouble(ProductionForRetail::getIncomeAfterTax).reversed())
                 .limit(3)
                 .collect(toList());
     }
