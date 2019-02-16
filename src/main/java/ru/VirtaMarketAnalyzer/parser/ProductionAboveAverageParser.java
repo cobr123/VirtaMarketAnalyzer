@@ -104,13 +104,15 @@ public final class ProductionAboveAverageParser {
         }
         return productHistory.parallelStream()
                 .filter(ph -> productRecipes.containsKey(ph.getProductID()))
-                .map(ph -> calcByProduct(techLvls, ph, productRemains, productRecipes.get(ph.getProductID()), manufactures))
+                .map(ph -> calcByProduct(host, realm, techLvls, ph, productRemains, productRecipes.get(ph.getProductID()), manufactures))
                 .flatMap(Collection::stream)
                 .collect(toList());
     }
 
     public static List<ProductionAboveAverage> calcByProduct(
-            final List<TechLvl> techLvls
+            final String host
+            , final String realm
+            , final List<TechLvl> techLvls
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final List<ProductRecipe> productRecipes
@@ -118,13 +120,15 @@ public final class ProductionAboveAverageParser {
     ) {
         return productRecipes.stream()
                 .filter(pr -> pr.getInputProducts() != null && !pr.getInputProducts().isEmpty())
-                .map(pr -> calcByMaxTech(techLvls, productHistory, productRemains, pr, manufactures))
+                .map(pr -> calcByMaxTech(host, realm, techLvls, productHistory, productRemains, pr, manufactures))
                 .flatMap(Collection::stream)
                 .collect(toList());
     }
 
     public static List<ProductionAboveAverage> calcByMaxTech(
-            final List<TechLvl> techLvls
+            final String host
+            , final String realm
+            , final List<TechLvl> techLvls
             , final ProductHistory productHistory
             , final Map<String, List<ProductRemain>> productRemains
             , final ProductRecipe productRecipe
@@ -140,7 +144,7 @@ public final class ProductionAboveAverageParser {
         final List<List<ProductRemain>> materials = getProductRemain(productRecipe, productRemains);
 
         return IntStream.rangeClosed(1, maxTechLvl)
-                .mapToObj(lvl -> calcByRecipe(productHistory, materials, productRecipe, lvl, manufactures, productRemains))
+                .mapToObj(lvl -> calcByRecipe(host, realm, productHistory, materials, productRecipe, lvl, manufactures, productRemains))
                 .flatMap(Collection::stream)
                 .collect(toList());
     }
@@ -154,8 +158,7 @@ public final class ProductionAboveAverageParser {
             final List<ProductRemain> remains = productRemains.getOrDefault(inputProduct.getProductID(), new ArrayList<>())
                     .stream()
                     .filter(r -> r.getQuality() >= inputProduct.getMinQuality())
-                    .filter(r -> r.getMaxOrderType() == ProductRemain.MaxOrderType.U || r.getMaxOrder() >= inputProduct.getQty() * koef)
-                    .filter(r -> r.getRemain() >= inputProduct.getQty() * koef)
+                    .filter(r -> r.getRemainByMaxOrderType() >= inputProduct.getQty() * koef)
                     .collect(Collectors.toList());
 
             materials.add(remains);
@@ -164,7 +167,9 @@ public final class ProductionAboveAverageParser {
     }
 
     public static List<ProductionAboveAverage> calcByRecipe(
-            final ProductHistory productHistory
+            final String host
+            , final String realm
+            , final ProductHistory productHistory
             , final List<List<ProductRemain>> materials
             , final ProductRecipe productRecipe
             , final double techLvl
@@ -184,7 +189,15 @@ public final class ProductionAboveAverageParser {
         //оставляем по 3 лучших для каждого уровня технологии для каждого товара
         return StreamEx.cartesianProduct(materials)
                 .limit(100_000)
-                .map(mats -> calcResult(productRecipe, mats, techLvl, maxWorkplacesCount, productRemains))
+                .map(mats -> {
+                    try {
+                        return calcResult(host, realm, productRecipe, mats, techLvl, maxWorkplacesCount, productRemains, null);
+                    } catch (Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .filter(paa -> paa.getQuality() > productHistory.getQuality())
                 .filter(paa -> paa.getProductID().equals(productHistory.getProductID()))
@@ -194,12 +207,15 @@ public final class ProductionAboveAverageParser {
     }
 
     public static List<ProductionAboveAverage> calcResult(
+            final String host,
+            final String realm,
             final ProductRecipe productRecipe,
             final List<ProductRemain> materials,
             final double techLvl,
             final long maxWorkplacesCount,
-            final Map<String, List<ProductRemain>> productRemains
-    ) {
+            final Map<String, List<ProductRemain>> productRemains,
+            final City productionCity
+    ) throws Exception {
         //logger.info("tech = {}", techLvl);
         final List<ProductionAboveAverage> result = new ArrayList<>(productRecipe.getResultProducts().size());
 //        var result = {
@@ -224,8 +240,15 @@ public final class ProductionAboveAverageParser {
             ingBaseQty[i] = productRecipe.getInputProducts().get(i).getQty();
         }
         for (int i = 0; i < materials.size(); ++i) {
-            ingQual[i] = materials.get(i).getQuality();
-            ingPrice[i] = materials.get(i).getPrice();
+            final ProductRemain material = materials.get(i);
+            ingQual[i] = material.getQuality();
+            ingPrice[i] = (productionCity == null) ? material.getPrice() : CountryDutyListParser.addDutyAndTransportCost(
+                    host, realm,
+                    material.getCountryId(), productionCity.getCountryId(),
+                    material.getTownId(), productionCity.getId(),
+                    material.getProductID(),
+                    material.getPrice()
+            );
         }
 
         final int num = ingQual.length;
@@ -243,7 +266,7 @@ public final class ProductionAboveAverageParser {
         }
 
         final double work_quant = 1000.0;
-        final double work_salary = 300.0;
+        final double work_salary = (productionCity == null) ? 300.0 : productionCity.getAverageSalary();
 
         //квалификация работников
         //var PersonalQual = Math.pow(tech, 0.8);
