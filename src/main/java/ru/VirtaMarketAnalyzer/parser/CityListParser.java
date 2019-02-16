@@ -14,16 +14,21 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by cobr123 on 25.04.2015.
  */
 public final class CityListParser {
     private static final Logger logger = LoggerFactory.getLogger(CityListParser.class);
+
+    public static City getCity(final String host, final String realm, final String id, final Boolean withDemography) throws Exception {
+        final Optional<City> opt = getCities(host, realm, withDemography).stream().filter(city -> city.getId().equals(id)).findFirst();
+        if (!opt.isPresent()) {
+            throw new IllegalArgumentException("Не найден город с id '" + id + "'");
+        }
+        return opt.get();
+    }
 
     public static List<City> getCities(final String host, final String realm) throws Exception {
         return getCities(host, realm, true);
