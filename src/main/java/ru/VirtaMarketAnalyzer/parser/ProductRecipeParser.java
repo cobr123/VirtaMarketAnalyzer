@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 18.05.2015.
@@ -143,5 +144,22 @@ final public class ProductRecipeParser {
     private static Product getProduct(final String host, final String realm, final Element equipElem) throws IOException {
         final String id = Utils.getLastBySep(equipElem.parent().attr("href"), "/");
         return ProductInitParser.getManufactureProduct(host, realm, id);
+    }
+
+    public static List<Product> getProductFromRecipes(final String host, final String realm, final List<ProductRecipe> productRecipes) throws IOException {
+        final Map<String, Product> map = new HashMap<>();
+        for (final ProductRecipe productRecipe : productRecipes) {
+            for (final ManufactureResult manufactureResult : productRecipe.getResultProducts()) {
+                if (!map.containsKey(manufactureResult.getProductID())) {
+                    map.put(manufactureResult.getProductID(), ProductInitParser.getManufactureProduct(host, realm, manufactureResult.getProductID()));
+                }
+            }
+            for (final ManufactureIngredient manufactureIngredient : productRecipe.getInputProducts()) {
+                if (!map.containsKey(manufactureIngredient.getProductID())) {
+                    map.put(manufactureIngredient.getProductID(), ProductInitParser.getManufactureProduct(host, realm, manufactureIngredient.getProductID()));
+                }
+            }
+        }
+        return new ArrayList<>(map.values());
     }
 }
