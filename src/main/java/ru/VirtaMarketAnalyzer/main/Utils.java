@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -109,7 +110,7 @@ public final class Utils {
     }
 
     public static String readFile(final String path) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(path)), "UTF-8");
+        return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
     }
 
     public static String clearNumber(final String text) {
