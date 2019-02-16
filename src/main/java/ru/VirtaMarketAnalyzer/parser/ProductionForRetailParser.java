@@ -29,12 +29,12 @@ final public class ProductionForRetailParser {
      */
     public static List<ProductionForRetail> genProductionForRetail(final String host, final String realm, final Product product) throws Exception {
         final List<City> cities = CityListParser.getCities(host, realm, false);
-        final List<Product> products = ProductInitParser.getTradingProducts(host, realm);
-        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host, realm, products);
         final List<TechUnitType> techList = TechListParser.getTechUnitTypes(host, realm);
         final List<TechLvl> techLvls = TechMarketAskParser.getTech(host, realm, techList);
         final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host, realm);
         final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
+        final List<Product> products = ProductRecipeParser.getProductFromRecipes(host, realm, productRecipes.get(product.getId()));
+        final Map<String, List<ProductRemain>> productRemains = ProductRemainParser.getRemains(host, realm, products);
 
         return cities.parallelStream()
                 .map(city -> genProductionForCity(host, realm, city, product, techLvls, productRemains, productRecipes.get(product.getId())))
@@ -106,8 +106,7 @@ final public class ProductionForRetailParser {
                 .limit(100_000)
                 .map(mats -> ProductionAboveAverageParser.calcResult(productRecipe, mats, techLvl, 0, productRemains))
                 .flatMap(Collection::stream)
-                .filter(paa -> paa.getQuality() >= minQuality)
-                .filter(paa -> paa.getProductID().equals(stat.getProductId()))
+                .filter(paa -> paa.getQuality() >= minQuality && paa.getProductID().equals(stat.getProductId()))
                 .sorted((o1, o2) -> (o1.getCost() / o1.getQuality() > o2.getCost() / o2.getQuality()) ? 1 : -1)
                 .map(ppa -> new ProductionForRetail(stat, ppa))
                 .sorted((o1, o2) -> o1.getSellPrice() - o1.getCost() > o2.getSellPrice() - o2.getCost() ? -1 : 1)
