@@ -50,6 +50,7 @@ final public class CityElectricityTariffParser {
             }
             return null;
         })
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }

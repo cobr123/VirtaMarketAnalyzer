@@ -31,6 +31,7 @@ final public class RegionCTIEParser {
             }
             return null;
         })
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(groupingBy(RegionCTIE::getRegionId));
     }
