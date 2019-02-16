@@ -4,7 +4,6 @@ import one.util.streamex.StreamEx;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
-import ru.VirtaMarketAnalyzer.main.Utils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -76,24 +75,28 @@ final public class ProductionForRetailParser {
                 .orElse(new TechLvl("", 2, 0.0))
                 .getLvl();
 
-        final TradeAtCity stat = new CityProduct(city, product, host, realm).getTradeAtCity().build();
-        final List<List<ProductRemain>> materials = ProductionAboveAverageParser.getProductRemain(productRecipe, productRemains);
-
         final List<ProductionForRetail> result = new ArrayList<>();
-        for (int i = 0; i <= 3; ++i) {
-            final double minQuality = stat.getLocalQuality() + 10.0 * i;
-            final List<ProductionForRetail> tmp = IntStream.rangeClosed(1, maxTechLvl)
-                    .mapToObj(lvl -> calcByRecipe(stat, materials, productRecipe, lvl, minQuality, productRemains))
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .collect(toList());
-            result.addAll(tmp);
+        final TradeAtCity stat = new CityProduct(city, product, host, realm).getTradeAtCity().build();
+        if(stat.getLocalPercent() > 0) {
+            final List<List<ProductRemain>> materials = ProductionAboveAverageParser.getProductRemain(productRecipe, productRemains);
+
+            for (int i = 0; i <= 3; ++i) {
+                final double minQuality = stat.getLocalQuality() + 10.0 * i;
+                final List<ProductionForRetail> tmp = IntStream.rangeClosed(1, maxTechLvl)
+                        .mapToObj(lvl -> calcByRecipe(host, realm, stat, materials, productRecipe, lvl, minQuality, productRemains))
+                        .filter(Objects::nonNull)
+                        .flatMap(Collection::stream)
+                        .collect(toList());
+                result.addAll(tmp);
+            }
         }
         return result;
 
     }
 
     private static List<ProductionForRetail> calcByRecipe(
+            final String host,
+            final String realm,
             final TradeAtCity stat,
             final List<List<ProductRemain>> materials,
             final ProductRecipe productRecipe,
@@ -108,8 +111,17 @@ final public class ProductionForRetailParser {
                 .flatMap(Collection::stream)
                 .filter(paa -> paa.getQuality() >= minQuality && paa.getProductID().equals(stat.getProductId()))
                 .sorted((o1, o2) -> (o1.getCost() / o1.getQuality() > o2.getCost() / o2.getQuality()) ? 1 : -1)
-                .map(ppa -> new ProductionForRetail(stat, ppa))
-                .sorted((o1, o2) -> o1.getSellPrice() - o1.getCost() > o2.getSellPrice() - o2.getCost() ? -1 : 1)
+                .map(ppa -> {
+                    try {
+                        return new ProductionForRetail(host, realm, stat, ppa);
+                    } catch (Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .filter(o -> o.getIncomeAfterTax() > 0)
+                .sorted(Comparator.comparingDouble(ProductionForRetail::getIncomeAfterTax))
                 .limit(3)
                 .collect(toList());
     }
