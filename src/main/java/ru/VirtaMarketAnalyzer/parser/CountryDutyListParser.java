@@ -116,4 +116,15 @@ final public class CountryDutyListParser {
         }
         throw new IOException("Не найдена цена транспортировки.");
     }
+
+    public static double addDutyAndTransportCost(final String host, final String realm,
+                                                 final String fromCountryId, final String toCountryId,
+                                                 final String fromCityId, final String toCityId,
+                                                 final String productId, final double price
+    ) throws Exception {
+        final double priceWithDuty = CountryDutyListParser.addDuty(host, realm, fromCountryId, toCountryId, productId, price);
+        final double transportCost = Utils.repeatOnErr(() -> CountryDutyListParser.getTransportCost(host, realm, fromCityId, toCityId, productId));
+        return priceWithDuty + transportCost;
+    }
+
 }

@@ -49,7 +49,17 @@ class CountryDutyListParserTest {
         //Двигатель
         final double transportCost1 = CountryDutyListParser.getTransportCost(Wizard.host, "olga", "310400", "331870", "1473");
         final double transportCost2 = CountryDutyListParser.getTransportCost(Wizard.host, "olga", "331870", "310400", "1473");
-        assertEquals(29, transportCost1);
+        assertEquals(24.6, transportCost1);
         assertEquals(transportCost1, transportCost2);
+    }
+
+    @Test
+    void addDutyAndTransportCostTest() throws Exception {
+        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
+        //Нукус (Узбекистан) -> Великие Луки (Россия, Северо-Запад)
+        //Двигатель
+        final double price = 900.0;
+        final double dutyAndTransportCost = CountryDutyListParser.addDutyAndTransportCost(Wizard.host, "olga", "310392", "310392", "310400", "331870", "1473", price);
+        assertEquals(981 + 24.6, dutyAndTransportCost);
     }
 }
