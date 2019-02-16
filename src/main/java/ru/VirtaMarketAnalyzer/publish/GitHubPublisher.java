@@ -1,6 +1,5 @@
 package ru.VirtaMarketAnalyzer.publish;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.BasicConfigurator;
@@ -16,7 +15,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.MergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.transport.CredentialsProvider;
@@ -27,7 +25,6 @@ import ru.VirtaMarketAnalyzer.data.FileVersion;
 import ru.VirtaMarketAnalyzer.data.RetailAnalytics;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
-import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 
 import java.io.*;
 import java.util.*;

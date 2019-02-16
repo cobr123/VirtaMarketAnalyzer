@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.ProductRemain;
 import ru.VirtaMarketAnalyzer.main.Utils;
-import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;

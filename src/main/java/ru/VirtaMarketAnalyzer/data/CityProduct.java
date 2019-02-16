@@ -4,11 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.parser.CityParser;
-import ru.VirtaMarketAnalyzer.scrapper.Downloader;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by cobr123 on 27.06.2015.

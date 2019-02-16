@@ -2,8 +2,6 @@ package ru.VirtaMarketAnalyzer.data;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
 /**
  * Created by cobr123 on 22.06.2017.
  * Тарифы на электроэнергию

@@ -1,10 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -13,11 +8,9 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.City;
 import ru.VirtaMarketAnalyzer.data.CityElectricityTariff;
 import ru.VirtaMarketAnalyzer.main.Utils;
-import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
