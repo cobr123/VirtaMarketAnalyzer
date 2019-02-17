@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TradeGuideParserTest {
 
     @Test
-    void collectByTradeAtCitiesTest() throws Exception {
+    void genTradeGuideTest() throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "olga";
         final List<ProductCategory> productCategories = ProductInitParser.getTradeProductCategories(Wizard.host, realm);
