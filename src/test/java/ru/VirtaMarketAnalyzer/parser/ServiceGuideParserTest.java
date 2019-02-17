@@ -33,6 +33,7 @@ public class ServiceGuideParserTest {
         final ServiceGuide serviceGuide = serviceGuides.get(0);
         logger.info(Utils.getPrettyGson(serviceGuide));
         logger.info("https://virtonomica.ru/{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", realm, serviceGuide.getGeo(), unitTypes.get(0).getId());
+        logger.info(Utils.getPrettyGson(serviceGuides.stream().filter(a -> a.getServiceSpecId().equals("359933")).findFirst().get()));
         logger.info("size = {}", serviceGuides.size());
     }
 }
