@@ -134,7 +134,7 @@ public final class Wizard {
         } else if ("vera".equalsIgnoreCase(realm) && todayIs(Calendar.THURSDAY)) {
         } else if ("lien".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
         } else if ("nika".equalsIgnoreCase(realm) && todayIs(Calendar.FRIDAY)) {
-        } else if ("olga".equalsIgnoreCase(realm) && todayIs(Calendar.SATURDAY)) {
+        } else if ("olga".equalsIgnoreCase(realm) && todayIs(Calendar.SUNDAY)) {
         } else if ("fast".equalsIgnoreCase(realm)) {
         } else {
             return false;
