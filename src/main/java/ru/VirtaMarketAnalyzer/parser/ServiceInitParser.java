@@ -18,12 +18,23 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Created by cobr123 on 25.02.16.
  */
 public final class ServiceInitParser {
     private static final Logger logger = LoggerFactory.getLogger(ServiceInitParser.class);
+
+
+    public static UnitType getServiceUnitType(final String host, final String realm, final String id) throws IOException {
+        final Optional<UnitType> opt = getServiceUnitTypes(host, realm).stream()
+                .filter(v -> v.getId().equals(id)).findFirst();
+        if (!opt.isPresent()) {
+            throw new IllegalArgumentException("Не найден сервис с id '" + id + "'");
+        }
+        return opt.get();
+    }
 
     public static List<UnitType> getServiceUnitTypes(final String host, final String realm) throws IOException {
         final String lang = (Wizard.host.equals(host) ? "ru" : "en");
