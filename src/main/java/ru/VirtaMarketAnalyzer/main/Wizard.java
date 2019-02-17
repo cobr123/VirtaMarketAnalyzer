@@ -261,7 +261,7 @@ public final class Wizard {
         logger.info("генерируем гид по сервисам, {}", realm);
         for (int i = 0; i < unitTypes.size(); i++) {
             final UnitType unitType = unitTypes.get(i);
-            logger.info("{} / {}, {}", i + 1, productCategories.size(), unitType.getCaption());
+            logger.info("{} / {}, {}", i + 1, unitTypes.size(), unitType.getCaption());
             final List<ServiceGuide> serviceGuides = ServiceGuideParser.genServiceGuide(host, realm, unitType);
             Utils.writeToGsonZip(serviceGuideBaseDir + by_service_id + File.separator + unitType.getId() + ".json", serviceGuides);
         }
