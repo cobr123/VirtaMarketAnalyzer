@@ -5,17 +5,13 @@ import com.google.gson.reflect.TypeToken;
 import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.VirtaMarketAnalyzer.data.Product;
-import ru.VirtaMarketAnalyzer.data.ProductCategory;
+import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -102,4 +98,16 @@ public final class ProductInitParser {
                 .collect(Collectors.toList());
     }
 
+    public static List<Product> getServiceProducts(final String host, final String realm, final UnitType serviceType) throws IOException {
+        final Set<String> set = serviceType.getSpecializations().stream()
+                .map(UnitTypeSpec::getRawMaterials)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .map(RawMaterial::getId)
+                .collect(Collectors.toSet());
+
+        return getManufactureProducts(host, realm).stream()
+                .filter(p -> set.contains(p.getId()))
+                .collect(Collectors.toList());
+    }
 }
