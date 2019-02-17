@@ -36,7 +36,9 @@ public final class Wizard {
     public static final String retail_trends = "retail_trends";
     public static final String product_remains_trends = "product_remains_trends";
     public static final String trade_guide = "trade_guide";
+    public static final String service_guide = "service_guide";
     public static final String by_product_category_id = "by_product_category_id";
+    public static final String by_service_id = "by_service_id";
     public static final String CITY_ELECTRICITY_TARIFF = "city_electricity_tariff";
     public static final List<String> realms = Arrays.asList("nika", "lien", "mary", "anna", "fast", "olga", "vera");
 
@@ -144,6 +146,7 @@ public final class Wizard {
         final String baseDir = Utils.getDir() + by_trade_at_cities + File.separator + realm + File.separator;
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
         final String tradeGuideBaseDir = Utils.getDir() + trade_guide + File.separator + realm + File.separator;
+        final String serviceGuideBaseDir = Utils.getDir() + service_guide + File.separator + realm + File.separator;
 
         final File baseDirFile = new File(baseDir);
         if (baseDirFile.exists()) {
@@ -255,6 +258,13 @@ public final class Wizard {
             final List<TradeGuide> tradeGuides = TradeGuideParser.genTradeGuide(host, realm, productCategory);
             Utils.writeToGsonZip(tradeGuideBaseDir + by_product_category_id + File.separator + productCategory.getId() + ".json", tradeGuides);
         }
+        logger.info("генерируем гид по сервисам, {}", realm);
+        for (int i = 0; i < unitTypes.size(); i++) {
+            final UnitType unitType = unitTypes.get(i);
+            logger.info("{} / {}, {}", i + 1, productCategories.size(), unitType.getCaption());
+            final List<ServiceGuide> serviceGuides = ServiceGuideParser.genServiceGuide(host, realm, unitType);
+            Utils.writeToGsonZip(serviceGuideBaseDir + by_service_id + File.separator + unitType.getId() + ".json", serviceGuides);
+        }
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
@@ -263,6 +273,7 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(tradeGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+        Utils.writeToGson(serviceGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
 
