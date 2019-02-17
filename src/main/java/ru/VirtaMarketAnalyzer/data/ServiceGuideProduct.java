@@ -10,6 +10,8 @@ import java.util.List;
 final public class ServiceGuideProduct {
     @SerializedName("pi")
     final private String productId;
+    @SerializedName("qps")
+    final private double quantityPerSell;
     @SerializedName("q")
     final private double quality;
     @SerializedName("bp")
@@ -18,26 +20,24 @@ final public class ServiceGuideProduct {
     final private double sellPrice;
     @SerializedName("v")
     final private long volume;
-    @SerializedName("iat")
-    final private double incomeAfterTax;
     @SerializedName("sui")
     final private List<String> suppliersUnitIds;
 
     public ServiceGuideProduct(
             final String productId,
+            final double quantityPerSell,
             final double quality,
             final double buyPrice,
             final double sellPrice,
             final long volume,
-            final double incomeAfterTax,
             final List<String> suppliersUnitIds
     ) {
         this.productId = productId;
+        this.quantityPerSell = quantityPerSell;
         this.quality = quality;
         this.buyPrice = buyPrice;
         this.sellPrice = sellPrice;
         this.volume = volume;
-        this.incomeAfterTax = incomeAfterTax;
         this.suppliersUnitIds = suppliersUnitIds;
     }
 
@@ -61,11 +61,11 @@ final public class ServiceGuideProduct {
         return volume;
     }
 
-    public double getIncomeAfterTax() {
-        return incomeAfterTax;
-    }
-
     public List<String> getSuppliersUnitIds() {
         return suppliersUnitIds;
+    }
+
+    public double getQuantityPerSell() {
+        return quantityPerSell;
     }
 }
