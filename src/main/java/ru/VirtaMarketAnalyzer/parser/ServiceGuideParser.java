@@ -62,14 +62,14 @@ final public class ServiceGuideParser {
 
             for (final RawMaterial rawMaterial : unitTypeSpec.getRawMaterials()) {
                 serviceGuideProducts.add(genServiceGuideProduct(
-                        host, realm, rawMaterial.getId(),
+                        host, realm, rawMaterial,
                         stat, stat.getRetailBySpec().get(unitTypeSpec.getCaption()).get(rawMaterial.getId()),
                         productRemains.getOrDefault(rawMaterial.getId(), new ArrayList<>())
                 ));
             }
-            final boolean positiveExists = serviceGuideProducts.stream().anyMatch(i -> i.getIncomeAfterTax() > 0);
-            if (positiveExists) {
-                serviceGuides.add(new ServiceGuide(unitTypeSpec.getId(), city, serviceGuideProducts));
+            final ServiceGuide serviceGuide = new ServiceGuide(host, realm, unitTypeSpec.getId(), city, serviceGuideProducts, Math.round(stat.getVolume() * 0.1));
+            if (serviceGuide.getIncomeAfterTaxSum() > 0) {
+                serviceGuides.add(serviceGuide);
             }
         }
         return serviceGuides;
@@ -82,7 +82,7 @@ final public class ServiceGuideParser {
     public static ServiceGuideProduct genServiceGuideProduct(
             final String host,
             final String realm,
-            final String productId,
+            final RawMaterial rawMaterial,
             final ServiceAtCity stat,
             final ServiceSpecRetail serviceSpecRetail,
             final List<ProductRemain> productRemains
@@ -92,7 +92,7 @@ final public class ServiceGuideParser {
                 .filter(pr -> pr.getRemainByMaxOrderType() > 0 && pr.getQuality() >= serviceSpecRetail.getLocalQuality())
                 .sorted(Comparator.comparingDouble(o -> o.getPrice() / o.getQuality()))
                 .collect(Collectors.toList());
-        final long maxVolume = Math.round(stat.getVolume() * 0.1);
+        final long maxVolume = Math.round(stat.getVolume() * 0.1 * rawMaterial.getQuantity());
         double quality = 0;
         double buyPrice = 0;
         long volume = 0;
@@ -116,12 +116,7 @@ final public class ServiceGuideParser {
         } else if (quality - 10.0 > serviceSpecRetail.getLocalQuality()) {
             sellPrice = Utils.round2(serviceSpecRetail.getLocalPrice() * 1.5);
         }
-        double incomeAfterTax = Utils.round2(volume * (sellPrice - buyPrice));
-        if (sellPrice > buyPrice) {
-            final Region region = CityInitParser.getRegion(host, realm, stat.getRegionId());
-            incomeAfterTax = Utils.round2(incomeAfterTax * (1.0 - region.getIncomeTaxRate() / 100.0));
-        }
-        return new ServiceGuideProduct(productId, quality, buyPrice, sellPrice, volume, incomeAfterTax, suppliersUnitIds);
+        return new ServiceGuideProduct(rawMaterial.getId(), rawMaterial.getQuantity(), quality, buyPrice, sellPrice, volume, suppliersUnitIds);
     }
 
     private static double merge(double quality1, double volume1, double quality2, double volume2) {
