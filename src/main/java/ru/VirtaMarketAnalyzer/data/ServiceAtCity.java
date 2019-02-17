@@ -107,4 +107,16 @@ public final class ServiceAtCity {
     public double getIncomeTaxRate() {
         return incomeTaxRate;
     }
+
+    public Map<String, Map<String, ServiceSpecRetail>> getRetailBySpec() {
+        return retailBySpec;
+    }
+
+    public Map<String, ServiceSpecRetail> getRetailCalcBySpec() {
+        return retailCalcBySpec;
+    }
+
+    public double getAreaRent() {
+        return areaRent;
+    }
 }
