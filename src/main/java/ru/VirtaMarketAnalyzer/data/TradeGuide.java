@@ -39,4 +39,8 @@ final public class TradeGuide {
     public List<TradeGuideProduct> getTradeGuideProduct() {
         return tradeGuideProduct;
     }
+
+    public String getGeo() {
+        return getCountryId() + "/" + getRegionId() + "/" + getTownId();
+    }
 }
