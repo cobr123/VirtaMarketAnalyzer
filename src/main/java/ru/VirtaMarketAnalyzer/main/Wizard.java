@@ -258,22 +258,24 @@ public final class Wizard {
             final List<TradeGuide> tradeGuides = TradeGuideParser.genTradeGuide(host, realm, productCategory);
             Utils.writeToGsonZip(tradeGuideBaseDir + by_product_category_id + File.separator + productCategory.getId() + ".json", tradeGuides);
         }
-        logger.info("генерируем гид по сервисам, {}", realm);
-        for (int i = 0; i < unitTypes.size(); i++) {
-            final UnitType unitType = unitTypes.get(i);
-            logger.info("{} / {}, {}", i + 1, unitTypes.size(), unitType.getCaption());
-            final List<ServiceGuide> serviceGuides = ServiceGuideParser.genServiceGuide(host, realm, unitType);
-            Utils.writeToGsonZip(serviceGuideBaseDir + by_service_id + File.separator + unitType.getId() + ".json", serviceGuides);
+        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+        if (!"fast".equalsIgnoreCase(realm)) {
+            logger.info("генерируем гид по сервисам, {}", realm);
+            for (int i = 0; i < unitTypes.size(); i++) {
+                final UnitType unitType = unitTypes.get(i);
+                logger.info("{} / {}, {}", i + 1, unitTypes.size(), unitType.getCaption());
+                final List<ServiceGuide> serviceGuides = ServiceGuideParser.genServiceGuide(host, realm, unitType);
+                Utils.writeToGsonZip(serviceGuideBaseDir + by_service_id + File.separator + unitType.getId() + ".json", serviceGuides);
+            }
+            Utils.writeToGson(serviceGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         }
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
         logger.info("запоминаем дату обновления данных");
-        final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(tradeGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
-        Utils.writeToGson(serviceGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
 
