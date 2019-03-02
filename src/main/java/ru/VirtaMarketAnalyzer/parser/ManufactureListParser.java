@@ -16,6 +16,7 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by cobr123 on 18.05.2015.
@@ -28,6 +29,15 @@ final public class ManufactureListParser {
 
         logger.info(Utils.getPrettyGson(getManufactures(Wizard.host, "olga")));
 //        logger.info(Utils.getPrettyGson(getManufactureSizes(Wizard.host, "olga", "380079")));
+    }
+
+    public static Manufacture getManufacture(final String host, final String realm, final String id) throws IOException {
+        final Optional<Manufacture> opt = getManufactures(host, realm).stream()
+                .filter(v -> v.getId().equals(id)).findFirst();
+        if (!opt.isPresent()) {
+            throw new IllegalArgumentException("Не найдено производство с id '" + id + "'");
+        }
+        return opt.get();
     }
 
     public static List<Manufacture> getManufactures(final String host, final String realm) throws IOException {
