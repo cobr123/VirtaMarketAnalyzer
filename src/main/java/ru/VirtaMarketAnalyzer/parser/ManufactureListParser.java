@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
@@ -10,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Manufacture;
 import ru.VirtaMarketAnalyzer.data.ManufactureSize;
 import ru.VirtaMarketAnalyzer.main.Utils;
-import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
@@ -23,13 +19,6 @@ import java.util.Optional;
  */
 final public class ManufactureListParser {
     private static final Logger logger = LoggerFactory.getLogger(ManufactureListParser.class);
-
-    public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
-
-        logger.info(Utils.getPrettyGson(getManufactures(Wizard.host, "olga")));
-//        logger.info(Utils.getPrettyGson(getManufactureSizes(Wizard.host, "olga", "380079")));
-    }
 
     public static Manufacture getManufacture(final String host, final String realm, final String id) throws IOException {
         final Optional<Manufacture> opt = getManufactures(host, realm).stream()
