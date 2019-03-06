@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.scrapper;
 
+import com.google.common.util.concurrent.RateLimiter;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -106,6 +107,8 @@ public final class Downloader {
         return getDoc(url, referrer, 99, false);
     }
 
+    private static final RateLimiter rateLimiter = RateLimiter.create(10.0);
+
     public static Document getDoc(final String url, final String referrer, final int maxTriesCnt, final boolean isJsonContentType) throws IOException {
         final String clearedUrl = getClearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ((isJsonContentType) ? ".json" : ".html");
@@ -118,6 +121,7 @@ public final class Downloader {
 
             for (int tries = 1; tries <= maxTriesCnt; ++tries) {
                 try {
+                    rateLimiter.acquire();
                     final Connection conn = Jsoup.connect(url);
                     if (referrer != null && !referrer.isEmpty()) {
                         logger.trace("referrer: {}", referrer);

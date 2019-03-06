@@ -88,16 +88,11 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
-        <!--<dependency> &lt;!&ndash; Spark dependency &ndash;&gt;-->
-            <!--<groupId>org.apache.spark</groupId>-->
-            <!--<artifactId>spark-core_2.11</artifactId>-->
-            <!--<version>2.1.0</version>-->
-        <!--</dependency>-->
-        <!--<dependency> &lt;!&ndash; Spark dependency &ndash;&gt;-->
-            <!--<groupId>org.apache.spark</groupId>-->
-            <!--<artifactId>spark-mllib_2.11</artifactId>-->
-            <!--<version>2.1.0</version>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.0.1-jre</version>
+        </dependency>
     </dependencies>
 
     <build>

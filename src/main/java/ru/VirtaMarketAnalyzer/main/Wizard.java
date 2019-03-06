@@ -214,16 +214,6 @@ public final class Wizard {
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-        logger.info("греем кэш данных продаж товаров в городах: {}", realm);
-        products.parallelStream()
-                .forEach(product -> {
-                    try {
-                        final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product);
-                        TopRetailParser.getShopList(host, realm, stats, product);
-                    } catch (final Exception e) {
-                        logger.error(e.getLocalizedMessage(), e);
-                    }
-                });
         for (int i = 0; i < products.size(); i++) {
             logger.info("{} / {} собираем данные продаж товаров в городах", i + 1, products.size());
             final Product product = products.get(i);
