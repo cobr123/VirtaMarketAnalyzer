@@ -1,16 +1,17 @@
 package ru.VirtaMarketAnalyzer.main;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
-import ru.VirtaMarketAnalyzer.ml.PrepareAnalitics;
-import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
 import ru.VirtaMarketAnalyzer.parser.*;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
+import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.File;
 import java.io.IOException;
@@ -214,20 +215,24 @@ public final class Wizard {
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
+        logger.info("идеальное время выполнения (все города для розницы одного продукта): {} секунд, итого: {}", cities.size() / Downloader.permitsPerSecond, DurationFormatUtils.formatDurationHMS(Math.round(cities.size() / Downloader.permitsPerSecond * products.size())));
         for (int i = 0; i < products.size(); i++) {
-            logger.info("{} / {} собираем данные продаж товаров в городах", i + 1, products.size());
+            final StopWatch watch = new StopWatch();
+            watch.start();
             final Product product = products.get(i);
+            logger.info("{} / {} собираем данные продаж товаров в городах, {}", i + 1, products.size(), product.getCaption());
             logger.info("{}{}/main/globalreport/marketing?product_id={}#by-trade-at-cities", host, realm, product.getId());
             final List<TradeAtCity> stats = CityParser.collectByTradeAtCities(host, realm, cities, product);
             Utils.writeToGson(baseDir + "tradeAtCity_" + product.getId() + ".json", stats);
-
-            logger.info("собираем данные из магазинов");
-            final List<Shop> shops = TopRetailParser.getShopList(host, realm, stats, product);
-            logger.info("shops.size() = {}", shops.size());
-            logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
-            final List<RetailAnalytics> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, product, cities);
-            logger.info("retailAnalytics.size() = {}", retailAnalytics.size());
-            Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + product.getId() + ".json", retailAnalytics);
+            watch.stop();
+            logger.info("время выполнения: {}", watch.toString());
+//            logger.info("собираем данные из магазинов");
+//            final List<Shop> shops = TopRetailParser.getShopList(host, realm, stats, product);
+//            logger.info("shops.size() = {}", shops.size());
+//            logger.info("группируем данные из магазинов по товарам и сохраняем с дополнительной аналитикой");
+//            final List<RetailAnalytics> retailAnalytics = PrepareAnalitics.getRetailAnalitincsByProducts(shops, stats, product, cities);
+//            logger.info("retailAnalytics.size() = {}", retailAnalytics.size());
+//            Utils.writeToGsonZip(baseDir + RetailSalePrediction.RETAIL_ANALYTICS_ + product.getId() + ".json", retailAnalytics);
         }
         logger.info("группируем данные о сервисах по городам");
         for (final UnitType ut : unitTypes) {

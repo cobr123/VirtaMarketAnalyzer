@@ -81,20 +81,16 @@ public final class CityParser {
         builder.setEducationIndex(city.getEducationIndex());
         builder.setAverageSalary(city.getAverageSalary());
 
-        final List<CountryDutyList> countriesDutyList = CountryDutyListParser.getCountryDutyList(host, realm, city.getCountryId());
-        final Optional<CountryDutyList> importTaxPercent = countriesDutyList.stream().filter(cdl -> cdl.getProductId().equals(product.getId())).findFirst();
+        final CountryDutyList importTaxPercent = CountryDutyListParser.getCountryDuty(host, realm, city.getCountryId(), product.getId());
+        builder.setImportTaxPercent(importTaxPercent.getImportTaxPercent());
 
-        if (!importTaxPercent.isPresent()) {
-            throw new Exception("Не найдены таможенные пошлины для продукта '" + product.getCaption() + "', id = '" + product.getId() + "', " + host + realm + "/main/geo/countrydutylist/" + city.getCountryId());
-        }
-        builder.setImportTaxPercent(importTaxPercent.get().getImportTaxPercent());
         final Region region = CityInitParser.getRegion(host, realm, city.getRegionId());
         final double incomeTaxRate = region.getIncomeTaxRate();
         builder.setIncomeTaxRate(incomeTaxRate);
 
         addMetrics(host, realm, city, product, builder);
         addLocalShare(host, realm, city, product, builder);
-        addMajorSellInCity(host, realm, city, product, builder);
+//        addMajorSellInCity(host, realm, city, product, builder);
 
         return builder;
     }
