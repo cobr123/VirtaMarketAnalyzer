@@ -217,7 +217,7 @@ public final class Wizard {
         for (final Map.Entry<String, List<CountryDutyList>> entry : countriesDutyList.entrySet()) {
             Utils.writeToGson(baseDir + countrydutylist + File.separator + entry.getKey() + ".json", entry.getValue());
         }
-        logger.info("идеальное время выполнения (все города для розницы одного продукта): {} секунд, итого: {}", cities.size() / Downloader.permitsPerSecond, DurationFormatUtils.formatDurationHMS(Math.round(cities.size() / Downloader.permitsPerSecond * products.size())));
+        logger.info("идеальное время выполнения (все города для розницы одного продукта): {} секунд, итого: {}", cities.size() / Downloader.permitsPerSecond, DurationFormatUtils.formatDurationHMS(Math.round(cities.size() / Downloader.permitsPerSecond * products.size() * 1000.0)));
         for (int i = 0; i < products.size(); i++) {
             final StopWatch watch = new StopWatch();
             watch.start();
