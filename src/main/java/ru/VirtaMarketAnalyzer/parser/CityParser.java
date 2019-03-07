@@ -89,7 +89,6 @@ public final class CityParser {
         builder.setIncomeTaxRate(incomeTaxRate);
 
         addMetrics(host, realm, city, product, builder);
-        addLocalShare(host, realm, city, product, builder);
 //        addMajorSellInCity(host, realm, city, product, builder);
 
         return builder;
@@ -150,43 +149,13 @@ public final class CityParser {
         }
     }
 
-    private static void addLocalShare(final String host,
-                                      final String realm,
-                                      final City city,
-                                      final Product product,
-                                      final TradeAtCityBuilder builder
-    ) throws IOException {
-        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String url = host + "api/" + realm + "/main/marketing/report/retail/shares?lang=" + lang + "&product_id=" + product.getId() + "&geo=" + city.getGeo();
-
-        try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
-            final Gson gson = new Gson();
-            final Type mapType = new TypeToken<List<Map<String, Object>>>() {
-            }.getType();
-            final List<Map<String, Object>> listOfMapOfMetrics = gson.fromJson(json, mapType);
-
-            builder.setLocalPercent(0);
-            for (final Map<String, Object> mapOfMetrics : listOfMapOfMetrics) {
-                if (mapOfMetrics.get("company_id").toString().equals("-1")) {
-                    builder.setLocalPercent(Utils.toDouble(mapOfMetrics.get("market_size").toString()));
-                }
-            }
-        } catch (final Exception e) {
-            logger.error(url + "&format=debug");
-            throw e;
-        }
-    }
-
     private static void addMetrics(final String host,
                                    final String realm,
                                    final City city,
                                    final Product product,
                                    final TradeAtCityBuilder builder
     ) throws IOException {
-        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String url = host + "api/" + realm + "/main/marketing/report/retail/metrics?lang=" + lang + "&product_id=" + product.getId() + "&geo=" + city.getGeo();
+        final String url = host + "api/" + realm + "/main/marketing/report/retail/metrics?shares=1&product_id=" + product.getId() + "&geo=" + city.getGeo();
 
         try {
             final Document doc = Downloader.getDoc(url, true);
@@ -237,6 +206,14 @@ public final class CityParser {
                     break;
             }
             builder.setMarketIdx(marketIdx);
+
+            final List<Map<String, Object>> listOfMapOfShares = (List<Map<String, Object>>) mapOfMetrics.get("shares");
+            builder.setLocalPercent(0);
+            for (final Map<String, Object> mapOfShares : listOfMapOfShares) {
+                if (mapOfShares.get("company_id").toString().equals("-1")) {
+                    builder.setLocalPercent(Utils.toDouble(mapOfShares.get("market_size").toString()));
+                }
+            }
         } catch (final Exception e) {
             logger.error(url + "&format=debug");
             throw e;
