@@ -1,7 +1,7 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import com.google.gson.GsonBuilder;
-import org.apache.commons.io.FileUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -15,9 +15,8 @@ import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -195,12 +194,13 @@ final public class TechMarketAskParser {
 
     public static List<TechLvl> getTech(final String host, final String realm, final String unit_type_id) throws IOException {
         final String url = host + "api/" + realm + "/main/unittype/technologies?app=virtonomica&format=json&ajax=1&id=" + unit_type_id + "&wrap=0";
-        final String fileToSave = Utils.getDir() + Downloader.getClearedUrl(host + "api/" + realm + "/main/technology/report/unittype/", null) + unit_type_id + ".json";
-        //logger.info(fileToSave);
-        FileUtils.copyURLToFile(new URL(url), new File(fileToSave));
-
         try {
-            final TechReport[] arr = new GsonBuilder().create().fromJson(Utils.readFile(fileToSave), TechReport[].class);
+            final Document doc = Downloader.getDoc(url, true);
+            final String json = doc.body().text();
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<TechReport[]>() {
+            }.getType();
+            final TechReport[] arr = gson.fromJson(json, mapType);
 
             return Stream.of(arr)
                     .map(row -> new TechLvl(row.getUnitTypeID(), row.getLevel(), row.getPrice()))
