@@ -107,7 +107,9 @@ public final class Downloader {
         return getDoc(url, referrer, 99, false);
     }
 
-    private static final RateLimiter rateLimiter = RateLimiter.create(10.0);
+    public static final double permitsPerSecond = 10.0;
+
+    private static final RateLimiter rateLimiter = RateLimiter.create(permitsPerSecond);
 
     public static Document getDoc(final String url, final String referrer, final int maxTriesCnt, final boolean isJsonContentType) throws IOException {
         final String clearedUrl = getClearedUrl(url, referrer);
