@@ -102,7 +102,9 @@ public final class Wizard {
         try {
             final URL imgFullUrl = new URL(host + imgUrl);
             final File imgFile = new File(Utils.getDir() + imgUrl.replace("/", File.separator));
-            FileUtils.copyURLToFile(imgFullUrl, imgFile);
+            if (!imgFile.exists()) {
+                FileUtils.copyURLToFile(imgFullUrl, imgFile);
+            }
         } catch (final Exception e) {
             logger.error(e.getLocalizedMessage(), e);
         }
