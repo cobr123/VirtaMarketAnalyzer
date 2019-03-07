@@ -56,9 +56,9 @@ final public class CountryDutyListParser {
             for (final String productId : dataMap.keySet()) {
                 final Map<String, Object> city = (Map<String, Object>) dataMap.get(productId);
 
-                final int exportTaxPercent = Utils.toInt(city.get("export").toString());
-                final int importTaxPercent = Utils.toInt(city.get("import").toString());
-                final double indicativePrice = Utils.toDouble(city.get("min_cost").toString());
+                final int exportTaxPercent = Integer.valueOf(city.get("export").toString());
+                final int importTaxPercent = Integer.valueOf(city.get("import").toString());
+                final double indicativePrice = Double.valueOf(city.get("min_cost").toString());
 
                 list.add(new CountryDutyList(countryId, productId, exportTaxPercent, importTaxPercent, indicativePrice));
             }
@@ -93,8 +93,21 @@ final public class CountryDutyListParser {
     }
 
     public static double getTransportCost(final String host, final String realm, final String fromCityId, final String toCityId, final String productId) throws IOException {
+        if (fromCityId.compareTo(toCityId) < 0) {
+            return getTransportCostImpl(host, realm, fromCityId, toCityId, productId);
+        } else {
+            return getTransportCostImpl(host, realm, toCityId, fromCityId, productId);
+        }
+    }
+
+    private static double getTransportCostImpl(final String host, final String realm, final String fromCityId, final String toCityId, final String productId) throws IOException {
+        return getTransportCostImpl(host, realm, fromCityId, toCityId, productId, 1);
+    }
+
+    private static double getTransportCostImpl(final String host, final String realm, final String fromCityId, final String toCityId, final String productId, final int page) throws IOException {
 //        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
-        final String url = host + "api/" + realm + "/main/geo/transport?city_id=" + fromCityId + "&product_id=" + productId + "&geo=0/0/" + toCityId;
+        final int pageSize = 10_000;
+        final String url = host + "api/" + realm + "/main/geo/transport?city_id=" + fromCityId + "&product_id=" + productId + "&pagesize=" + pageSize + "&pagenum=" + page;
 
         try {
             final Document doc = Downloader.getDoc(url, true);
@@ -103,11 +116,18 @@ final public class CountryDutyListParser {
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();
             final Map<String, Map<String, Object>> infoAndDataMap = gson.fromJson(json, mapType);
+            final Map<String, Object> infoMap = infoAndDataMap.get("info");
             final Map<String, Object> dataMap = infoAndDataMap.get("data");
 
             for (final String idx : dataMap.keySet()) {
                 final Map<String, Object> data = (Map<String, Object>) dataMap.get(idx);
-                return Utils.toDouble(data.get("transport_cost").toString());
+                if (data.get("city_id").toString().equals(toCityId)) {
+                    return Double.valueOf(data.get("transport_cost").toString());
+                }
+            }
+            final int count = Integer.valueOf(infoMap.get("count").toString());
+            if (count > pageSize * page) {
+                return getTransportCostImpl(host, realm, fromCityId, toCityId, productId, page + 1);
             }
         } catch (final Exception e) {
             Downloader.invalidateCache(url);
