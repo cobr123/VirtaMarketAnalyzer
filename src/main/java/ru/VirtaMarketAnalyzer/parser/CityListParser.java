@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 25.04.2015.
@@ -58,12 +59,9 @@ public final class CityListParser {
                 final String educationIndex = city.get("education").toString();
                 final String averageSalary = city.get("salary").toString();
                 final String population = city.get("population").toString();
-                int demography = 0;
-                if (withDemography) {
-                    demography = Utils.repeatOnErr(() -> CityListParser.getDemography(host, realm, city_id));
-                }
+                final int demography = 0;
                 final List<String> mayoralBonuses = new ArrayList<>();
-                final int retail_count = Utils.toInt(city.get("retail_count").toString());
+                final int retail_count = Integer.valueOf(city.get("retail_count").toString());
                 if (retail_count > 0) {
                     final Map<String, Object> mapOfCat = (Map<String, Object>) city.get("retails");
                     for (final String category_id : mapOfCat.keySet()) {
@@ -73,11 +71,11 @@ public final class CityListParser {
                 }
 
                 list.add(new City(country_id, region_id, id, caption
-                        , Utils.toDouble(wealthIndex)
-                        , Utils.toDouble(educationIndex)
-                        , Utils.toDouble(averageSalary)
+                        , Double.valueOf(wealthIndex)
+                        , Double.valueOf(educationIndex)
+                        , Double.valueOf(averageSalary)
                         , demography
-                        , Utils.toInt(population)
+                        , Integer.valueOf(population)
                         , mayoralBonuses
                 ));
             }
@@ -85,7 +83,22 @@ public final class CityListParser {
             logger.error(url + "&format=debug");
             throw e;
         }
-        return list;
+        if (withDemography) {
+            return list.parallelStream()
+                    .map(city -> {
+                        try {
+                            final int demography = Utils.repeatOnErr(() -> CityListParser.getDemography(host, realm, city.getId()));
+                            return new City(city, demography);
+                        } catch (final Exception e) {
+                            logger.error(e.getLocalizedMessage(), e);
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        } else {
+            return list;
+        }
     }
 
     public static int getDemography(final String host, final String realm, final String city_id) throws IOException {
@@ -106,7 +119,7 @@ public final class CityListParser {
                 final String real_date = hist.get("real_date").toString();
                 if (real_date.equals(today)) {
                     final String population_real = hist.get("population_real").toString();
-                    demography = Utils.toInt(population_real);
+                    demography = Integer.valueOf(population_real);
                     break;
                 }
             }

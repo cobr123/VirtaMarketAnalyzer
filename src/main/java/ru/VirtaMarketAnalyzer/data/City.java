@@ -48,6 +48,19 @@ public final class City {
         this.mayoralBonuses = mayoralBonuses;
     }
 
+    public City(final City city, final int demography) {
+        this.countryId = city.countryId;
+        this.regionId = city.regionId;
+        this.id = city.id;
+        this.caption = city.caption;
+        this.wealthIndex = city.wealthIndex;
+        this.educationIndex = city.educationIndex;
+        this.averageSalary = city.averageSalary;
+        this.demography = demography;
+        this.population = city.population;
+        this.mayoralBonuses = city.mayoralBonuses;
+    }
+
     public String getRegionId() {
         return regionId;
     }
