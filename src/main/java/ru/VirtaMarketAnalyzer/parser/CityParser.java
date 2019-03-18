@@ -174,10 +174,10 @@ public final class CityParser {
             builder.setShopBrand(Utils.toDouble(mapOfMetrics.get("avg_brand").toString()));
 
             builder.setVolume(Utils.toLong(mapOfMetrics.get("local_market_size").toString()));
-            builder.setSellerCnt(Utils.toInt(mapOfMetrics.get("shop_count").toString()));
+            builder.setSellerCnt(Integer.valueOf(mapOfMetrics.get("shop_count").toString()));
             builder.setCompaniesCnt(Utils.toLong(mapOfMetrics.get("company_count").toString()));
 
-            final int index_min = Utils.toInt(mapOfMetrics.get("index_min").toString());
+            final int index_min = Integer.valueOf(mapOfMetrics.get("index_min").toString());
             String marketIdx = "";
             switch (index_min) {
                 case -1:

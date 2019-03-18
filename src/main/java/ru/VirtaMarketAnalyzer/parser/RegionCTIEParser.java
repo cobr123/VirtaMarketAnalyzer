@@ -53,7 +53,7 @@ final public class RegionCTIEParser {
             for (final String productId : dataMap.keySet()) {
                 final Map<String, Object> city = (Map<String, Object>) dataMap.get(productId);
 
-                final int rate = Utils.toInt(city.get("tax").toString());
+                final int rate = Integer.valueOf(city.get("tax").toString());
 
                 list.add(new RegionCTIE(regionId, productId, rate));
             }

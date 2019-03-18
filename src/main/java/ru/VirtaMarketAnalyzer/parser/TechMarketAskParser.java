@@ -168,7 +168,7 @@ final public class TechMarketAskParser {
                 final Matcher matcher = tech_lvl_pattern.matcher(ask.attr("href"));
                 if (matcher.find()) {
                     final String techID = matcher.group(1);
-                    final int lvl = Utils.toInt(matcher.group(2));
+                    final int lvl = Integer.valueOf(matcher.group(2));
                     return new TechLicenseLvl(techID, lvl);
                 }
                 return null;

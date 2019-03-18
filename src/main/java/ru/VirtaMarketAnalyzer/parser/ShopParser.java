@@ -37,10 +37,10 @@ public final class ShopParser {
             final double marketShare = Utils.round2(majorSellInCity.getSellVolume() / (double) stat.getVolume() * 100.0);
             shopProducts.add(new ShopProduct(product.getId(), (long) majorSellInCity.getSellVolume(), majorSellInCity.getPrice(), majorSellInCity.getQuality(), majorSellInCity.getBrand(), marketShare));
 
-            final int shopSize = Utils.toInt(mapOfMetrics.get("square").toString());
+            final int shopSize = Integer.valueOf(mapOfMetrics.get("square").toString());
             int departmentCount = 1;
             if (mapOfMetrics.get("section_count") != null) {
-                departmentCount = Utils.toInt(mapOfMetrics.get("section_count").toString());
+                departmentCount = Integer.valueOf(mapOfMetrics.get("section_count").toString());
             }
             final double notoriety = Utils.round2(Utils.toDouble(mapOfMetrics.get("fame").toString()) * 100.0);
             final String visitorsCount = mapOfMetrics.get("customers_count").toString();

@@ -90,7 +90,7 @@ public final class ProductRemainParser {
 
                 list.add(new ProductRemain(productId, companyName, unitID, countryId, regionId, cityId, total, remain, quality, price, maxOrderType, maxOrder));
             }
-            final int count = Utils.toInt(infoMap.get("count").toString());
+            final int count = Integer.valueOf(infoMap.get("count").toString());
             if (count > pageSize * page) {
                 list.addAll(getRemains(host, realm, material, page + 1));
             }

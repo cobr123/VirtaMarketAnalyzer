@@ -192,8 +192,8 @@ public final class ServiceAtCityParser {
                 final String turnId = mapOfMetrics.get("turn_id").toString();
                 final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
                 final long sales = Utils.toLong(mapOfMetrics.get("sales").toString());
-                final int unitCount = Utils.toInt(mapOfMetrics.get("unit_count").toString());
-                final int companyCount = Utils.toInt(mapOfMetrics.get("company_count").toString());
+                final int unitCount = Integer.valueOf(mapOfMetrics.get("unit_count").toString());
+                final int companyCount = Integer.valueOf(mapOfMetrics.get("company_count").toString());
                 final double revenuePerRetail = Utils.toDouble(mapOfMetrics.get("revenue_per_retail").toString());
 
                 return new ServiceMetrics(turnId, price, sales, unitCount, companyCount, revenuePerRetail, name, symbol, specialization);
