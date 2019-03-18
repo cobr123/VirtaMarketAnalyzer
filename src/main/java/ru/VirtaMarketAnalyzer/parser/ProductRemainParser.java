@@ -71,11 +71,11 @@ public final class ProductRemainParser {
                 final String unitID = city.get("unit_id").toString();
                 long total = 0;
                 if (city.get("quantity") != null) {
-                    total = Utils.toLong(city.get("quantity").toString());
+                    total = Long.valueOf(city.get("quantity").toString());
                 }
                 long remain = 0;
                 if (city.get("free_for_buy") != null) {
-                    remain = Utils.toLong(city.get("free_for_buy").toString());
+                    remain = Long.valueOf(city.get("free_for_buy").toString());
                 }
                 final double quality = Double.valueOf(city.get("quality").toString());
                 double price = 0;
@@ -84,7 +84,7 @@ public final class ProductRemainParser {
                 }
                 long maxOrder = 0;
                 if (city.get("max_qty") != null) {
-                    maxOrder = Utils.toLong(city.get("max_qty").toString());
+                    maxOrder = Long.valueOf(city.get("max_qty").toString());
                 }
                 final ProductRemain.MaxOrderType maxOrderType = (maxOrder > 0) ? ProductRemain.MaxOrderType.L : ProductRemain.MaxOrderType.U;
 

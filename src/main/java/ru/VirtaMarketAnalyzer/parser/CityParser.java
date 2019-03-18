@@ -121,7 +121,7 @@ public final class CityParser {
                     cityDistrict = mapOfMetrics.get("district_name").toString();
                 }
                 final String unitId = mapOfMetrics.get("unit_id").toString();
-                final long shopSize = Utils.toLong(mapOfMetrics.get("shop_size").toString());
+                final long shopSize = Long.valueOf(mapOfMetrics.get("shop_size").toString());
                 final double sellVolume = Double.valueOf(mapOfMetrics.get("qty").toString());
                 final double price = Double.valueOf(mapOfMetrics.get("price").toString());
                 final double quality = Double.valueOf(mapOfMetrics.get("quality").toString());
@@ -173,9 +173,9 @@ public final class CityParser {
 
             builder.setShopBrand(Double.valueOf(mapOfMetrics.get("avg_brand").toString()));
 
-            builder.setVolume(Utils.toLong(mapOfMetrics.get("local_market_size").toString()));
+            builder.setVolume(Long.valueOf(mapOfMetrics.get("local_market_size").toString()));
             builder.setSellerCnt(Integer.valueOf(mapOfMetrics.get("shop_count").toString()));
-            builder.setCompaniesCnt(Utils.toLong(mapOfMetrics.get("company_count").toString()));
+            builder.setCompaniesCnt(Long.valueOf(mapOfMetrics.get("company_count").toString()));
 
             final int index_min = Integer.valueOf(mapOfMetrics.get("index_min").toString());
             String marketIdx = "";
