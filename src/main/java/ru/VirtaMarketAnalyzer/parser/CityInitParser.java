@@ -52,7 +52,7 @@ public final class CityInitParser {
                 final String country_id = region.get("country_id").toString();
                 final String id = region.get("id").toString();
                 final String caption = region.get("name").toString();
-                final double incomeTaxRate = Utils.toDouble(region.get("tax").toString());
+                final double incomeTaxRate = Double.valueOf(region.get("tax").toString());
 
                 list.add(new Region(country_id, id, caption, incomeTaxRate));
             }

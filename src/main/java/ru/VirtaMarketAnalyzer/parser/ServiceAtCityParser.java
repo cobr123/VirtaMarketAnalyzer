@@ -190,11 +190,11 @@ public final class ServiceAtCityParser {
                 return new ServiceMetrics("", 0, 0, 0, 0, 0, name, symbol, specialization);
             } else {
                 final String turnId = mapOfMetrics.get("turn_id").toString();
-                final double price = Utils.toDouble(mapOfMetrics.get("price").toString());
+                final double price = Double.valueOf(mapOfMetrics.get("price").toString());
                 final long sales = Utils.toLong(mapOfMetrics.get("sales").toString());
                 final int unitCount = Integer.valueOf(mapOfMetrics.get("unit_count").toString());
                 final int companyCount = Integer.valueOf(mapOfMetrics.get("company_count").toString());
-                final double revenuePerRetail = Utils.toDouble(mapOfMetrics.get("revenue_per_retail").toString());
+                final double revenuePerRetail = Double.valueOf(mapOfMetrics.get("revenue_per_retail").toString());
 
                 return new ServiceMetrics(turnId, price, sales, unitCount, companyCount, revenuePerRetail, name, symbol, specialization);
             }
@@ -220,7 +220,7 @@ public final class ServiceAtCityParser {
                 final Map<String, Object> metrics = mapOfMetrics.get(idx);
 
                 final String caption = metrics.get("name").toString();
-                final double marketPerc = Utils.toDouble(metrics.get("market_size").toString());
+                final double marketPerc = Double.valueOf(metrics.get("market_size").toString());
 
                 percentBySpec.put(caption, marketPerc);
             }

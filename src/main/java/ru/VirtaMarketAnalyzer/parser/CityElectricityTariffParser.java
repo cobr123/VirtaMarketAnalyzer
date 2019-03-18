@@ -92,7 +92,7 @@ final public class CityElectricityTariffParser {
 //
 //                final String productId = country.get("id").toString();
 //                final String productCategory = country.get("industry_name").toString();
-//                final double electricityTariff = Utils.toDouble(country.get("energy_tariff").toString());
+//                final double electricityTariff = Double.valueOf(country.get("energy_tariff").toString());
 //
 //                list.add(new CityElectricityTariff(city.getId(), productCategory, productId, electricityTariff));
 //            }

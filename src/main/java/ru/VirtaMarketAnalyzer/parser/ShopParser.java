@@ -42,7 +42,7 @@ public final class ShopParser {
             if (mapOfMetrics.get("section_count") != null) {
                 departmentCount = Integer.valueOf(mapOfMetrics.get("section_count").toString());
             }
-            final double notoriety = Utils.round2(Utils.toDouble(mapOfMetrics.get("fame").toString()) * 100.0);
+            final double notoriety = Utils.round2(Double.valueOf(mapOfMetrics.get("fame").toString()) * 100.0);
             final String visitorsCount = mapOfMetrics.get("customers_count").toString();
             final String serviceLevel = getServiceLevel(host, realm, majorSellInCity.getUnitId());
 

@@ -77,10 +77,10 @@ public final class ProductRemainParser {
                 if (city.get("free_for_buy") != null) {
                     remain = Utils.toLong(city.get("free_for_buy").toString());
                 }
-                final double quality = Utils.toDouble(city.get("quality").toString());
+                final double quality = Double.valueOf(city.get("quality").toString());
                 double price = 0;
                 if (city.get("price") != null) {
-                    price = Utils.toDouble(city.get("price").toString());
+                    price = Double.valueOf(city.get("price").toString());
                 }
                 long maxOrder = 0;
                 if (city.get("max_qty") != null) {
