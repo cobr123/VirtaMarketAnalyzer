@@ -41,7 +41,7 @@ public final class Wizard {
     public static final String by_product_category_id = "by_product_category_id";
     public static final String by_service_id = "by_service_id";
     public static final String CITY_ELECTRICITY_TARIFF = "city_electricity_tariff";
-    public static final List<String> realms = Arrays.asList("nika", "lien", "mary", "anna", "fast", "olga", "vera");
+    public static final List<String> realms = Arrays.asList("nika", "mary", "anna", "fast", "olga", "vera", "lien");
 
 
     public static void main(String[] args) throws Exception {
