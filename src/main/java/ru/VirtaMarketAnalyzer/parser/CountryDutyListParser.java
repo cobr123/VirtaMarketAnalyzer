@@ -92,7 +92,7 @@ final public class CountryDutyListParser {
         }
     }
 
-    public static double getTransportCost(final String host, final String realm, final String fromCityId, final String toCityId, final String productId) throws IOException {
+    public static double getTransportCost(final String host, final String realm, final String fromCityId, final String toCityId, final String productId) throws Exception {
         if (fromCityId.compareTo(toCityId) < 0) {
             return getTransportCostImpl(host, realm, fromCityId, toCityId, productId);
         } else {
@@ -100,8 +100,8 @@ final public class CountryDutyListParser {
         }
     }
 
-    private static double getTransportCostImpl(final String host, final String realm, final String fromCityId, final String toCityId, final String productId) throws IOException {
-        return getTransportCostImpl(host, realm, fromCityId, toCityId, productId, 1);
+    private static double getTransportCostImpl(final String host, final String realm, final String fromCityId, final String toCityId, final String productId) throws Exception {
+        return Utils.repeatOnErr(() -> getTransportCostImpl(host, realm, fromCityId, toCityId, productId, 1));
     }
 
     private static double getTransportCostImpl(final String host, final String realm, final String fromCityId, final String toCityId, final String productId, final int page) throws IOException {
@@ -143,7 +143,7 @@ final public class CountryDutyListParser {
                                                  final String productId, final double price
     ) throws Exception {
         final double priceWithDuty = CountryDutyListParser.addDuty(host, realm, fromCountryId, toCountryId, productId, price);
-        final double transportCost = Utils.repeatOnErr(() -> CountryDutyListParser.getTransportCost(host, realm, fromCityId, toCityId, productId));
+        final double transportCost = CountryDutyListParser.getTransportCost(host, realm, fromCityId, toCityId, productId);
         return priceWithDuty + transportCost;
     }
 

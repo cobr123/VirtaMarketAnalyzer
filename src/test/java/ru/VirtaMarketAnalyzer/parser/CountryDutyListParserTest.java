@@ -43,7 +43,7 @@ class CountryDutyListParserTest {
     }
 
     @Test
-    void getTransportCostTest() throws IOException {
+    void getTransportCostTest() throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         //Нукус (Узбекистан) -> Великие Луки (Россия, Северо-Запад)
         //Двигатель
