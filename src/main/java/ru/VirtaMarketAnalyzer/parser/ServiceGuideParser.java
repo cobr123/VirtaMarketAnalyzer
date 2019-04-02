@@ -98,7 +98,7 @@ final public class ServiceGuideParser {
         long volume = 0;
         for (final ProductRemain pr : productRemainsFiltered) {
             suppliersUnitIds.add(pr.getUnitID());
-            final double maxProductRemainVolume = Math.min(pr.getRemainByMaxOrderType(), maxVolume - volume);
+            final long maxProductRemainVolume = Math.min(pr.getRemainByMaxOrderType(), maxVolume - volume);
             final double priceWithDuty = CountryDutyListParser.addDuty(host, realm, pr.getCountryId(), stat.getCountryId(), pr.getProductID(), pr.getPrice());
             final double transportCost = Utils.repeatOnErr(() -> CountryDutyListParser.getTransportCost(host, realm, pr.getTownId(), stat.getTownId(), pr.getProductID()));
             quality = merge(quality, volume, pr.getQuality(), maxProductRemainVolume);
