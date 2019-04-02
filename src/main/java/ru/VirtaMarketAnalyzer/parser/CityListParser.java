@@ -84,7 +84,7 @@ public final class CityListParser {
             throw e;
         }
         if (withDemography) {
-            return list.parallelStream()
+            final List<City> listWithDemography = list.parallelStream()
                     .map(city -> {
                         try {
                             final int demography = Utils.repeatOnErr(() -> CityListParser.getDemography(host, realm, city.getId()));
@@ -96,6 +96,13 @@ public final class CityListParser {
                     })
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
+
+            if (listWithDemography.isEmpty()) {
+                throw new Exception("На реалме '" + realm + "' не было пересчета! Список городов пустой.");
+            } else if (listWithDemography.size() != list.size()) {
+                throw new Exception("На реалме '" + realm + "' не для всех городов (" + listWithDemography.size() + " из " + list.size() + ") удалось узнать демографию.");
+            }
+            return listWithDemography;
         } else {
             return list;
         }
