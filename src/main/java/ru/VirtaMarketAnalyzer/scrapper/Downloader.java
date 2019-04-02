@@ -148,7 +148,7 @@ public final class Downloader {
                     if (maxTriesCnt == tries) {
                         throw new IOException(e);
                     } else {
-                        Utils.waitSecond(3 * tries);
+                        Utils.waitSecond(3L * tries);
                     }
                 }
             }
