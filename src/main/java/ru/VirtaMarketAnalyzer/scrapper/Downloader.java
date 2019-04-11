@@ -84,10 +84,15 @@ public final class Downloader {
 
     public static void invalidateCache(final String url, final String referrer) {
         final String clearedUrl = getClearedUrl(url, referrer);
-        final String fileToSave = Utils.getDir() + clearedUrl + ".html";
-        final File file = new File(fileToSave);
-        if (file.exists()) {
-            file.delete();
+        final File htmlFile = new File(Utils.getDir() + clearedUrl + ".html");
+        if (htmlFile.exists()) {
+            logger.info("invalidateCache: {}", htmlFile.getAbsolutePath());
+            htmlFile.delete();
+        }
+        final File jsonFile = new File(Utils.getDir() + clearedUrl + ".json");
+        if (jsonFile.exists()) {
+            logger.info("invalidateCache: {}", jsonFile.getAbsolutePath());
+            jsonFile.delete();
         }
     }
 
