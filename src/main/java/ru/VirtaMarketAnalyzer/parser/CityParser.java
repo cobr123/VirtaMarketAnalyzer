@@ -215,6 +215,7 @@ public final class CityParser {
                 }
             }
         } catch (final Exception e) {
+            Downloader.invalidateCache(url);
             logger.error(url + "&format=debug");
             throw e;
         }
