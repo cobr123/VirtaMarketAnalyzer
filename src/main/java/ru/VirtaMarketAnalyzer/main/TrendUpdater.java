@@ -37,7 +37,7 @@ final public class TrendUpdater {
 
     public static void updateTrends() throws IOException, GitAPIException {
         //обновляем
-        getRepo();
+        RetailSalePrediction.fetchAndHardReset();
 
         for (final String realm : Wizard.realms) {
             updateTrends(realm);
@@ -49,15 +49,6 @@ final public class TrendUpdater {
     }
 
     private static void updateTrends(final String realm) throws IOException, GitAPIException {
-//        if ("olga".equalsIgnoreCase(realm) && (todayIs(Calendar.WEDNESDAY) || todayIs(Calendar.SATURDAY))) {
-//        } else if ("anna".equalsIgnoreCase(realm) && todayIs(Calendar.TUESDAY)) {
-//        } else if ("mary".equalsIgnoreCase(realm) && todayIs(Calendar.MONDAY)) {
-//        } else if (("lien".equalsIgnoreCase(realm) || "nika".equalsIgnoreCase(realm)) && todayIs(Calendar.FRIDAY)) {
-//        } else if ("vera".equalsIgnoreCase(realm) && (todayIs(Calendar.THURSDAY) || todayIs(Calendar.SUNDAY))) {
-//        } else if ("fast".equalsIgnoreCase(realm)) {
-//        } else {
-//            return;
-//        }
         logger.info("обновляем тренды, {}", realm);
         updateAllRetailTrends(realm);
         updateAllProductRemainTrends(realm);

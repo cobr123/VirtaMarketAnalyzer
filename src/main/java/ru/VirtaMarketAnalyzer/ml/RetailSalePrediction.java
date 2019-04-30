@@ -139,7 +139,7 @@ public final class RetailSalePrediction {
     }
 
     public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
-        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
+        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm), false)
                 .map(fileVersion -> {
                     try {
                         final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
@@ -177,7 +177,7 @@ public final class RetailSalePrediction {
     }
 
     public static Set<ProductRemain> getAllProductRemains(final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
-        return getAllVersions(Wizard.industry, fileNameStartWith, Optional.of(realm))
+        return getAllVersions(Wizard.industry, fileNameStartWith, Optional.of(realm), false)
                 .map(fileVersion -> {
                     try {
                         final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
@@ -218,8 +218,7 @@ public final class RetailSalePrediction {
                 .collect(toSet());
     }
 
-    public static Stream<FileVersion> getAllVersions(final String dirName, final String fileNameStartWith, final Optional<String> realm) throws IOException, GitAPIException {
-        final File dir = new File(GitHubPublisher.localPath + dirName + File.separator);
+    public static void fetchAndHardReset() throws GitAPIException, IOException {
         final Git git = GitHubPublisher.getRepo();
         logger.info("git fetch");
         git.fetch().call();
@@ -227,6 +226,23 @@ public final class RetailSalePrediction {
         logger.info("git reset");
         git.reset().setMode(ResetCommand.ResetType.HARD).call();
         logger.info("git reset finished");
+    }
+
+    public static Stream<FileVersion> getAllVersions(final String dirName, final String fileNameStartWith, final Optional<String> realm) throws IOException, GitAPIException {
+        return getAllVersions(dirName, fileNameStartWith, realm, true);
+    }
+
+    public static Stream<FileVersion> getAllVersions(
+            final String dirName,
+            final String fileNameStartWith,
+            final Optional<String> realm,
+            final boolean fetchAndHardReset
+    ) throws IOException, GitAPIException {
+        if (fetchAndHardReset) {
+            fetchAndHardReset();
+        }
+        final Git git = GitHubPublisher.getRepo();
+        final File dir = new File(GitHubPublisher.localPath + dirName + File.separator);
         logger.trace("dir = {}", dir.getAbsoluteFile());
         if (dir.listFiles() == null) {
             return Stream.empty();
