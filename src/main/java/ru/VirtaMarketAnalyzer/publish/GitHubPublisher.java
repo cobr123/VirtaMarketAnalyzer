@@ -106,7 +106,7 @@ final public class GitHubPublisher {
         treeWalk.setRecursive(true);
         treeWalk.setFilter(PathFilter.create(file));
         if (!treeWalk.next()) {
-            logger.info("Did not find expected file '" + file + "'");
+            logger.trace("Did not find expected file '" + file + "'");
             return false;
         }
 
