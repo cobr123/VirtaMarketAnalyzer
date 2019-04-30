@@ -1,5 +1,6 @@
 package ru.VirtaMarketAnalyzer.main;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
@@ -8,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.ml.RetailSalePrediction;
+import ru.VirtaMarketAnalyzer.parser.ProductInitParser;
 import ru.VirtaMarketAnalyzer.publish.GitHubPublisher;
 
 import java.io.File;
@@ -61,19 +63,22 @@ final public class TrendUpdater {
         updateAllProductRemainTrends(realm);
     }
 
-    public static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
+    private static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
-        final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm);
-        logger.info("updateAllRetailAnalytics.size() = {}, {}", set.size(), realm);
+        logger.info("получаем список доступных розничных товаров");
+        final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, realm);
+        logger.info("products.size() = {}, realm = {}", products.size(), realm);
 
-        //группируем аналитику по товарам и сохраняем
-        final Map<String, List<TradeAtCity>> tradeAtCityByProduct = set.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(TradeAtCity::getProductId));
-
-        for (final Map.Entry<String, List<TradeAtCity>> entry : tradeAtCityByProduct.entrySet()) {
-            final String fileNamePath = baseDir + Wizard.retail_trends + File.separator + entry.getKey() + ".json";
-            Utils.writeToGsonZip(fileNamePath, getRetailTrends(entry.getValue()));
+        for (int i = 0; i < products.size(); i++) {
+            final StopWatch watch = new StopWatch();
+            watch.start();
+            final Product product = products.get(i);
+            logger.info("{} / {} собираем данные продаж товаров в городах, {}", i + 1, products.size(), product.getCaption());
+            final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm, product.getId());
+            final String fileNamePath = baseDir + Wizard.retail_trends + File.separator + product.getId() + ".json";
+            Utils.writeToGsonZip(fileNamePath, getRetailTrends(new ArrayList<>(set)));
+            watch.stop();
+            logger.info("время выполнения: {}", watch.toString());
         }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -83,8 +88,8 @@ final public class TrendUpdater {
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
         return list.stream()
                 .collect(Collectors.groupingBy((tac) -> RetailTrend.dateFormat.format(tac.getDate())))
-                .entrySet().stream()
-                .map(e -> getWeighedRetailTrend(groupByTown(e.getValue())))
+                .values().stream()
+                .map(e -> getWeighedRetailTrend(groupByTown(e)))
                 .sorted(Comparator.comparing(RetailTrend::getDate))
                 .collect(Collectors.toList());
     }
@@ -93,8 +98,8 @@ final public class TrendUpdater {
         //проверяем что для одного продукта в одном городе только одна запись на дату
         return list.stream()
                 .collect(Collectors.groupingBy(TradeAtCity::getTownId))
-                .entrySet().stream()
-                .map(e -> e.getValue().stream()
+                .values().stream()
+                .map(e -> e.stream()
                         .reduce((f1, f2) -> {
                             //logger.info("reduce, productID = {}, town = {}, date = {}", f1.getProductId(), f1.getTownCaption(), f1.getDate());
                             if (f1.getVolume() > f2.getVolume()) {
@@ -131,19 +136,22 @@ final public class TrendUpdater {
         );
     }
 
-    public static void updateAllProductRemainTrends(final String realm) throws IOException, GitAPIException {
+    private static void updateAllProductRemainTrends(final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + Wizard.industry + File.separator + realm + File.separator;
-        final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm);
-        logger.info("updateAllProductRemainTrends.size() = {}, {}", set.size(), realm);
+        logger.info("получаем список всех доступных товаров и материалов");
+        final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, realm);
+        logger.info("materials.size() = {}, realm = {}", materials.size(), realm);
 
-        //группируем аналитику по товарам и сохраняем
-        final Map<String, List<ProductRemain>> productRemainByProduct = set.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(ProductRemain::getProductID));
-
-        for (final Map.Entry<String, List<ProductRemain>> entry : productRemainByProduct.entrySet()) {
-            final String fileNamePath = baseDir + Wizard.product_remains_trends + File.separator + entry.getKey() + ".json";
-            Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(entry.getValue()));
+        for (int i = 0; i < materials.size(); i++) {
+            final StopWatch watch = new StopWatch();
+            watch.start();
+            final Product material = materials.get(i);
+            logger.info("{} / {} собираем данные о доступных товарах на оптовом рынке, {}", i + 1, materials.size(), material.getCaption());
+            final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm, material.getId());
+            final String fileNamePath = baseDir + Wizard.product_remains_trends + File.separator + material.getId() + ".json";
+            Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(new ArrayList<>(set)));
+            watch.stop();
+            logger.info("время выполнения: {}", watch.toString());
         }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -153,8 +161,8 @@ final public class TrendUpdater {
     private static List<ProductRemainTrend> getProductRemainTrends(final List<ProductRemain> list) {
         return list.stream()
                 .collect(Collectors.groupingBy((pr) -> RetailTrend.dateFormat.format(pr.getDate())))
-                .entrySet().stream()
-                .map(e -> getWeighedProductRemainTrend(groupByUnit(e.getValue())))
+                .values().stream()
+                .map(e -> getWeighedProductRemainTrend(groupByUnit(e)))
                 .sorted(Comparator.comparing(ProductRemainTrend::getDate))
                 .collect(Collectors.toList());
     }
@@ -163,8 +171,8 @@ final public class TrendUpdater {
         //проверяем что для одного продукта в одном подразделении только одна запись на дату
         return list.stream()
                 .collect(Collectors.groupingBy(ProductRemain::getUnitID))
-                .entrySet().stream()
-                .map(e -> e.getValue().stream()
+                .values().stream()
+                .map(e -> e.stream()
                         .reduce((f1, f2) -> {
                             if (f1.getRemain() > f2.getRemain()) {
                                 return f1;
