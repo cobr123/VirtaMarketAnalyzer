@@ -4,6 +4,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.PatternLayout;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,24 +38,24 @@ final public class TrendUpdater {
 
     public static void updateTrends() throws IOException, GitAPIException {
         //обновляем
-        RetailSalePrediction.fetchAndHardReset();
+        final Git git = RetailSalePrediction.fetchAndHardReset();
 
         for (final String realm : Wizard.realms) {
-            updateTrends(realm);
+            updateTrends(git, realm);
         }
         //публикуем на сайте
-        GitHubPublisher.publishTrends(Wizard.realms);
+        GitHubPublisher.publishTrends(git, Wizard.realms);
         //gc
         GitHubPublisher.repackRepository();
     }
 
-    private static void updateTrends(final String realm) throws IOException, GitAPIException {
+    private static void updateTrends(final Git git, final String realm) throws IOException, GitAPIException {
         logger.info("обновляем тренды, {}", realm);
-        updateAllRetailTrends(realm);
-        updateAllProductRemainTrends(realm);
+        updateAllRetailTrends(git, realm);
+        updateAllProductRemainTrends(git, realm);
     }
 
-    private static void updateAllRetailTrends(final String realm) throws IOException, GitAPIException {
+    private static void updateAllRetailTrends(final Git git, final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
         logger.info("получаем список доступных розничных товаров");
         final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, realm);
@@ -65,7 +66,7 @@ final public class TrendUpdater {
             watch.start();
             final Product product = products.get(i);
             logger.info("{} / {} собираем данные продаж товаров в городах, {}", i + 1, products.size(), product.getCaption());
-            final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(TRADE_AT_CITY_, realm, product.getId());
+            final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(git, TRADE_AT_CITY_, realm, product.getId());
             final String fileNamePath = baseDir + Wizard.retail_trends + File.separator + product.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getRetailTrends(new ArrayList<>(set)));
             watch.stop();
@@ -127,7 +128,7 @@ final public class TrendUpdater {
         );
     }
 
-    private static void updateAllProductRemainTrends(final String realm) throws IOException, GitAPIException {
+    private static void updateAllProductRemainTrends(final Git git, final String realm) throws IOException, GitAPIException {
         final String baseDir = Utils.getDir() + Wizard.industry + File.separator + realm + File.separator;
         logger.info("получаем список всех доступных товаров и материалов");
         final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, realm);
@@ -138,7 +139,7 @@ final public class TrendUpdater {
             watch.start();
             final Product material = materials.get(i);
             logger.info("{} / {} собираем данные о доступных товарах на оптовом рынке, {}", i + 1, materials.size(), material.getCaption());
-            final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(PRODUCT_REMAINS_, realm, material.getId());
+            final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(git, PRODUCT_REMAINS_, realm, material.getId());
             final String fileNamePath = baseDir + Wizard.product_remains_trends + File.separator + material.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(new ArrayList<>(set)));
             watch.stop();

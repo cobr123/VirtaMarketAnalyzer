@@ -138,8 +138,8 @@ public final class RetailSalePrediction {
         return new ArrayList<>(set);
     }
 
-    public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
-        return getAllVersions(Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm), false)
+    public static Set<TradeAtCity> getAllTradeAtCity(final Git git, final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
+        return getAllVersions(git, Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
                 .map(fileVersion -> {
                     try {
                         final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
@@ -176,8 +176,8 @@ public final class RetailSalePrediction {
                 .collect(toSet());
     }
 
-    public static Set<ProductRemain> getAllProductRemains(final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
-        return getAllVersions(Wizard.industry, fileNameStartWith, Optional.of(realm), false)
+    public static Set<ProductRemain> getAllProductRemains(final Git git, final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
+        return getAllVersions(git, Wizard.industry, fileNameStartWith, Optional.of(realm))
                 .map(fileVersion -> {
                     try {
                         final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
@@ -218,7 +218,7 @@ public final class RetailSalePrediction {
                 .collect(toSet());
     }
 
-    public static void fetchAndHardReset() throws GitAPIException, IOException {
+    public static Git fetchAndHardReset() throws GitAPIException, IOException {
         final Git git = GitHubPublisher.getRepo();
         logger.info("git fetch");
         git.fetch().call();
@@ -226,29 +226,27 @@ public final class RetailSalePrediction {
         logger.info("git reset");
         git.reset().setMode(ResetCommand.ResetType.HARD).call();
         logger.info("git reset finished");
+        return git;
     }
 
     public static Stream<FileVersion> getAllVersions(final String dirName, final String fileNameStartWith, final Optional<String> realm) throws IOException, GitAPIException {
-        return getAllVersions(dirName, fileNameStartWith, realm, true);
+        final Git git = fetchAndHardReset();
+        return getAllVersions(git, dirName, fileNameStartWith, realm);
     }
 
     public static Stream<FileVersion> getAllVersions(
+            final Git git,
             final String dirName,
             final String fileNameStartWith,
-            final Optional<String> realm,
-            final boolean fetchAndHardReset
-    ) throws IOException, GitAPIException {
-        if (fetchAndHardReset) {
-            fetchAndHardReset();
-        }
-        final Git git = GitHubPublisher.getRepo();
+            final Optional<String> realm
+    ) {
         final File dir = new File(GitHubPublisher.localPath + dirName + File.separator);
         logger.trace("dir = {}", dir.getAbsoluteFile());
         if (dir.listFiles() == null) {
             return Stream.empty();
         }
 
-        final Stream<FileVersion> stream = Stream.of(dir.listFiles())
+        return Stream.of(dir.listFiles())
                 .filter(File::isDirectory)
                 .filter(realmDir -> !realm.isPresent() || realmDir.getName().equals(realm.get()))
                 .map(File::listFiles)
@@ -266,8 +264,6 @@ public final class RetailSalePrediction {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .parallel();
-        logger.info("getAllVersions done");
-        return stream;
     }
 
     public static Stream<RetailAnalytics> getAllRetailAnalytics(final String fileNameStartWith) throws IOException, GitAPIException {

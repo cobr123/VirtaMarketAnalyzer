@@ -59,8 +59,7 @@ final public class GitHubPublisher {
         git.close();
     }
 
-    public static void publishTrends(final List<String> realms) throws IOException, GitAPIException {
-        final Git git = getRepo();
+    public static void publishTrends(final Git git, final List<String> realms) throws IOException, GitAPIException {
         copyTrendsToLocalRepo(Wizard.by_trade_at_cities, Wizard.retail_trends, realms);
         copyTrendsToLocalRepo(Wizard.industry, Wizard.product_remains_trends, realms);
         final String pattern = ".";
