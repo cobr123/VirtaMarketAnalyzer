@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.PRODUCT_REMAINS_;
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
-import static ru.VirtaMarketAnalyzer.publish.GitHubPublisher.getRepo;
 
 /**
  * Created by cobr123 on 29.09.2017.
@@ -65,12 +64,12 @@ final public class TrendUpdater {
             final StopWatch watch = new StopWatch();
             watch.start();
             final Product product = products.get(i);
-            logger.info("{} / {} собираем данные продаж товаров в городах, {}", i + 1, products.size(), product.getCaption());
+            logger.info("realm = {}, {} / {} собираем данные продаж товаров в городах, {}", realm, i + 1, products.size(), product.getCaption());
             final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(git, TRADE_AT_CITY_, realm, product.getId());
             final String fileNamePath = baseDir + Wizard.retail_trends + File.separator + product.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getRetailTrends(new ArrayList<>(set)));
             watch.stop();
-            logger.info("время выполнения: {}", watch.toString());
+            logger.info("время выполнения: {}, записей сохранено: {}", watch.toString(), set.size());
         }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -138,12 +137,12 @@ final public class TrendUpdater {
             final StopWatch watch = new StopWatch();
             watch.start();
             final Product material = materials.get(i);
-            logger.info("{} / {} собираем данные о доступных товарах на оптовом рынке, {}", i + 1, materials.size(), material.getCaption());
+            logger.info("realm = {}, {} / {} собираем данные о доступных товарах на оптовом рынке, {}", realm, i + 1, materials.size(), material.getCaption());
             final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(git, PRODUCT_REMAINS_, realm, material.getId());
             final String fileNamePath = baseDir + Wizard.product_remains_trends + File.separator + material.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(new ArrayList<>(set)));
             watch.stop();
-            logger.info("время выполнения: {}", watch.toString());
+            logger.info("время выполнения: {}, записей сохранено: {}", watch.toString(), set.size());
         }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
