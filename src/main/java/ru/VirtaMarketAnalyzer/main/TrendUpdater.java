@@ -20,8 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.PRODUCT_REMAINS_;
-import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.TRADE_AT_CITY_;
+import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.*;
 
 /**
  * Created by cobr123 on 29.09.2017.
@@ -74,6 +73,7 @@ final public class TrendUpdater {
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + Wizard.retail_trends + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
+        cacheTradeAtCity.clear();
     }
 
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
@@ -147,6 +147,7 @@ final public class TrendUpdater {
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + Wizard.product_remains_trends + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
+        cacheProductRemain.clear();
     }
 
     private static List<ProductRemainTrend> getProductRemainTrends(final List<ProductRemain> list) {
