@@ -37,8 +37,8 @@ public final class ProductRemainParser {
                 .collect(groupingBy(ProductRemain::getProductID));
     }
 
-    public static List<ProductRemain> getRemains(final String host, final String realm, final Product material) throws IOException {
-        return getRemains(host, realm, material, 1);
+    public static List<ProductRemain> getRemains(final String host, final String realm, final Product material) throws Exception {
+        return Utils.repeatOnErr(() -> getRemains(host, realm, material, 1));
     }
 
     private static List<ProductRemain> getRemains(final String host, final String realm, final Product material, final int page) throws IOException {
@@ -90,11 +90,12 @@ public final class ProductRemainParser {
 
                 list.add(new ProductRemain(productId, companyName, unitID, countryId, regionId, cityId, total, remain, quality, price, maxOrderType, maxOrder));
             }
-            final int count = Integer.valueOf(infoMap.get("count").toString());
+            final int count = Utils.doubleToInt(Double.valueOf(infoMap.get("count").toString()));
             if (count > pageSize * page) {
                 list.addAll(getRemains(host, realm, material, page + 1));
             }
         } catch (final Exception e) {
+            Downloader.invalidateCache(url);
             logger.error(url + "&format=debug");
             throw e;
         }
