@@ -173,8 +173,7 @@ public final class ServiceAtCityParser {
         //TODO: &produce_id=422835
         final String url = host + "api/" + realm + "/main/marketing/report/service/metrics?geo=" + city.getGeo() + "&unit_type_id=" + service.getId();
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Object>>() {
             }.getType();
@@ -209,8 +208,7 @@ public final class ServiceAtCityParser {
         //TODO: &produce_id=422835
         final String url = host + "api/" + realm + "/main/marketing/report/service/specializations?geo=" + city.getGeo() + "&unit_type_id=" + service.getId();
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();

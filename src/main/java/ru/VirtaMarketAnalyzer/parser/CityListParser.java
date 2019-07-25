@@ -41,8 +41,7 @@ public final class CityListParser {
 
         final List<City> list = new ArrayList<>();
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();
@@ -115,8 +114,7 @@ public final class CityListParser {
         final String today = df.format(new Date());
         int demography = -1;
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<List<Map<String, Object>>>() {
             }.getType();

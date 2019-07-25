@@ -41,8 +41,7 @@ public final class ProductInitParser {
     private static List<Product> getProducts(final String url) throws IOException {
         final List<Product> list = new ArrayList<>();
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();

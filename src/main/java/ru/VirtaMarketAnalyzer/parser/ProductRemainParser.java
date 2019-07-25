@@ -48,8 +48,7 @@ public final class ProductRemainParser {
 
         final List<ProductRemain> list = new ArrayList<>();
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
             }.getType();

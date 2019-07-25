@@ -104,8 +104,7 @@ public final class CityParser {
         final String url = host + "api/" + realm + "/main/marketing/report/retail/units?lang=" + lang + "&product_id=" + product.getId() + "&geo=" + city.getGeo();
 
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<List<Map<String, Object>>>() {
             }.getType();
@@ -158,8 +157,7 @@ public final class CityParser {
         final String url = host + "api/" + realm + "/main/marketing/report/retail/metrics?shares=1&product_id=" + product.getId() + "&geo=" + city.getGeo();
 
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Object>>() {
             }.getType();

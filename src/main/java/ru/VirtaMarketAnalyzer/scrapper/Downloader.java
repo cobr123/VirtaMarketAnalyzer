@@ -1,6 +1,7 @@
 package ru.VirtaMarketAnalyzer.scrapper;
 
 import com.google.common.util.concurrent.RateLimiter;
+import org.apache.commons.io.FileUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,8 +11,8 @@ import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 
 import javax.net.ssl.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
@@ -96,29 +97,58 @@ public final class Downloader {
         }
     }
 
+    public static String getJson(final String url) throws IOException {
+        return getJson(url, null, 99);
+    }
+
+    public static String getJson(final String url, final String referrer, final int maxTriesCnt) throws IOException {
+        final String clearedUrl = getClearedUrl(url, referrer);
+        final String fileToSave = Utils.getDir() + clearedUrl + ".json";
+        final File file = new File(fileToSave);
+        if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
+            logger.trace("Взят из кэша: {}", file.getAbsolutePath());
+            return Utils.readFile(file.getAbsolutePath());
+        } else {
+            logger.trace("Запрошен адрес: {}", url);
+
+            for (int tries = 1; tries <= maxTriesCnt; ++tries) {
+                try {
+                    rateLimiter.acquire();
+                    FileUtils.copyURLToFile(new URL(url), file, 60_000, 60_000);
+                    return Utils.readFile(file.getAbsolutePath());
+                } catch (final IOException e) {
+                    logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
+                    logger.error("Ошибка: {}", e.getLocalizedMessage());
+                    if (maxTriesCnt == tries) {
+                        throw new IOException(e);
+                    } else {
+                        Utils.waitSecond(3L * tries);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public static Document getDoc(final String url) throws IOException {
         return getDoc(url, null);
     }
 
-    public static Document getDoc(final String url, final boolean isJsonContentType) throws IOException {
-        return getDoc(url, null, 99, isJsonContentType);
-    }
-
     public static Document getDoc(final String url, final int maxTriesCnt) throws IOException {
-        return getDoc(url, null, maxTriesCnt, false);
+        return getDoc(url, null, maxTriesCnt);
     }
 
     public static Document getDoc(final String url, final String referrer) throws IOException {
-        return getDoc(url, referrer, 99, false);
+        return getDoc(url, referrer, 99);
     }
 
     public static final double permitsPerSecond = 10.0;
 
     private static final RateLimiter rateLimiter = RateLimiter.create(permitsPerSecond);
 
-    public static Document getDoc(final String url, final String referrer, final int maxTriesCnt, final boolean isJsonContentType) throws IOException {
+    public static Document getDoc(final String url, final String referrer, final int maxTriesCnt) throws IOException {
         final String clearedUrl = getClearedUrl(url, referrer);
-        final String fileToSave = Utils.getDir() + clearedUrl + ((isJsonContentType) ? ".json" : ".html");
+        final String fileToSave = Utils.getDir() + clearedUrl + ".html";
         final File file = new File(fileToSave);
         if (file.exists() && Utils.equalsWoTime(new Date(file.lastModified()), new Date())) {
             logger.trace("Взят из кэша: {}", file.getAbsolutePath());
@@ -139,13 +169,8 @@ public final class Downloader {
                     conn.userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0");
                     conn.maxBodySize(0);
                     conn.timeout(60_000);
-                    conn.ignoreContentType(isJsonContentType);
                     final Document doc = conn.get();
-                    if (isJsonContentType) {
-                        Utils.writeFile(fileToSave, doc.text());
-                    } else {
-                        Utils.writeFile(fileToSave, doc.outerHtml());
-                    }
+                    Utils.writeFile(fileToSave, doc.outerHtml());
                     return doc;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);

@@ -25,8 +25,7 @@ public final class ShopParser {
         final String url = host + "api/" + realm + "/main/unit/summary?lang=" + lang + "&id=" + majorSellInCity.getUnitId();
 
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Object>>() {
             }.getType();

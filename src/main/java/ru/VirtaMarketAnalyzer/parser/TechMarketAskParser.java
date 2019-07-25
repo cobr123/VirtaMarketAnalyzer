@@ -195,8 +195,7 @@ final public class TechMarketAskParser {
     public static List<TechLvl> getTech(final String host, final String realm, final String unit_type_id) throws IOException {
         final String url = host + "api/" + realm + "/main/unittype/technologies?app=virtonomica&format=json&ajax=1&id=" + unit_type_id + "&wrap=0";
         try {
-            final Document doc = Downloader.getDoc(url, true);
-            final String json = doc.body().text();
+            final String json = Downloader.getJson(url);
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<TechReport[]>() {
             }.getType();
