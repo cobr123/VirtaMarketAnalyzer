@@ -175,7 +175,7 @@ public final class ClassifierToJs {
         if (m_isLeaf) {
             result[0] = new StringBuilder("    p = "
                     + m_localModel.distribution().maxClass(0) + ";\n");
-            result[1] = new StringBuilder("");
+            result[1] = new StringBuilder();
         } else {
             final StringBuilder text = new StringBuilder();
             final StringBuilder atEnd = new StringBuilder();
