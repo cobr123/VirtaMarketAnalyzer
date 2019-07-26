@@ -105,7 +105,7 @@ final public class TechMarketAskParser {
         return asks.stream()
                 .map(ask -> {
                     final int bidQtySum = bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).mapToInt(TechLicenseAskBid::getQuantity).sum();
-                    final boolean bidWithGreaterPriceExist = bids.stream().filter(bid -> ask.getPrice() >= bid.getPrice()).findAny().isPresent();
+                    final boolean bidWithGreaterPriceExist = bids.stream().anyMatch(bid -> ask.getPrice() >= bid.getPrice());
                     if (ask.getQuantity() > bidQtySum) {
                         return new TechLicenseAskBid(ask.getPrice(), ask.getQuantity() - bidQtySum);
                     } else if (!bidWithGreaterPriceExist) {
