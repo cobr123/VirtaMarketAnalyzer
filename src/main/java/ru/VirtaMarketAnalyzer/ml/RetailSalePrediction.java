@@ -792,7 +792,7 @@ public final class RetailSalePrediction {
 //                productCategories.forEach(fv::addElement);
 //                attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.DEPARTMENT_COUNT.ordinal()) {
-                final int maxDepCnt = retailAnalytics.parallelStream().max((o1, o2) -> o1.getDepartmentCount() - o2.getDepartmentCount()).get().getDepartmentCount();
+                final int maxDepCnt = retailAnalytics.parallelStream().max(Comparator.comparingInt(RetailAnalytics::getDepartmentCount)).get().getDepartmentCount();
                 logger.info("maxDepCnt =  {}", maxDepCnt);
                 final FastVector fv = new FastVector(maxDepCnt);
                 for (int i = 1; i <= maxDepCnt; ++i) {
@@ -800,7 +800,7 @@ public final class RetailSalePrediction {
                 }
                 attrs.addElement(new Attribute(attr.name(), fv));
             } else if (attr.ordinal() == ATTR.SELLER_COUNT.ordinal()) {
-                final int maxSellerCnt = retailAnalytics.parallelStream().max((o1, o2) -> o1.getSellerCnt() - o2.getSellerCnt()).get().getSellerCnt();
+                final int maxSellerCnt = retailAnalytics.parallelStream().max(Comparator.comparingInt(RetailAnalytics::getSellerCnt)).get().getSellerCnt();
                 logger.info("maxSellerCnt =  {}", maxSellerCnt);
                 final FastVector fv = new FastVector(maxSellerCnt + 1);
                 for (int i = 0; i <= maxSellerCnt; ++i) {
