@@ -68,7 +68,7 @@ public final class Utils {
 
     public static String readFromZip(final String path, final ByteArrayOutputStream os) throws IOException {
         try (final ZipFile zipFile = new ZipFile(new SeekableInMemoryByteChannel(os.toByteArray()))) {
-            return IOUtils.toString(zipFile.getInputStream(zipFile.getEntry(path)), "UTF-8");
+            return IOUtils.toString(zipFile.getInputStream(zipFile.getEntry(path)), StandardCharsets.UTF_8);
         }
     }
 
