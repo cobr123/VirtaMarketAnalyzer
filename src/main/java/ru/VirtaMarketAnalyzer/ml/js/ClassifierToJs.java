@@ -105,7 +105,7 @@ public final class ClassifierToJs {
 
         final StringBuilder[] source = toSourceClassifierTree(m_root, prefix);
         final StringBuilder sb = new StringBuilder();
-        sb.append("  function getParamFor" + WordUtils.capitalize(prefix) + "(){\n");
+        sb.append("  function getParamFor").append(WordUtils.capitalize(prefix)).append("(){\n");
         sb.append("    param = [").append(RetailSalePrediction.ATTR.values().length - 1).append("];\n");
         for (RetailSalePrediction.ATTR attr : RetailSalePrediction.ATTR.values()) {
             //для последнего делаем вычисления, поэтому его в параметрах не должно быть
@@ -120,7 +120,7 @@ public final class ClassifierToJs {
         sb.append("    return param;\n");
         sb.append("  }\n");
 
-        sb.append("  function getValueFor" + WordUtils.capitalize(prefix) + "(idx){\n");
+        sb.append("  function getValueFor").append(WordUtils.capitalize(prefix)).append("(idx){\n");
         sb.append("    values = [];\n");
         sb.append("    values[0] = 'менее 50';\n");
         sb.append("    values[1] = 'около 50';\n");
@@ -184,8 +184,7 @@ public final class ClassifierToJs {
             PRINT_ID++;
             final long printID = PRINT_ID;
 
-            text.append("  function ").append(prefix).append("N")
-                    .append(Integer.toHexString(m_localModel.hashCode()) + printID)
+            text.append("  function ").append(prefix).append("N").append(Integer.toHexString(m_localModel.hashCode())).append(printID)
                     .append("(i) {\n")
                     .append("    p = NaN;\n");
 
@@ -214,7 +213,7 @@ public final class ClassifierToJs {
             text.append("    return p;\n  }\n");
 
             result[0] = new StringBuilder("    p = " + prefix + "N");
-            result[0].append(Integer.toHexString(m_localModel.hashCode()) + printID)
+            result[0].append(Integer.toHexString(m_localModel.hashCode())).append(printID)
                     .append("(i);\n");
             result[1] = text.append(atEnd);
         }
