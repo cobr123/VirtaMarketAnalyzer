@@ -13,9 +13,7 @@ class UtilsTest {
 
     @Test
     void toDoubleTestCommaDecimal() {
-        assertThrows(NumberFormatException.class, () -> {
-            Utils.toDouble("4,90");
-        });
+        assertThrows(NumberFormatException.class, () -> Utils.toDouble("4,90"));
     }
 
     @Test

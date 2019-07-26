@@ -120,9 +120,7 @@ public final class Wizard {
 
     public static void saveUnitTypeImg(final List<UnitType> unitTypes) {
         unitTypes.parallelStream()
-                .forEach(unitType -> {
-                    saveImg(unitType.getImgUrl());
-                });
+                .forEach(unitType -> saveImg(unitType.getImgUrl()));
     }
 
     private static boolean todayIs(final int dayOfWeek) {

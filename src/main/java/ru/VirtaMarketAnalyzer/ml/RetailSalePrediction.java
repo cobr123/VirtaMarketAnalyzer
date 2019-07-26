@@ -236,9 +236,7 @@ public final class RetailSalePrediction {
                         final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
                         return Stream.of(arr)
                                 .filter(ra -> ra.getProductID() != null)
-                                .peek(ra -> {
-                                    ra.setDate(fileVersion.getDate());
-                                })
+                                .peek(ra -> ra.setDate(fileVersion.getDate()))
                                 .collect(toList());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
