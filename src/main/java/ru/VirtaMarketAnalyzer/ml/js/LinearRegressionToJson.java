@@ -25,8 +25,8 @@ public final class LinearRegressionToJson {
         if (m_TransformedData == null) {
             throw new Exception("Linear Regression: No model built yet.");
         }
-        final StringBuffer text = new StringBuffer();
-        final StringBuffer json = new StringBuffer();
+        final StringBuilder text = new StringBuilder();
+        final StringBuilder json = new StringBuilder();
         int column = 0;
         boolean first = true;
 
