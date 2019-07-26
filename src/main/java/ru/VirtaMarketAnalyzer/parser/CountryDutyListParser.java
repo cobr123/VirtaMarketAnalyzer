@@ -54,9 +54,9 @@ final public class CountryDutyListParser {
             for (final String productId : dataMap.keySet()) {
                 final Map<String, Object> city = (Map<String, Object>) dataMap.get(productId);
 
-                final int exportTaxPercent = Integer.valueOf(city.get("export").toString());
-                final int importTaxPercent = Integer.valueOf(city.get("import").toString());
-                final double indicativePrice = Double.valueOf(city.get("min_cost").toString());
+                final int exportTaxPercent = Integer.parseInt(city.get("export").toString());
+                final int importTaxPercent = Integer.parseInt(city.get("import").toString());
+                final double indicativePrice = Double.parseDouble(city.get("min_cost").toString());
 
                 list.add(new CountryDutyList(countryId, productId, exportTaxPercent, importTaxPercent, indicativePrice));
             }
@@ -119,10 +119,10 @@ final public class CountryDutyListParser {
             for (final String idx : dataMap.keySet()) {
                 final Map<String, Object> data = (Map<String, Object>) dataMap.get(idx);
                 if (data.get("city_id").toString().equals(toCityId)) {
-                    return Double.valueOf(data.get("transport_cost").toString());
+                    return Double.parseDouble(data.get("transport_cost").toString());
                 }
             }
-            final int count = Integer.valueOf(infoMap.get("count").toString());
+            final int count = Integer.parseInt(infoMap.get("count").toString());
             if (count > pageSize * page) {
                 return getTransportCostImpl(host, realm, fromCityId, toCityId, productId, page + 1);
             }

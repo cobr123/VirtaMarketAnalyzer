@@ -69,26 +69,26 @@ public final class ProductRemainParser {
                 final String unitID = city.get("unit_id").toString();
                 long total = 0;
                 if (city.get("quantity") != null) {
-                    total = Long.valueOf(city.get("quantity").toString());
+                    total = Long.parseLong(city.get("quantity").toString());
                 }
                 long remain = 0;
                 if (city.get("free_for_buy") != null) {
-                    remain = Long.valueOf(city.get("free_for_buy").toString());
+                    remain = Long.parseLong(city.get("free_for_buy").toString());
                 }
-                final double quality = Double.valueOf(city.get("quality").toString());
+                final double quality = Double.parseDouble(city.get("quality").toString());
                 double price = 0;
                 if (city.get("price") != null) {
-                    price = Double.valueOf(city.get("price").toString());
+                    price = Double.parseDouble(city.get("price").toString());
                 }
                 long maxOrder = 0;
                 if (city.get("max_qty") != null) {
-                    maxOrder = Long.valueOf(city.get("max_qty").toString());
+                    maxOrder = Long.parseLong(city.get("max_qty").toString());
                 }
                 final ProductRemain.MaxOrderType maxOrderType = (maxOrder > 0) ? ProductRemain.MaxOrderType.L : ProductRemain.MaxOrderType.U;
 
                 list.add(new ProductRemain(productId, companyName, unitID, countryId, regionId, cityId, total, remain, quality, price, maxOrderType, maxOrder));
             }
-            final int count = Utils.doubleToInt(Double.valueOf(infoMap.get("count").toString()));
+            final int count = Utils.doubleToInt(Double.parseDouble(infoMap.get("count").toString()));
             if (count > pageSize * page) {
                 list.addAll(getRemains(host, realm, material, page + 1));
             }

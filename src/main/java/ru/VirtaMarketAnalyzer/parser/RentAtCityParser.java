@@ -61,7 +61,7 @@ public final class RentAtCityParser {
 
             for (final Map<String, Object> rent : rentList) {
                 final String unit_class_kind = rent.get("unit_class_kind").toString();
-                final double areaRent = Utils.round2(Double.valueOf(rent.get("rent_cost").toString()));
+                final double areaRent = Utils.round2(Double.parseDouble(rent.get("rent_cost").toString()));
                 final double workplaceRent = 0;
 
                 list.add(new RentAtCity("/img/unit_types/" + unit_class_kind + ".gif", cityId, areaRent, workplaceRent));

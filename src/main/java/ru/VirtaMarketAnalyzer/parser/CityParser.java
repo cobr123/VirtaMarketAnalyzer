@@ -118,11 +118,11 @@ public final class CityParser {
                     cityDistrict = mapOfMetrics.get("district_name").toString();
                 }
                 final String unitId = mapOfMetrics.get("unit_id").toString();
-                final long shopSize = Long.valueOf(mapOfMetrics.get("shop_size").toString());
-                final double sellVolume = Double.valueOf(mapOfMetrics.get("qty").toString());
-                final double price = Double.valueOf(mapOfMetrics.get("price").toString());
-                final double quality = Double.valueOf(mapOfMetrics.get("quality").toString());
-                final double brand = Double.valueOf(mapOfMetrics.get("brand").toString());
+                final long shopSize = Long.parseLong(mapOfMetrics.get("shop_size").toString());
+                final double sellVolume = Double.parseDouble(mapOfMetrics.get("qty").toString());
+                final double price = Double.parseDouble(mapOfMetrics.get("price").toString());
+                final double quality = Double.parseDouble(mapOfMetrics.get("quality").toString());
+                final double brand = Double.parseDouble(mapOfMetrics.get("brand").toString());
                 majorSellInCityList.add(
                         new MajorSellInCity(
                                 product.getId(),
@@ -161,19 +161,19 @@ public final class CityParser {
             }.getType();
             final Map<String, Object> mapOfMetrics = gson.fromJson(json, mapType);
 
-            builder.setLocalPrice(Double.valueOf(mapOfMetrics.get("local_price").toString()));
-            builder.setShopPrice(Double.valueOf(mapOfMetrics.get("avg_price").toString()));
+            builder.setLocalPrice(Double.parseDouble(mapOfMetrics.get("local_price").toString()));
+            builder.setShopPrice(Double.parseDouble(mapOfMetrics.get("avg_price").toString()));
 
-            builder.setLocalQuality(Double.valueOf(mapOfMetrics.get("local_quality").toString()));
-            builder.setShopQuality(Double.valueOf(mapOfMetrics.get("avg_quality").toString()));
+            builder.setLocalQuality(Double.parseDouble(mapOfMetrics.get("local_quality").toString()));
+            builder.setShopQuality(Double.parseDouble(mapOfMetrics.get("avg_quality").toString()));
 
-            builder.setShopBrand(Double.valueOf(mapOfMetrics.get("avg_brand").toString()));
+            builder.setShopBrand(Double.parseDouble(mapOfMetrics.get("avg_brand").toString()));
 
-            builder.setVolume(Long.valueOf(mapOfMetrics.get("local_market_size").toString()));
-            builder.setSellerCnt(Integer.valueOf(mapOfMetrics.get("shop_count").toString()));
-            builder.setCompaniesCnt(Long.valueOf(mapOfMetrics.get("company_count").toString()));
+            builder.setVolume(Long.parseLong(mapOfMetrics.get("local_market_size").toString()));
+            builder.setSellerCnt(Integer.parseInt(mapOfMetrics.get("shop_count").toString()));
+            builder.setCompaniesCnt(Long.parseLong(mapOfMetrics.get("company_count").toString()));
 
-            final int index_min = Integer.valueOf(mapOfMetrics.get("index_min").toString());
+            final int index_min = Integer.parseInt(mapOfMetrics.get("index_min").toString());
             String marketIdx = "";
             switch (index_min) {
                 case -1:
@@ -207,7 +207,7 @@ public final class CityParser {
             builder.setLocalPercent(0);
             for (final Map<String, Object> mapOfShares : listOfMapOfShares) {
                 if (mapOfShares.get("company_id").toString().equals("-1")) {
-                    builder.setLocalPercent(Double.valueOf(mapOfShares.get("market_size").toString()));
+                    builder.setLocalPercent(Double.parseDouble(mapOfShares.get("market_size").toString()));
                 }
             }
         } catch (final Exception e) {

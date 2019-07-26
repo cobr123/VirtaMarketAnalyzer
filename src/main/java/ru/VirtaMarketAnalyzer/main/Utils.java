@@ -141,9 +141,9 @@ public final class Utils {
                 final Matcher matcher = fraction_pattern.matcher(clear);
                 if (matcher.find()) {
                     final String[] data = clear.split("/");
-                    return Double.valueOf(data[0]) / Double.valueOf(data[1]);
+                    return Double.parseDouble(data[0]) / Double.parseDouble(data[1]);
                 } else {
-                    return Double.valueOf(clear);
+                    return Double.parseDouble(clear);
                 }
             }
         } catch (final Exception e) {
@@ -158,7 +158,7 @@ public final class Utils {
             if (clear.isEmpty()) {
                 return 0;
             } else {
-                return Long.valueOf(clear);
+                return Long.parseLong(clear);
             }
         } catch (final Exception e) {
             logger.error("Не удалось преобразовать строку \"" + text + "\" в long");
@@ -172,7 +172,7 @@ public final class Utils {
             if (clear.isEmpty()) {
                 return 0;
             } else {
-                return Integer.valueOf(clear);
+                return Integer.parseInt(clear);
             }
         } catch (final Exception e) {
             logger.error("Не удалось преобразовать строку \"" + text + "\" в int");

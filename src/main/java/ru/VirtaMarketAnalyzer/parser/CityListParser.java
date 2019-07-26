@@ -59,7 +59,7 @@ public final class CityListParser {
                 final String population = city.get("population").toString();
                 final int demography = 0;
                 final List<String> mayoralBonuses = new ArrayList<>();
-                final int retail_count = Integer.valueOf(city.get("retail_count").toString());
+                final int retail_count = Integer.parseInt(city.get("retail_count").toString());
                 if (retail_count > 0) {
                     final Map<String, Object> mapOfCat = (Map<String, Object>) city.get("retails");
                     for (final String category_id : mapOfCat.keySet()) {
@@ -69,11 +69,11 @@ public final class CityListParser {
                 }
 
                 list.add(new City(country_id, region_id, id, caption
-                        , Double.valueOf(wealthIndex)
-                        , Double.valueOf(educationIndex)
-                        , Double.valueOf(averageSalary)
+                        , Double.parseDouble(wealthIndex)
+                        , Double.parseDouble(educationIndex)
+                        , Double.parseDouble(averageSalary)
                         , demography
-                        , Integer.valueOf(population)
+                        , Integer.parseInt(population)
                         , mayoralBonuses
                 ));
             }
@@ -123,7 +123,7 @@ public final class CityListParser {
                 final String real_date = hist.get("real_date").toString();
                 if (real_date.equals(today)) {
                     final String population_real = hist.get("population_real").toString();
-                    demography = Integer.valueOf(population_real);
+                    demography = Integer.parseInt(population_real);
                     break;
                 }
             }
