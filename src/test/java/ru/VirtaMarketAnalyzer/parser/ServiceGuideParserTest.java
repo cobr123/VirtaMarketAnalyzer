@@ -25,14 +25,14 @@ public class ServiceGuideParserTest {
     void genServiceGuideTest() throws Exception {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "olga";
-        final List<UnitType> unitTypes = ServiceInitParser.getServiceUnitTypes(Wizard.host, realm);
-        logger.info("unitType {}", unitTypes.get(0).getCaption());
-        final List<ServiceGuide> serviceGuides = ServiceGuideParser.genServiceGuide(Wizard.host, realm, unitTypes.get(0));
+        final UnitType unitType = ServiceInitParser.getServiceUnitTypes(Wizard.host, realm).get(0);
+        logger.info("unitType {}", unitType.getCaption());
+        final List<ServiceGuide> serviceGuides = ServiceGuideParser.genServiceGuide(Wizard.host, realm, unitType);
         assertFalse(serviceGuides.isEmpty());
         assertTrue(serviceGuides.stream().anyMatch(l -> !l.getServiceGuideProducts().isEmpty()));
         final ServiceGuide serviceGuide = serviceGuides.get(0);
         logger.info(Utils.getPrettyGson(serviceGuide));
-        logger.info("https://virtonomica.ru/{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", realm, serviceGuide.getGeo(), unitTypes.get(0).getId());
+        logger.info("https://virtonomica.ru/{}/main/globalreport/marketing?geo={}&unit_type_id={}#by-service", realm, serviceGuide.getGeo(), unitType.getId());
         logger.info(Utils.getPrettyGson(serviceGuides.stream().filter(a -> a.getServiceSpecId().equals("359933")).findFirst().get()));
         logger.info("size = {}", serviceGuides.size());
     }

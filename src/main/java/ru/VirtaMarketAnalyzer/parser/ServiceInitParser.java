@@ -105,12 +105,13 @@ public final class ServiceInitParser {
 
     private static List<RawMaterial> getRawMaterials(final String host, final String realm, final Map<String, Object> unitType) throws IOException {
         final List<RawMaterial> rawMaterials = new ArrayList<>();
-        if (unitType.get("input_product_ids") != null) {
-            final String[] input_product_ids = removeCurlyBraces(unitType.get("input_product_ids").toString()).split(",");
-            final String[] input_quantities = removeCurlyBraces(unitType.get("input_quantities").toString()).split(",");
-            for (int i = 0; i < input_product_ids.length; ++i) {
-                final Product product = getProduct(host, realm, input_product_ids[i]);
-                final double quantity = Utils.toDouble(input_quantities[i]);
+        final Object inputObj = unitType.get("input");
+        if (inputObj != null && !(inputObj instanceof ArrayList)) {
+            final Map<String, Object> inputList = (Map<String, Object>) inputObj;
+            for (final String idx : inputList.keySet()) {
+                final Map<String, Object> input = (Map<String, Object>) inputList.get(idx);
+                final Product product = getProduct(host, realm, input.get("id").toString());
+                final double quantity = Double.parseDouble(input.get("qty").toString());
                 rawMaterials.add(new RawMaterial(product, quantity));
             }
         }

@@ -104,9 +104,6 @@ public final class ServiceAtCityParser {
             , final List<RentAtCity> rents
     ) throws IOException {
         final ServiceMetrics serviceMetrics = getServiceMetrics(host, realm, city, service);
-        if (serviceMetrics == null) {
-            return null;
-        }
         final Map<String, Double> percentBySpec = getPercentBySpec(host, realm, city, service);
 
         final double incomeTaxRate = (regions == null) ? 0 : regions.stream().filter(r -> r.getId().equals(city.getRegionId())).findFirst().get().getIncomeTaxRate();
