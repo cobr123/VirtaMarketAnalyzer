@@ -3,9 +3,6 @@ package ru.VirtaMarketAnalyzer.main;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
@@ -45,8 +42,6 @@ public final class Wizard {
 
 
     public static void main(String[] args) throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
-
         final List<String> parsedRealms = new ArrayList<>();
         for (final String realm : Wizard.realms) {
             try {

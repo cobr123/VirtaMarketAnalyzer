@@ -1,9 +1,6 @@
 package ru.VirtaMarketAnalyzer.main;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
@@ -29,8 +26,6 @@ final public class TrendUpdater {
     private static final Logger logger = LoggerFactory.getLogger(TrendUpdater.class);
 
     public static void main(String[] args) throws IOException, GitAPIException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
-
         updateTrends();
     }
 
