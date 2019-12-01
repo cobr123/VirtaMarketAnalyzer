@@ -292,8 +292,7 @@ public final class RetailSalePrediction {
                     }
                 })
                 .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .parallel();
+                .flatMap(Collection::stream);
     }
 
     public static Stream<RetailAnalytics> getAllRetailAnalytics(final String fileNameStartWith) throws IOException, GitAPIException {
