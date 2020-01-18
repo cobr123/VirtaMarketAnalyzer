@@ -57,21 +57,16 @@ public final class Wizard {
         //публикуем на сайте
         GitHubPublisher.publishRetail(parsedRealms);
 
-/*
-        if (todayIs(Calendar.SUNDAY)) {
-            //собираем данные со всех реалмов и продуктов
-            final List<LinearRegressionSummary> summaries = new ArrayList<>();
-            int iter = 1;
-            int total = products.size();
-            for (final Product product : products) {
-                logger.info("{}/{}", iter, total);
-                summaries.add(RetailSalePrediction.createCommonPrediction(product.getId()));
-                ++iter;
+        //тренды
+        final List<String> trendRealms = new ArrayList<>();
+
+        for (final String realm : Wizard.realms) {
+            if (!"fast".equalsIgnoreCase(realm) && isParseNeedToday(realm)) {
+                trendRealms.add(realm);
             }
-            Utils.writeToGson(Utils.getDir() + WEKA + File.separator  + "summaries.json", summaries);
-        }*/
+        }
         //публикуем на сайте
-//        GitHubPublisher.publishPredictions();
+        TrendUpdater.updateTrends(trendRealms);
     }
 
     private static void collectToJsonTech(final String realm) throws IOException {
