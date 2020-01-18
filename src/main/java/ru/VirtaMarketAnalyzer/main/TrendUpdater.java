@@ -26,23 +26,23 @@ final public class TrendUpdater {
     private static final Logger logger = LoggerFactory.getLogger(TrendUpdater.class);
 
     public static void main(String[] args) throws IOException, GitAPIException {
-        updateTrends();
+        updateTrends(Wizard.realms);
     }
 
-    public static void updateTrends() throws IOException, GitAPIException {
+    public static void updateTrends(List<String> realms) throws IOException, GitAPIException {
         //обновляем
         final Git git = RetailSalePrediction.fetchAndHardReset();
 
-        for (final String realm : Wizard.realms) {
+        for (final String realm : realms) {
             updateTrends(git, realm);
         }
         //публикуем на сайте
-        GitHubPublisher.publishTrends(git, Wizard.realms);
+        GitHubPublisher.publishTrends(git, realms);
         //gc
         GitHubPublisher.repackRepository();
     }
 
-    private static void updateTrends(final Git git, final String realm) throws IOException, GitAPIException {
+    public static void updateTrends(final Git git, final String realm) throws IOException, GitAPIException {
         logger.info("обновляем тренды, {}", realm);
         updateAllRetailTrends(git, realm);
         updateAllProductRemainTrends(git, realm);
@@ -68,7 +68,6 @@ final public class TrendUpdater {
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + Wizard.retail_trends + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
-        cacheTradeAtCity.clear();
     }
 
     private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {

@@ -138,38 +138,29 @@ public final class RetailSalePrediction {
         return new ArrayList<>(set);
     }
 
-    public static final Map<String, List<TradeAtCity>> cacheTradeAtCity = new HashMap<>();
-
-    public static List<TradeAtCity> getAllVersionsTradeAtCity(
+    public static Stream<TradeAtCity> getAllVersionsTradeAtCity(
             final Git git,
             final String fileNameStartWith,
             final String realm
     ) {
-        final String key = realm + "|" + fileNameStartWith;
-        if (!cacheTradeAtCity.containsKey(key)) {
-            final List<TradeAtCity> list = getAllVersions(git, Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
-                    .map(fileVersion -> {
-                        try {
-                            final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
-                            return Stream.of(arr)
-                                    .peek(ra -> ra.setDate(fileVersion.getDate()))
-                                    .collect(toList());
-                        } catch (final Exception e) {
-                            logger.error(e.getLocalizedMessage(), e);
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .collect(toList());
-            cacheTradeAtCity.put(key, list);
-        }
-        return cacheTradeAtCity.get(key);
+        return getAllVersions(git, Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
+                .map(fileVersion -> {
+                    try {
+                        final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
+                        return Stream.of(arr)
+                                .peek(ra -> ra.setDate(fileVersion.getDate()))
+                                .collect(toList());
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream);
     }
 
     public static Set<TradeAtCity> getAllTradeAtCity(final Git git, final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
         return getAllVersionsTradeAtCity(git, fileNameStartWith, realm)
-                .stream()
                 .filter(ra -> productID.equals(ra.getProductId()))
                 .collect(toSet());
     }
