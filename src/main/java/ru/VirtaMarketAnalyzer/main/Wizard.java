@@ -35,10 +35,11 @@ public final class Wizard {
     public static final String product_remains_trends = "product_remains_trends";
     public static final String trade_guide = "trade_guide";
     public static final String service_guide = "service_guide";
+    //public static final String retail_production_guide = "retail_production_guide";
     public static final String by_product_category_id = "by_product_category_id";
     public static final String by_service_id = "by_service_id";
     public static final String CITY_ELECTRICITY_TARIFF = "city_electricity_tariff";
-    public static final List<String> realms = Arrays.asList("nika", "mary", "anna", "fast", "olga", "vera", "lien");
+    public static final List<String> realms = Arrays.asList("nika", "mary", "anna", /*"fast",*/ "olga", "vera", "lien");
 
 
     public static void main(String[] args) throws Exception {
@@ -56,17 +57,6 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(parsedRealms);
-
-        //тренды
-        final List<String> trendRealms = new ArrayList<>();
-
-        for (final String realm : Wizard.realms) {
-            if (!"fast".equalsIgnoreCase(realm) && isParseNeedToday(realm)) {
-                trendRealms.add(realm);
-            }
-        }
-        //публикуем на сайте
-        TrendUpdater.updateTrends(trendRealms);
     }
 
     private static void collectToJsonTech(final String realm) throws IOException {
@@ -138,6 +128,7 @@ public final class Wizard {
         final String serviceBaseDir = Utils.getDir() + by_service + File.separator + realm + File.separator;
         final String tradeGuideBaseDir = Utils.getDir() + trade_guide + File.separator + realm + File.separator;
         final String serviceGuideBaseDir = Utils.getDir() + service_guide + File.separator + realm + File.separator;
+        //final String retailProductionGuideBaseDir = Utils.getDir() + retail_production_guide + File.separator + realm + File.separator;
 
         final File baseDirFile = new File(baseDir);
         if (baseDirFile.exists()) {
@@ -254,6 +245,13 @@ public final class Wizard {
             }
             Utils.writeToGson(serviceGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         }
+//        logger.info("генерируем производственный гид для розницы, {}", realm);
+//        for (int i = 0; i < productCategories.size(); i++) {
+//            final ProductCategory productCategory = productCategories.get(i);
+//            logger.info("{} / {}, {}", i + 1, productCategories.size(), productCategory.getCaption());
+//            final List<ProductionForRetail> retailProductionGuides = ProductionForRetailParser.genProductionForRetailByProductCategory(host, realm, productCategory);
+//            Utils.writeToGsonZip(retailProductionGuideBaseDir + by_product_category_id + File.separator + productCategory.getId() + ".json", retailProductionGuides);
+//        }
 
 //        ищем формулу для объема продаж в рознице
 //        RetailSalePrediction.createPrediction(realm, retailAnalytics, products);
@@ -261,6 +259,7 @@ public final class Wizard {
         Utils.writeToGson(baseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(serviceBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
         Utils.writeToGson(tradeGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
+//        Utils.writeToGson(retailProductionGuideBaseDir + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
 

@@ -23,6 +23,8 @@ final public class ProductionForRetail {
     final private String specialization;
     @SerializedName("pi")
     final private String productID;
+//    @SerializedName("wq")
+//    final int workersQuantity;
     @SerializedName("v")
     final private long volume;
     @SerializedName("q")
@@ -39,10 +41,18 @@ final public class ProductionForRetail {
     final private double techLvl;
     @SerializedName("ir")
     final private List<ProductRemain> ingredientsRemain;
+//    @SerializedName("iu")
+//    final private List<ProductRemain> ingredientsUsed;
     @SerializedName("ctm")
     final private boolean cheaperThenMarket;
 
-    public ProductionForRetail(final String host, final String realm, final TradeAtCity stat, final ProductionAboveAverage paa, final City productionCity) throws Exception {
+    public ProductionForRetail(
+            final String host,
+            final String realm,
+            final TradeAtCity stat,
+            final ProductionAboveAverage paa,
+            final City productionCity
+    ) throws Exception {
         this.manufactureID = paa.getManufactureID();
         this.specialization = paa.getSpecialization();
         this.productID = paa.getProductID();
@@ -51,6 +61,7 @@ final public class ProductionForRetail {
         this.cost = paa.getCost();
         this.techLvl = paa.getTechLvl();
         this.ingredientsRemain = paa.getIngredientsRemain();
+//        this.ingredientsUsed = paa.getIngredientsUsed();
         this.cheaperThenMarket = paa.isCheaperThenMarket();
 
         this.countryId = stat.getCountryId();

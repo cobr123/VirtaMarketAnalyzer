@@ -11,7 +11,9 @@ import ru.VirtaMarketAnalyzer.data.ProductionForRetail;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +25,10 @@ class ProductionForRetailParserTest {
         BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "olga";
         final Product product = ProductInitParser.getTradingProduct(Wizard.host, realm, "422897");
-        final List<ProductionForRetail> productionsForRetail = ProductionForRetailParser.genProductionForRetail(Wizard.host, realm, product);
+        final List<ProductionForRetail> productionsForRetail = ProductionForRetailParser.genProductionForRetailByProduct(Wizard.host, realm, product)
+                .stream()
+                .sorted(Comparator.comparingDouble(ProductionForRetail::getIncomeAfterTax).reversed())
+                .collect(Collectors.toList());
         assertFalse(productionsForRetail.isEmpty());
         final ProductionForRetail productionForRetail1 = productionsForRetail.get(0);
         logger.info(Utils.getPrettyGson(productionForRetail1));
