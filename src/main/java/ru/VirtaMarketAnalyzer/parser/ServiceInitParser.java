@@ -47,8 +47,8 @@ public final class ServiceInitParser {
             }.getType();
             final Map<String, Map<String, Object>> mapOfUnitTypes = gson.fromJson(json, mapType);
 
-            for (final String idx : mapOfUnitTypes.keySet()) {
-                final Map<String, Object> unitType = mapOfUnitTypes.get(idx);
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfUnitTypes.entrySet()) {
+                final Map<String, Object> unitType = entry.getValue();
 
                 if ("service_light".equalsIgnoreCase(unitType.get("kind").toString())
                         || "educational".equalsIgnoreCase(unitType.get("kind").toString())
@@ -83,8 +83,8 @@ public final class ServiceInitParser {
             }.getType();
             final Map<String, Map<String, Object>> mapOfUnitTypes = gson.fromJson(json, mapType);
 
-            for (final String idx : mapOfUnitTypes.keySet()) {
-                final Map<String, Object> unitType = mapOfUnitTypes.get(idx);
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfUnitTypes.entrySet()) {
+                final Map<String, Object> unitType = entry.getValue();
 
                 final String id = unitType.get("id").toString();
                 final String caption = unitType.get("name").toString();
@@ -108,8 +108,8 @@ public final class ServiceInitParser {
         final Object inputObj = unitType.get("input");
         if (inputObj != null && !(inputObj instanceof ArrayList)) {
             final Map<String, Object> inputList = (Map<String, Object>) inputObj;
-            for (final String idx : inputList.keySet()) {
-                final Map<String, Object> input = (Map<String, Object>) inputList.get(idx);
+            for (final Map.Entry<String, Object> entry : inputList.entrySet()) {
+                final Map<String, Object> input = (Map<String, Object>) entry.getValue();
                 final Product product = getProduct(host, realm, input.get("id").toString());
                 final double quantity = Double.parseDouble(input.get("qty").toString());
                 rawMaterials.add(new RawMaterial(product, quantity));

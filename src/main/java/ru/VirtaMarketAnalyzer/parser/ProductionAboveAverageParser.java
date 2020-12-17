@@ -95,8 +95,9 @@ public final class ProductionAboveAverageParser {
 //                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
 //                .entrySet().stream()
 //                .forEachOrdered(entry -> logger.info("топ по количеству ингридиентов - {}: {} шт.", entry.getKey(), entry.getValue()));
-        for (final String key : productRemains.keySet()) {
-            final List<ProductRemain> sortedList = productRemains.get(key);
+        for (final Map.Entry<String, List<ProductRemain>> entry : productRemains.entrySet()) {
+            final String key = entry.getKey();
+            final List<ProductRemain> sortedList = entry.getValue();
             sortedList.sort((o1, o2) -> (o1.getPrice() / o1.getQuality() > o2.getPrice() / o2.getQuality()) ? 1 : -1);
             productRemains.put(key, sortedList);
         }

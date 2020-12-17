@@ -43,8 +43,8 @@ public final class CityInitParser {
             }.getType();
             final Map<String, Map<String, Object>> mapOfRegions = gson.fromJson(json, mapType);
 
-            for (final String region_id : mapOfRegions.keySet()) {
-                final Map<String, Object> region = mapOfRegions.get(region_id);
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfRegions.entrySet()) {
+                final Map<String, Object> region = entry.getValue();
 
                 final String country_id = region.get("country_id").toString();
                 final String id = region.get("id").toString();
@@ -73,8 +73,8 @@ public final class CityInitParser {
             final Map<String, Map<String, Object>> mapOfCountry = gson.fromJson(json, mapType);
 
 
-            for (final String country_id : mapOfCountry.keySet()) {
-                final Map<String, Object> country = mapOfCountry.get(country_id);
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfCountry.entrySet()) {
+                final Map<String, Object> country = entry.getValue();
 
                 final String id = country.get("id").toString();
                 final String caption = country.get("name").toString();

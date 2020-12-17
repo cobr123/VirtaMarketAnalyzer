@@ -46,8 +46,8 @@ public final class ProductInitParser {
             }.getType();
             final Map<String, Map<String, Object>> mapOfRegions = gson.fromJson(json, mapType);
 
-            for (final String region_id : mapOfRegions.keySet()) {
-                final Map<String, Object> region = mapOfRegions.get(region_id);
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfRegions.entrySet()) {
+                final Map<String, Object> region = entry.getValue();
 
                 final String productCategory = region.get("product_category_name").toString();
                 final String productCategoryID = region.get("product_category_id").toString();

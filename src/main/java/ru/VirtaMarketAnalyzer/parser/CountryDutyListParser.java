@@ -51,8 +51,9 @@ final public class CountryDutyListParser {
             final Map<String, Map<String, Object>> infoAndDataMap = gson.fromJson(json, mapType);
             final Map<String, Object> dataMap = infoAndDataMap.get("data");
 
-            for (final String productId : dataMap.keySet()) {
-                final Map<String, Object> city = (Map<String, Object>) dataMap.get(productId);
+            for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                final String productId = entry.getKey();
+                final Map<String, Object> city = (Map<String, Object>) entry.getValue();
 
                 final int exportTaxPercent = Integer.parseInt(city.get("export").toString());
                 final int importTaxPercent = Integer.parseInt(city.get("import").toString());
@@ -116,8 +117,8 @@ final public class CountryDutyListParser {
             final Map<String, Object> infoMap = infoAndDataMap.get("info");
             final Map<String, Object> dataMap = infoAndDataMap.get("data");
 
-            for (final String idx : dataMap.keySet()) {
-                final Map<String, Object> data = (Map<String, Object>) dataMap.get(idx);
+            for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                final Map<String, Object> data = (Map<String, Object>) entry.getValue();
                 if (data.get("city_id").toString().equals(toCityId)) {
                     return Double.parseDouble(data.get("transport_cost").toString());
                 }

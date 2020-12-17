@@ -55,8 +55,8 @@ public final class ProductRemainParser {
             final Map<String, Object> infoMap = infoAndDataMap.get("info");
             final Map<String, Object> dataMap = infoAndDataMap.get("data");
 
-            for (final String idx : dataMap.keySet()) {
-                final Map<String, Object> city = (Map<String, Object>) dataMap.get(idx);
+            for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                final Map<String, Object> city = (Map<String, Object>) entry.getValue();
 
                 final String productId = city.get("product_id").toString();
                 final String countryId = city.get("country_id").toString();

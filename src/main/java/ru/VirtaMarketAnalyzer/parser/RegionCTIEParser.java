@@ -47,8 +47,9 @@ final public class RegionCTIEParser {
             final Map<String, Map<String, Object>> infoAndDataMap = gson.fromJson(json, mapType);
             final Map<String, Object> dataMap = infoAndDataMap.get("data");
 
-            for (final String productId : dataMap.keySet()) {
-                final Map<String, Object> city = (Map<String, Object>) dataMap.get(productId);
+            for (final Map.Entry<String, Object> entry : dataMap.entrySet()) {
+                final String productId = entry.getKey();
+                final Map<String, Object> city = (Map<String, Object>) entry.getValue();
 
                 final int rate = Integer.parseInt(city.get("tax").toString());
 

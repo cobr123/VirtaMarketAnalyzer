@@ -210,8 +210,8 @@ public final class ServiceAtCityParser {
             }.getType();
             final Map<String, Map<String, Object>> mapOfMetrics = gson.fromJson(json, mapType);
 
-            for (final String idx : mapOfMetrics.keySet()) {
-                final Map<String, Object> metrics = mapOfMetrics.get(idx);
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfMetrics.entrySet()) {
+                final Map<String, Object> metrics = entry.getValue();
 
                 final String caption = metrics.get("name").toString();
                 final double marketPerc = Double.parseDouble(metrics.get("market_size").toString());

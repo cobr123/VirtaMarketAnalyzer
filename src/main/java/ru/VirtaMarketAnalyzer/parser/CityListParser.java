@@ -46,8 +46,8 @@ public final class CityListParser {
             }.getType();
             final Map<String, Map<String, Object>> mapOfCities = gson.fromJson(json, mapType);
 
-            for (final String city_id : mapOfCities.keySet()) {
-                final Map<String, Object> city = mapOfCities.get(city_id);
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfCities.entrySet()) {
+                final Map<String, Object> city = entry.getValue();
 
                 final String id = city.get("id").toString();
                 final String region_id = city.get("region_id").toString();
