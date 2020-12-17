@@ -59,7 +59,7 @@ final public class TrendUpdater {
             watch.start();
             final Product product = products.get(i);
             logger.info("realm = {}, {} / {} собираем данные продаж товаров в городах, {}", realm, i + 1, products.size(), product.getCaption());
-            final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(git, TRADE_AT_CITY_, realm, product.getId());
+            final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(git, TRADE_AT_CITY_ + product.getId(), realm, product.getId());
             final String fileNamePath = baseDir + Wizard.retail_trends + File.separator + product.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getRetailTrends(new ArrayList<>(set)));
             watch.stop();
@@ -132,7 +132,7 @@ final public class TrendUpdater {
             watch.start();
             final Product material = materials.get(i);
             logger.info("realm = {}, {} / {} собираем данные о доступных товарах на оптовом рынке, {}", realm, i + 1, materials.size(), material.getCaption());
-            final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(git, PRODUCT_REMAINS_, realm, material.getId());
+            final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(git, PRODUCT_REMAINS_ + material.getId(), realm, material.getId());
             final String fileNamePath = baseDir + Wizard.product_remains_trends + File.separator + material.getId() + ".json";
             Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(new ArrayList<>(set)));
             watch.stop();
