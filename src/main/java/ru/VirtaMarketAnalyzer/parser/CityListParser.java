@@ -62,8 +62,8 @@ public final class CityListParser {
                 final int retail_count = Integer.parseInt(city.get("retail_count").toString());
                 if (retail_count > 0) {
                     final Map<String, Object> mapOfCat = (Map<String, Object>) city.get("retails");
-                    for (final String category_id : mapOfCat.keySet()) {
-                        final String name = mapOfCat.get(category_id).toString();
+                    for (final Map.Entry<String, Object> entry2 : mapOfCat.entrySet()) {
+                        final String name = entry2.getValue().toString();
                         mayoralBonuses.add(name);
                     }
                 }
