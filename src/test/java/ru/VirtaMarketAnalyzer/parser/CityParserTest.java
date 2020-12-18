@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.junit.jupiter.api.Test;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Wizard;
@@ -28,7 +25,6 @@ class CityParserTest {
 
     @Test
     void collectByTradeAtCitiesTest2() throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "vera";
         final List<City> cities = new ArrayList<>();
         final City city = new City("423255", "423256", "423257", "Москва", 10, 0, 0, 0, 0, null);

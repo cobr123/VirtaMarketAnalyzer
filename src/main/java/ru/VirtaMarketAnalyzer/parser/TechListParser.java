@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
@@ -24,8 +21,6 @@ final public class TechListParser {
     private static final Logger logger = LoggerFactory.getLogger(TechListParser.class);
 
     public static void main(String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-
         final String realm = "olga";
         final List<TechUnitType> techList = getTechUnitTypes(Wizard.host , realm);
         logger.info(Utils.getPrettyGson(techList));

@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.junit.jupiter.api.Test;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Wizard;
@@ -16,7 +13,6 @@ class TopRetailParserTest {
 
     @Test
     void getShopListTest() throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "olga";
         final String host = Wizard.host;
         final Product product = ProductInitParser.getTradingProduct(host, realm, "423863");

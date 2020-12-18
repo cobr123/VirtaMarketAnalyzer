@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +20,6 @@ public class ServiceGuideParserTest {
 
     @Test
     void genServiceGuideTest() throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "olga";
         final UnitType unitType = ServiceInitParser.getServiceUnitTypes(Wizard.host, realm).get(0);
         logger.info("unitType {}", unitType.getCaption());

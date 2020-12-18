@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -26,7 +23,6 @@ final public class ProductRecipeParser {
     private static final Logger logger = LoggerFactory.getLogger(ProductRecipeParser.class);
 
     public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/15751");
 //        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/422209");
 //        final Document doc = Downloader.getDoc(Wizard.host + "olga/main/industry/unit_type/info/2425");

@@ -2,9 +2,6 @@ package ru.VirtaMarketAnalyzer.publish;
 
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -256,8 +253,6 @@ final public class GitHubPublisher {
     }
 
     public static void main(String[] args) throws IOException, GitAPIException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
-
         testGetAllVersions();
     }
 }

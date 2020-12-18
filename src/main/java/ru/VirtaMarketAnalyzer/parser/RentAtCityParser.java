@@ -2,9 +2,6 @@ package ru.VirtaMarketAnalyzer.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.City;
@@ -26,7 +23,6 @@ public final class RentAtCityParser {
     private static final Logger logger = LoggerFactory.getLogger(RentAtCityParser.class);
 
     public static void main(String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final List<RentAtCity> list = getUnitTypeRent(Wizard.host, "olga", "422077");
         logger.info(Utils.getPrettyGson(list));
         System.out.println("list.size() = " + list.size());

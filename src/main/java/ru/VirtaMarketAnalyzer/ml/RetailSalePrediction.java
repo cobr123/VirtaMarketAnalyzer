@@ -2,9 +2,6 @@ package ru.VirtaMarketAnalyzer.ml;
 
 import com.google.gson.GsonBuilder;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ResetCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -902,7 +899,6 @@ public final class RetailSalePrediction {
     }
 
     public static void main(String[] args) throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
 //        createCommonPrediction("");
 //        createCommonPrediction("1490");
 //        createCommonPrediction("422705");

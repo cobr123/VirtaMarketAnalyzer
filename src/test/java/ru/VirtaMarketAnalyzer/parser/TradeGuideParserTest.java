@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.junit.jupiter.api.Test;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Wizard;
@@ -19,7 +16,6 @@ public class TradeGuideParserTest {
 
     @Test
     void genTradeGuideTest() throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "olga";
         final List<ProductCategory> productCategories = ProductInitParser.getTradeProductCategories(Wizard.host, realm);
         final List<TradeGuide> tradeGuides = TradeGuideParser.genTradeGuide(Wizard.host, realm, productCategories.get(0));

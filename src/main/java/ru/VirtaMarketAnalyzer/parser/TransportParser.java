@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -24,7 +21,6 @@ public final class TransportParser {
     private static final Logger logger = LoggerFactory.getLogger(TransportParser.class);
 
     public static void main(final String[] args) throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%r %d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
         final String realm = "olga";
         logger.info("begin");

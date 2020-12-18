@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.junit.jupiter.api.Test;
 import ru.VirtaMarketAnalyzer.data.Country;
 import ru.VirtaMarketAnalyzer.data.CountryDutyList;
@@ -44,7 +41,6 @@ class CountryDutyListParserTest {
 
     @Test
     void getTransportCostTest() throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         //Нукус (Узбекистан) -> Великие Луки (Россия, Северо-Запад)
         //Двигатель
         final double transportCost1 = CountryDutyListParser.getTransportCost(Wizard.host, "olga", "310400", "331870", "1473");
@@ -55,7 +51,6 @@ class CountryDutyListParserTest {
 
     @Test
     void addDutyAndTransportCostTest() throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         //Нукус (Узбекистан) -> Великие Луки (Россия, Северо-Запад)
         //Двигатель
         final double price = 900.0;

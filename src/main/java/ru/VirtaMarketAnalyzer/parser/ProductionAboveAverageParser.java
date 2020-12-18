@@ -1,9 +1,6 @@
 package ru.VirtaMarketAnalyzer.parser;
 
 import one.util.streamex.StreamEx;
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
@@ -24,8 +21,6 @@ public final class ProductionAboveAverageParser {
     private static final Logger logger = LoggerFactory.getLogger(ProductionAboveAverageParser.class);
 
     public static void main(final String[] args) throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
-
         final String host = Wizard.host;
         final String realm = "olga";
 

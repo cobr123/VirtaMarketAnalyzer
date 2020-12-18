@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.junit.jupiter.api.Test;
 import ru.VirtaMarketAnalyzer.data.*;
 import ru.VirtaMarketAnalyzer.main.Wizard;
@@ -17,7 +14,6 @@ class ServiceAtCityParserTest {
 
     @Test
     void getTest() throws IOException {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
         final String realm = "olga";
         final City city = new City("3010", "3023", "3025", "Николаев", 10, 0, 0, 0, 0, null);
@@ -36,7 +32,6 @@ class ServiceAtCityParserTest {
     @Test
     void getEmptyTurnIdTest() throws IOException {
         //Не найден turn_id
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %c %x - %m%n")));
         final String host = Wizard.host;
         final String realm = "anna";
         final City city = new City("2931", "2961", "424013", "Масейо", 10, 0, 0, 0, 0, null);

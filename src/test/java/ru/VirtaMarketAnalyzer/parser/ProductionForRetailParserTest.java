@@ -1,8 +1,5 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +19,6 @@ class ProductionForRetailParserTest {
 
     @Test
     void genProductionForRetailTest() throws Exception {
-        BasicConfigurator.configure(new ConsoleAppender(new PatternLayout("%d{ISO8601} [%t] %p %C{1} %x - %m%n")));
         final String realm = "olga";
         final Product product = ProductInitParser.getTradingProduct(Wizard.host, realm, "422897");
         final List<ProductionForRetail> productionsForRetail = ProductionForRetailParser.genProductionForRetailByProduct(Wizard.host, realm, product)
