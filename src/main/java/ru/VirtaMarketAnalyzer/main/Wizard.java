@@ -43,6 +43,7 @@ public final class Wizard {
 
 
     public static void main(String[] args) throws Exception {
+        checkLoginRequired();
         final List<String> parsedRealms = new ArrayList<>();
         for (final String realm : Wizard.realms) {
             try {
@@ -57,6 +58,15 @@ public final class Wizard {
         }
         //публикуем на сайте
         GitHubPublisher.publishRetail(parsedRealms);
+    }
+
+    private static void checkLoginRequired() throws Exception {
+        final List<Product> olgaProducts = ProductInitParser.getTradingProducts(Wizard.host, "olga");
+        final List<Product> fastProducts = ProductInitParser.getTradingProducts(Wizard.host, "fast");
+        if (olgaProducts.size() <= fastProducts.size()) {
+            logger.error("login required! olgaProducts.size({}) <= fastProducts.size({})", olgaProducts.size(), fastProducts.size());
+            throw new Exception("login required!");
+        }
     }
 
     private static void collectToJsonTech(final String realm) throws IOException {
