@@ -17,6 +17,7 @@ import java.security.GeneralSecurityException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Created by cobr123 on 24.04.2015.
@@ -101,6 +102,29 @@ public final class Downloader {
         return getJson(url, null, 99);
     }
 
+    final static Map<String, String> loginCookies;
+
+    static {
+        Connection.Response res = null;
+        try {
+            final String login = System.getenv("vma.login");
+            final String password = System.getenv("vma.password");
+            if (login == null || login.isEmpty()) {
+                throw new IllegalArgumentException("Необходим логин виртономики, иначе api вернет данные реалма vera для всех остальных реалмов (vma.login)");
+            }
+            if (password == null || password.isEmpty()) {
+                throw new IllegalArgumentException("Необходим пароль виртономики, иначе api вернет данные реалма vera для всех остальных реалмов (vma.password)");
+            }
+            res = Jsoup.connect(Wizard.host + "olga/main/user/login")
+                    .data("userData[login]", login, "userData[password]", password)
+                    .method(Connection.Method.POST)
+                    .execute();
+        } catch (final IOException e) {
+            logger.error(e.getLocalizedMessage(), e);
+        }
+        loginCookies = res.cookies();
+    }
+
     public static String getJson(final String url, final String referrer, final int maxTriesCnt) throws IOException {
         final String clearedUrl = getClearedUrl(url, referrer);
         final String fileToSave = Utils.getDir() + clearedUrl + ".json";
@@ -114,8 +138,21 @@ public final class Downloader {
             for (int tries = 1; tries <= maxTriesCnt; ++tries) {
                 try {
                     rateLimiter.acquire();
-                    FileUtils.copyURLToFile(new URL(url), file, 60_000, 60_000);
-                    return Utils.readFile(file.getAbsolutePath());
+                    final Connection conn = Jsoup.connect(url);
+                    if (referrer != null && !referrer.isEmpty()) {
+                        logger.trace("referrer: {}", referrer);
+                        conn.referrer(referrer);
+                    }
+                    conn.header("Accept-Language", "ru");
+                    conn.header("Accept-Encoding", "gzip, deflate");
+                    conn.userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0");
+                    conn.maxBodySize(0);
+                    conn.timeout(60_000);
+                    conn.ignoreContentType(true);
+                    conn.cookies(loginCookies);
+                    final String json = conn.get().text();
+                    Utils.writeFile(file.getAbsolutePath(), json);
+                    return json;
                 } catch (final IOException e) {
                     logger.error("Ошибка при запросе, попытка #{} из {}: {}", tries, maxTriesCnt, url);
                     logger.error("Ошибка: {}", e.getLocalizedMessage());

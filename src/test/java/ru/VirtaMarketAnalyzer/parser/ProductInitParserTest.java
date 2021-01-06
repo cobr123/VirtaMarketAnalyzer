@@ -34,7 +34,15 @@ class ProductInitParserTest {
         if (olgaProducts.size() <= fastProducts.size()) {
             logger.error("olgaProducts.size({}) <= fastProducts.size({})", olgaProducts.size(), fastProducts.size());
         }
-        assertTrue(olgaProducts.size() > fastProducts.size());
+        assertFalse(olgaProducts.size() <= fastProducts.size());
+
+        final List<Product> veraProducts = ProductInitParser.getTradingProducts(Wizard.host, "vera");
+        assertFalse(veraProducts.isEmpty());
+        if (olgaProducts.size() == veraProducts.size()) {
+            logger.error("olgaProducts.size({}) == veraProducts.size({})", olgaProducts.size(), veraProducts.size());
+        }
+        assertFalse(olgaProducts.size() == veraProducts.size());
+        assertFalse(fastProducts.size() == veraProducts.size());
     }
 
     @Test
