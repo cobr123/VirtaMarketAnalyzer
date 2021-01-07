@@ -8,7 +8,6 @@ import ru.VirtaMarketAnalyzer.data.Product;
 import ru.VirtaMarketAnalyzer.data.RawMaterial;
 import ru.VirtaMarketAnalyzer.data.UnitType;
 import ru.VirtaMarketAnalyzer.data.UnitTypeSpec;
-import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
@@ -65,6 +64,7 @@ public final class ServiceInitParser {
                 }
             }
         } catch (final Exception e) {
+            Downloader.invalidateCache(url);
             logger.error(url + "&format=debug");
             throw e;
         }
@@ -93,6 +93,7 @@ public final class ServiceInitParser {
                 list.add(new UnitTypeSpec(id, caption, getProduct(host, realm, equipment_product_id), getRawMaterials(host, realm, unitType)));
             }
         } catch (final Exception e) {
+            Downloader.invalidateCache(url);
             logger.error(url + "&format=debug");
             throw e;
         }
