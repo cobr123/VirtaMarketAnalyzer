@@ -1,7 +1,6 @@
 package ru.VirtaMarketAnalyzer.scrapper;
 
 import com.google.common.util.concurrent.RateLimiter;
-import org.apache.commons.io.FileUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -10,12 +9,7 @@ import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 
-import javax.net.ssl.*;
 import java.io.*;
-import java.net.URL;
-import java.security.GeneralSecurityException;
-import java.security.SecureRandom;
-import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.Map;
 
@@ -24,44 +18,6 @@ import java.util.Map;
  */
 public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
-
-    static {
-        final TrustManager[] trustAllCertificates = new TrustManager[]{
-                new X509TrustManager() {
-                    @Override
-                    public X509Certificate[] getAcceptedIssuers() {
-                        return null; // Not relevant.
-                    }
-
-                    @Override
-                    public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        // Do nothing. Just allow them all.
-                    }
-
-                    @Override
-                    public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        // Do nothing. Just allow them all.
-                    }
-                }
-        };
-
-        final HostnameVerifier trustAllHostnames = new HostnameVerifier() {
-            @Override
-            public boolean verify(String hostname, SSLSession session) {
-                return true; // Just allow them all.
-            }
-        };
-
-        try {
-            System.setProperty("jsse.enableSNIExtension", "false");
-            final SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCertificates, new SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            HttpsURLConnection.setDefaultHostnameVerifier(trustAllHostnames);
-        } catch (GeneralSecurityException e) {
-            throw new ExceptionInInitializerError(e);
-        }
-    }
 
     public static String getClearedUrl(final String url, final String referrer) {
         String clearedUrl;
