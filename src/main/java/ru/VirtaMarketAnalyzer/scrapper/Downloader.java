@@ -106,7 +106,7 @@ public final class Downloader {
                     conn.timeout(60_000);
                     conn.ignoreContentType(true);
                     conn.cookies(loginCookies);
-                    final String json = conn.get().text();
+                    final String json = conn.execute().body();
                     Utils.writeFile(file.getAbsolutePath(), json);
                     return json;
                 } catch (final IOException e) {
