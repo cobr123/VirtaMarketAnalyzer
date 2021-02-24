@@ -18,7 +18,9 @@ final public class ManufactureResult {
     public ManufactureResult(final String productID, final Double prodBaseQty, final Double resultQty, final Double qualityBonusPercent) {
         this.productID = productID;
         this.qualityBonusPercent = qualityBonusPercent;
+        // количество товаров производимых 1 человеком
         this.prodBaseQty = prodBaseQty;
+        // итоговое количество товара за единицу производства
         this.resultQty = resultQty;
     }
 

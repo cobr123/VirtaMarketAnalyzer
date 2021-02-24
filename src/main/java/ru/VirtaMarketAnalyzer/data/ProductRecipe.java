@@ -64,4 +64,8 @@ final public class ProductRecipe {
     public double getEquipmentPerWorker() {
         return equipmentPerWorker;
     }
+
+    public double getEnergyConsumption() {
+        return energyConsumption;
+    }
 }

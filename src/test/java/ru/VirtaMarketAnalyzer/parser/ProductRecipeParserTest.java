@@ -24,11 +24,25 @@ class ProductRecipeParserTest {
         final List<Manufacture> manufactures = new ArrayList<>();
         manufactures.add(manufacture);
         final Map<String, List<ProductRecipe>> recipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
-        //Модификатор качества для меда -20%
-        assertEquals(-20, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423151")).collect(toList()).get(0).getQualityBonusPercent());
+        assertEquals("Лекарственное пчеловодство", recipes.get("423153").get(0).getSpecialization());
+        assertEquals(0.3, recipes.get("423153").get(0).getInputProducts().stream().filter(p -> p.getProductID().equals("423139")).collect(toList()).get(0).getQty());
+        assertEquals(0.0, recipes.get("423153").get(0).getInputProducts().stream().filter(p -> p.getProductID().equals("423139")).collect(toList()).get(0).getMinQuality());
+        // 10 маточного молочка
+        assertEquals(10.0, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423153")).collect(toList()).get(0).getResultQty());
+        assertEquals(50.0, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423153")).collect(toList()).get(0).getProdBaseQty());
         //Модификатор качества для маточного молочка 0%
-        assertEquals(0, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423153")).collect(toList()).get(0).getQualityBonusPercent());
+        assertEquals(0.0, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423153")).collect(toList()).get(0).getQualityBonusPercent());
+        // 15 меда
+        assertEquals(15.0, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423151")).collect(toList()).get(0).getResultQty());
+        assertEquals(75.0, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423151")).collect(toList()).get(0).getProdBaseQty());
+        //Модификатор качества для меда -20%
+        assertEquals(-20.0, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423151")).collect(toList()).get(0).getQualityBonusPercent());
+
         assertEquals(1, recipes.get("423153").size());
+        assertEquals(5.0, recipes.get("423153").get(0).getEquipmentPerWorker());
+        assertEquals(0.1, recipes.get("423153").get(0).getEnergyConsumption());
+        assertEquals("423138", recipes.get("423153").get(0).getEquipment().getId());
+        assertEquals(1, recipes.get("423153").get(0).getInputProducts().size());
         assertEquals(2, recipes.get("423153").get(0).getResultProducts().size());
         assertEquals(1, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423153")).collect(toList()).size());
         assertEquals(1, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423151")).collect(toList()).size());

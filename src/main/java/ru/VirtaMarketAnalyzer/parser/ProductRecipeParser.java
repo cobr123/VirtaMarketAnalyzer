@@ -1,8 +1,7 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
@@ -11,6 +10,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,90 +55,99 @@ final public class ProductRecipeParser {
     }
 
     public static List<ProductRecipe> getRecipes(final String host, final String realm, final List<Manufacture> manufactures) throws IOException {
+        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
         final List<ProductRecipe> recipes = new ArrayList<>();
 
         for (final Manufacture manufacture : manufactures) {
+            final String url = host + "api/" + realm + "/main/unittype/produce?id=" + manufacture.getId() + "&lang=" + lang;
+
             try {
-                final Document doc = Downloader.getDoc(host + realm + "/main/industry/unit_type/info/" + manufacture.getId());
+                final String json = Downloader.getJson(url);
+                final Gson gson = new Gson();
+                final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+                }.getType();
+                final Map<String, Map<String, Object>> mapOfProductRecipes = gson.fromJson(json, mapType);
 
-                final String manufactureCategory = doc.select("table.infoblock > tbody > tr > td:nth-child(2) > a").text();
-                manufacture.setManufactureCategory(manufactureCategory);
+                for (final Map.Entry<String, Map<String, Object>> entry : mapOfProductRecipes.entrySet()) {
+                    final Map<String, Object> productRecipe = entry.getValue();
 
-                final Element lastTableRow = doc.select("table.grid > tbody > tr:nth-child(3)").last();
-                final Elements rows = doc.select("table.grid > tbody > tr[class]");
-                if (rows.size() > 0) {
+                    final String specialization = productRecipe.get("name").toString();
+
                     //количество товаров производимых 1 человеком
-                    final String minWorkerQty = Utils.getFirstBySep(lastTableRow.select("> td:nth-child(2)").text(), " ");
-                    final String minEquipQty = Utils.getLastBySep(lastTableRow.select("> td:nth-child(2)").text(), " ");
-                    final double equipmentPerWorker = Utils.toDouble(minEquipQty) / Utils.toDouble(minWorkerQty);
-//                logger.info("minWorkerQty = {}", minWorkerQty);
-                    //System.out.println(list.outerHtml());
-                    int minProdQtyCellIdx = 3;
-                    for (final Element row : rows) {
-                        if (!row.select("> td:nth-child(1) > b").text().isEmpty()) {
-                            final String specialization = row.select("td:nth-child(1) > b").text();
-//                        logger.info("specialization = {}", specialization);
-                            final List<ManufactureIngredient> inputProducts = new ArrayList<>();
-                            //td:nth-child(3) > table > tbody > tr > td:nth-child(1) > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img
-                            //td:nth-child(3) > table > tbody > tr > td:nth-child(2) > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img
-                            final Elements ings = row.select("> td:nth-child(3) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1) > img");
-                            for (final Element ing : ings) {
-                                final String productID = Utils.getLastBySep(ing.parent().attr("href"), "/");
-                                final String minQuality = Utils.clearNumber(ing.parent().parent().parent().nextElementSibling().child(0).select("> div > nobr > b").text());
-                                ing.parent().parent().parent().nextElementSibling().child(0).children().remove();
-                                final String qty = ing.parent().parent().parent().nextElementSibling().child(0).text();
-                                inputProducts.add(new ManufactureIngredient(productID, Utils.toDouble(qty), Utils.toDouble(minQuality)));
+                    final int workerQty = manufacture.getSizes().get(0).getWorkplacesCount();
+                    final int equipQty = manufacture.getSizes().get(0).getMaxEquipment();
+                    final double equipmentPerWorker = (double) equipQty / (double) workerQty;
+
+                    Product equipment = null;
+                    //если не "склад"
+                    if (!"2011".equals(manufacture.getId())) {
+                        equipment = getProduct(host, realm, productRecipe.get("equipment_product_id").toString());
+                        final double energyConsumption = Double.parseDouble(productRecipe.get("energy_per_equipment").toString()) * (double) equipQty;
+
+                        final Map<String, Map<String, Object>> output = (Map<String, Map<String, Object>>) productRecipe.get("output");
+                        if (!output.isEmpty() && !output.containsKey("")) {
+                            Map<String, Map<String, Object>> input = new HashMap<>();
+                            // проверка для шахт
+                            if (productRecipe.get("input") instanceof Map) {
+                                input = (Map<String, Map<String, Object>>) productRecipe.get("input");
                             }
-
-                            final List<ManufactureResult> resultProducts = new ArrayList<>();
-                            final Elements results = row.select("> td:nth-child(5) > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td > a:nth-child(1)");
-                            int resultIdx = 0;
-                            for (final Element result : results) {
-                                final String minProdQty = lastTableRow.select("> td").eq(minProdQtyCellIdx).select("> nobr").text();
-//                            logger.info("minProdQty = {}", minProdQty);
-                                final Double prodBaseQty = Utils.toDouble(minProdQty) / Utils.toDouble(minWorkerQty);
-//                            logger.info("prodBaseQty = {}", prodBaseQty);
-
-                                final String resultID = Utils.getLastBySep(result.attr("href"), "/");
-                                result.parent().parent().nextElementSibling().child(0).children().remove();
-                                final String resultQty = result.parent().parent().nextElementSibling().child(0).text();
-//                            logger.info("resultQty = {}", Utils.toDouble(resultQty));
-                                String qualityBonus = row.select("> td:nth-child(6)").text();
-                                if (results.size() > 1) {
-                                    final Element bonusTD = row.select("> td:nth-child(6) > table > tbody > tr").eq(resultIdx).select("> td").first();
-                                    bonusTD.children().remove();
-                                    qualityBonus = bonusTD.text();
-                                }
-                                final ManufactureResult manufactureResult = new ManufactureResult(resultID, prodBaseQty, Utils.toDouble(resultQty), Utils.toDouble(qualityBonus));
-                                resultProducts.add(manufactureResult);
-                                ++resultIdx;
-                                ++minProdQtyCellIdx;
-                            }
-
-                            final Element equipElem = row.select(" > td:nth-child(2) > a:nth-child(1) > img").first();
-                            Product equipment = null;
-                            //если не "склад"
-                            if (!"2011".equals(manufacture.getId())) {
-                                equipment = getProduct(host, realm, equipElem);
-                            }
-                            final double energyConsumption = Utils.toDouble(row.select("> td:nth-child(4)").text());
-
-                            final ProductRecipe recipe = new ProductRecipe(manufacture.getId(), specialization, equipment, equipmentPerWorker, energyConsumption, inputProducts, resultProducts);
+                            final ProductRecipe recipe = new ProductRecipe(
+                                    manufacture.getId(),
+                                    specialization,
+                                    equipment,
+                                    equipmentPerWorker,
+                                    energyConsumption,
+                                    getManufactureIngredient(input),
+                                    getManufactureResult(manufacture, output)
+                            );
                             recipes.add(recipe);
                         }
                     }
                 }
             } catch (final Exception e) {
-                logger.error(host + realm + "/main/industry/unit_type/info/" + manufacture.getId());
+                logger.error(url + "&format=debug");
                 throw e;
             }
         }
         return recipes;
     }
 
-    private static Product getProduct(final String host, final String realm, final Element equipElem) throws IOException {
-        final String id = Utils.getLastBySep(equipElem.parent().attr("href"), "/");
-        return ProductInitParser.getManufactureProduct(host, realm, id);
+    private static List<ManufactureIngredient> getManufactureIngredient(final Map<String, Map<String, Object>> input) {
+        final List<ManufactureIngredient> inputProducts = new ArrayList<>();
+
+        for (final Map.Entry<String, Map<String, Object>> entry : input.entrySet()) {
+            final Map<String, Object> recipeInput = entry.getValue();
+
+            final String productID = recipeInput.get("id").toString();
+            final double minQuality = Utils.toDouble(recipeInput.get("quality").toString());
+            final double qty = Utils.toDouble(recipeInput.get("qty").toString());
+
+            inputProducts.add(new ManufactureIngredient(productID, Utils.round2(qty), Utils.round2(minQuality)));
+        }
+        return inputProducts;
+    }
+
+    private static List<ManufactureResult> getManufactureResult(final Manufacture manufacture, final Map<String, Map<String, Object>> output) {
+        final List<ManufactureResult> resultProducts = new ArrayList<>();
+
+        for (final Map.Entry<String, Map<String, Object>> entry : output.entrySet()) {
+            final Map<String, Object> recipeOutput = entry.getValue();
+
+            final String resultID = recipeOutput.get("id").toString();
+            final double resultQty = Utils.toDouble(recipeOutput.get("qty").toString());
+            final double prodBaseQty = resultQty * (double) manufacture.getSizes().get(0).getMaxEquipment();
+
+            final double quality = Utils.toDouble(recipeOutput.get("quality").toString());
+            final double qualityBonus = quality * 100.0 - 100.0;
+
+            final ManufactureResult manufactureResult = new ManufactureResult(resultID, prodBaseQty, resultQty, qualityBonus);
+            resultProducts.add(manufactureResult);
+        }
+        return resultProducts;
+    }
+
+    private static Product getProduct(final String host, final String realm, final String equipID) throws IOException {
+        return ProductInitParser.getManufactureProduct(host, realm, equipID);
     }
 
     public static List<Product> getProductFromRecipes(final String host, final String realm, final List<ProductRecipe> productRecipes) throws IOException {
