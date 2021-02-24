@@ -11,6 +11,7 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 
 import java.io.*;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -58,10 +59,9 @@ public final class Downloader {
         return getJson(url, null, 99);
     }
 
-    final static Map<String, String> loginCookies;
+    final static Map<String, String> loginCookies = new HashMap<>();
 
     static {
-        Connection.Response res = null;
         try {
             final String login = System.getenv("vma.login");
             final String password = System.getenv("vma.password");
@@ -71,14 +71,15 @@ public final class Downloader {
             if (password == null || password.isEmpty()) {
                 throw new IllegalArgumentException("Необходим пароль виртономики, иначе api вернет данные реалма vera для всех остальных реалмов (vma.password)");
             }
-            res = Jsoup.connect(Wizard.host + "olga/main/user/login")
+            final Connection.Response res = Jsoup.connect(Wizard.host + "olga/main/user/login")
                     .data("userData[login]", login, "userData[password]", password)
                     .method(Connection.Method.POST)
                     .execute();
+            loginCookies.clear();
+            loginCookies.putAll(res.cookies());
         } catch (final IOException e) {
             logger.error(e.getLocalizedMessage(), e);
         }
-        loginCookies = res.cookies();
     }
 
     public static String getJson(final String url, final String referrer, final int maxTriesCnt) throws IOException {
