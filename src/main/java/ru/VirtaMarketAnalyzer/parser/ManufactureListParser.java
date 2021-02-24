@@ -1,17 +1,19 @@
 package ru.VirtaMarketAnalyzer.parser;
 
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Manufacture;
 import ru.VirtaMarketAnalyzer.data.ManufactureSize;
-import ru.VirtaMarketAnalyzer.main.Utils;
+import ru.VirtaMarketAnalyzer.main.Wizard;
 import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -30,40 +32,38 @@ final public class ManufactureListParser {
     }
 
     public static List<Manufacture> getManufactures(final String host, final String realm) throws IOException {
+        final String lang = (Wizard.host.equals(host) ? "ru" : "en");
+        final String url = host + "api/" + realm + "/main/unittype/browse?lang=" + lang;
+
         final List<Manufacture> list = new ArrayList<>();
-        final Document doc = Downloader.getDoc(host + realm + "/main/common/main_page/game_info/industry/");
+        try {
+            final String json = Downloader.getJson(url);
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<Map<String, Map<String, Object>>>() {
+            }.getType();
+            final Map<String, Map<String, Object>> mapOfUnitTypes = gson.fromJson(json, mapType);
 
-        final Elements rows = doc.select("table[class=\"list\"] > tbody > tr > td > a");
+            for (final Map.Entry<String, Map<String, Object>> entry : mapOfUnitTypes.entrySet()) {
+                final Map<String, Object> unitType = entry.getValue();
 
-        rows.stream().filter(row -> !row.text().isEmpty()).forEach(row -> {
-            final String[] data = row.attr("href").split("/");
-            final String id = data[data.length - 1];
-            final String caption = row.text();
-            final String manufactureCategory = "";
-            final List<ManufactureSize> sizes = getManufactureSizes(host, realm, id);
-            list.add(new Manufacture(id, manufactureCategory, caption, sizes));
-        });
+                final String id = unitType.get("id").toString();
+                final String caption = unitType.get("name").toString();
+                final String manufactureCategory = unitType.get("industry_name").toString();
+
+                final int workplacesCount = Integer.parseInt(unitType.get("labor_max").toString());
+                final int maxEquipment = Integer.parseInt(unitType.get("equipment_max").toString());
+                final int buildingDurationWeeks = Integer.parseInt(unitType.get("building_time").toString());
+
+                final List<ManufactureSize> sizes = new ArrayList<>();
+                sizes.add(new ManufactureSize(workplacesCount, maxEquipment, buildingDurationWeeks));
+
+                list.add(new Manufacture(id, manufactureCategory, caption, sizes));
+            }
+        } catch (final Exception e) {
+            logger.error(url + "&format=debug");
+            throw e;
+        }
         return list;
     }
 
-    public static List<ManufactureSize> getManufactureSizes(final String host, final String realm, final String id) {
-        final List<ManufactureSize> sizes = new ArrayList<>();
-        try {
-            final Document doc = Downloader.getDoc(host + realm + "/main/industry/unit_type/info/" + id);
-            if (doc.select("table[class=\"grid\"]").first() != null) {
-                doc.select("table[class=\"grid\"]").first().remove();
-
-                final Elements rows = doc.select("table[class=\"grid\"] > tbody > tr[class]");
-                rows.stream().forEach(row -> {
-                    final int workplacesCount = Utils.toInt(Utils.getFirstBySep(row.select("> td:nth-child(2)").first().html().toLowerCase(), "<br>"));
-                    final int maxEquipment = Utils.toInt(Utils.getLastBySep(row.select("> td:nth-child(2)").first().html().toLowerCase(), "<br>"));
-                    final int buildingDurationWeeks = Utils.toInt(row.select("> td:nth-child(3)").first().text());
-                    sizes.add(new ManufactureSize(workplacesCount, maxEquipment, buildingDurationWeeks));
-                });
-            }
-        } catch (final Exception e) {
-            logger.error(host + realm + "/main/industry/unit_type/info/" + id, e);
-        }
-        return sizes;
-    }
 }
