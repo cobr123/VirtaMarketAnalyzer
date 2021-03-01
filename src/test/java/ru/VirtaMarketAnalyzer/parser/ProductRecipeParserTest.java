@@ -1,8 +1,13 @@
 package ru.VirtaMarketAnalyzer.parser;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.Manufacture;
 import ru.VirtaMarketAnalyzer.data.ProductRecipe;
+import ru.VirtaMarketAnalyzer.main.Utils;
 import ru.VirtaMarketAnalyzer.main.Wizard;
 
 import java.io.IOException;
@@ -14,6 +19,8 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProductRecipeParserTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProductRecipeParserTest.class);
 
     @Test
     void getProductRecipesTest() throws IOException {
@@ -46,5 +53,28 @@ class ProductRecipeParserTest {
         assertEquals(2, recipes.get("423153").get(0).getResultProducts().size());
         assertEquals(1, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423153")).collect(toList()).size());
         assertEquals(1, recipes.get("423153").get(0).getResultProducts().stream().filter(p -> p.getProductID().equals("423151")).collect(toList()).size());
+
+        assertFalse(Utils.getGson(recipes.get("423153")).isEmpty());
     }
+
+    @Test
+    void getGsonTest() throws IOException {
+        final String host = Wizard.host;
+        final String realm = "olga";
+        final List<Manufacture> manufactures = ManufactureListParser.getManufactures(host, realm);
+        assertFalse(manufactures.isEmpty());
+        final Map<String, List<ProductRecipe>> productRecipes = ProductRecipeParser.getProductRecipes(host, realm, manufactures);
+        assertFalse(productRecipes.isEmpty());
+
+        for (final Map.Entry<String, List<ProductRecipe>> entry : productRecipes.entrySet()) {
+            try {
+                assertFalse(Utils.getGson(entry.getValue()).isEmpty());
+            } catch (final Exception e) {
+                final Gson gson = new GsonBuilder().serializeSpecialFloatingPointValues().create();
+                logger.error("entry.getKey = {}\n{}", entry.getKey(), gson.toJson(entry.getValue()));
+                throw e;
+            }
+        }
+    }
+
 }

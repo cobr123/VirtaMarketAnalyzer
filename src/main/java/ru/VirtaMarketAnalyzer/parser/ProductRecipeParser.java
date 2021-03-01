@@ -75,32 +75,34 @@ final public class ProductRecipeParser {
 
                     //количество товаров производимых 1 человеком
                     final int workerQty = manufacture.getSizes().get(0).getWorkplacesCount();
-                    final int equipQty = manufacture.getSizes().get(0).getMaxEquipment();
-                    final double equipmentPerWorker = (double) equipQty / (double) workerQty;
+                    if (workerQty > 0) {
+                        final int equipQty = manufacture.getSizes().get(0).getMaxEquipment();
+                        final double equipmentPerWorker = (double) equipQty / (double) workerQty;
 
-                    Product equipment = null;
-                    //если не "склад"
-                    if (!"2011".equals(manufacture.getId())) {
-                        equipment = getProduct(host, realm, productRecipe.get("equipment_product_id").toString());
-                        final double energyConsumption = Double.parseDouble(productRecipe.get("energy_per_equipment").toString()) * (double) equipQty;
+                        Product equipment = null;
+                        //если не "склад"
+                        if (!"2011".equals(manufacture.getId())) {
+                            equipment = getProduct(host, realm, productRecipe.get("equipment_product_id").toString());
+                            final double energyConsumption = Double.parseDouble(productRecipe.get("energy_per_equipment").toString()) * (double) equipQty;
 
-                        final Map<String, Map<String, Object>> output = (Map<String, Map<String, Object>>) productRecipe.get("output");
-                        if (!output.isEmpty() && !output.containsKey("")) {
-                            Map<String, Map<String, Object>> input = new HashMap<>();
-                            // проверка для шахт
-                            if (productRecipe.get("input") instanceof Map) {
-                                input = (Map<String, Map<String, Object>>) productRecipe.get("input");
+                            final Map<String, Map<String, Object>> output = (Map<String, Map<String, Object>>) productRecipe.get("output");
+                            if (!output.isEmpty() && !output.containsKey("")) {
+                                Map<String, Map<String, Object>> input = new HashMap<>();
+                                // проверка для шахт
+                                if (productRecipe.get("input") instanceof Map) {
+                                    input = (Map<String, Map<String, Object>>) productRecipe.get("input");
+                                }
+                                final ProductRecipe recipe = new ProductRecipe(
+                                        manufacture.getId(),
+                                        specialization,
+                                        equipment,
+                                        equipmentPerWorker,
+                                        energyConsumption,
+                                        getManufactureIngredient(input),
+                                        getManufactureResult(manufacture, output)
+                                );
+                                recipes.add(recipe);
                             }
-                            final ProductRecipe recipe = new ProductRecipe(
-                                    manufacture.getId(),
-                                    specialization,
-                                    equipment,
-                                    equipmentPerWorker,
-                                    energyConsumption,
-                                    getManufactureIngredient(input),
-                                    getManufactureResult(manufacture, output)
-                            );
-                            recipes.add(recipe);
                         }
                     }
                 }
