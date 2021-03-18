@@ -60,7 +60,7 @@ final public class TechMarketAskParser {
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String dateStr = df.format(new Date());
 
-        final String url1 = host + realm + "/main/globalreport/technology_target_market/total";
+        final String url1 = host + realm + "/main/globalreport/technology_target_market/total?old";
         final List<TechLicenseLvl> techIdAsks = getAskTechLicense(url1);
 //        logger.info(Utils.getPrettyGson(techIdAsks));
         logger.info("techIdAsks.size() = {}, realm = {}", techIdAsks.size(), realm);
@@ -68,14 +68,14 @@ final public class TechMarketAskParser {
         final List<TechLicenseLvl> licenseAskWoBid = new ArrayList<>();
         for (final TechLicenseLvl techIdAsk : techIdAsks) {
             //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
-            final String url2 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask";
+            final String url2 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask?old";
 //            logger.info("url2 = {}", url2);
             final List<TechLicenseAskBid> techAsks = getTechLicenseAskBids(url2);
 //            logger.info(Utils.getPrettyGson(techAsks));
 //            logger.info("techAsks.size() = {}", techAsks.size());
 
             //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/bid
-            final String url3 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid";
+            final String url3 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid?old";
 //            logger.info("url3 = {}", url3);
             final List<TechLicenseAskBid> techBids = getTechLicenseAskBids(url3);
 //            logger.info(Utils.getPrettyGson(techBids));
