@@ -147,14 +147,14 @@ final public class GitHubPublisher {
     }
 
     private static CredentialsProvider getCredentialsProvider() {
-        final String token = System.getenv("vma.github.token");
-        final String name = System.getenv("vma.github.username");
+        final String token = System.getenv("vma_github_token");
+        final String name = System.getenv("vma_github_username");
         if ((name == null || name.isEmpty()) && (token == null || token.isEmpty())) {
-            throw new IllegalArgumentException("Необходимо задать логин к репозиторию (vma.github.username) или токен (vma.github.token)");
+            throw new IllegalArgumentException("Необходимо задать логин к репозиторию (vma_github_username) или токен (vma_github_token)");
         }
-        final String password = System.getenv("vma.github.password");
+        final String password = System.getenv("vma_github_password");
         if (name != null && !name.isEmpty() && (password == null || password.isEmpty())) {
-            throw new IllegalArgumentException("Не задан пароль к репозиторию (vma.github.password)");
+            throw new IllegalArgumentException("Не задан пароль к репозиторию (vma_github_password)");
         }
         if (token != null && !token.isEmpty()) {
             logger.info("auth by token");
@@ -185,9 +185,9 @@ final public class GitHubPublisher {
                     return git;
                 } else {
                     //"https://github.com/user/repo.git"
-                    final String remotePath = System.getenv("vma.github.remotepath");
+                    final String remotePath = System.getenv("vma_github_remotepath");
                     if (remotePath == null || remotePath.isEmpty()) {
-                        throw new IllegalArgumentException("Не задан удаленный путь к репозиторию (vma.github.remotepath), например https://github.com/user/repo.git");
+                        throw new IllegalArgumentException("Не задан удаленный путь к репозиторию (vma_github_remotepath), например https://github.com/user/repo.git");
                     }
                     logger.info("git clone {} в {}", remotePath, localPathFile.getAbsolutePath());
                     final CloneCommand cloneCommand = Git.cloneRepository();
