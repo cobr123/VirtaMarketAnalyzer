@@ -63,13 +63,13 @@ public final class Downloader {
 
     static {
         try {
-            final String login = System.getenv("vma.login");
-            final String password = System.getenv("vma.password");
+            final String login = System.getenv("vma_login");
+            final String password = System.getenv("vma_password");
             if (login == null || login.isEmpty()) {
-                throw new IllegalArgumentException("Необходим логин виртономики, иначе api вернет данные реалма vera для всех остальных реалмов (vma.login)");
+                throw new IllegalArgumentException("Необходим логин виртономики, иначе api вернет данные реалма vera для всех остальных реалмов (vma_login)");
             }
             if (password == null || password.isEmpty()) {
-                throw new IllegalArgumentException("Необходим пароль виртономики, иначе api вернет данные реалма vera для всех остальных реалмов (vma.password)");
+                throw new IllegalArgumentException("Необходим пароль виртономики, иначе api вернет данные реалма vera для всех остальных реалмов (vma_password)");
             }
             final Connection.Response res = Jsoup.connect(Wizard.host + "olga/main/user/login")
                     .data("userData[login]", login, "userData[password]", password)
