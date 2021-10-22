@@ -154,13 +154,13 @@ public final class ServiceAtCityParser {
         final Set<String> tradingProductsId = ProductInitParser.getTradingProducts(host, realm).stream().map(Product::getId).collect(Collectors.toSet());
 
         return cities.parallelStream().map(city -> {
-            try {
-                return get(host, realm, city, service, regions, tradingProductsId, rents);
-            } catch (final Exception e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-            return null;
-        })
+                    try {
+                        return get(host, realm, city, service, regions, tradingProductsId, rents);
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                    }
+                    return null;
+                })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
@@ -170,6 +170,10 @@ public final class ServiceAtCityParser {
         final String url = host + "api/" + realm + "/main/marketing/report/service/metrics?geo=" + city.getGeo() + "&unit_type_id=" + service.getId();
         try {
             final String json = Downloader.getJson(url);
+            if ("false".equalsIgnoreCase(json)) {
+                // если запрос возвращает false значит не было продаж в этом городе в этот ход
+                return new ServiceMetrics("", 0, 0, 0, 0, 0, "", "", "");
+            }
             final Gson gson = new Gson();
             final Type mapType = new TypeToken<Map<String, Object>>() {
             }.getType();
