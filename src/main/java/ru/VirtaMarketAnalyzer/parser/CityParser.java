@@ -205,9 +205,11 @@ public final class CityParser {
 
             final List<Map<String, Object>> listOfMapOfShares = (List<Map<String, Object>>) mapOfMetrics.get("shares");
             builder.setLocalPercent(0);
-            for (final Map<String, Object> mapOfShares : listOfMapOfShares) {
-                if (mapOfShares.get("company_id").toString().equals("-1")) {
-                    builder.setLocalPercent(Double.parseDouble(mapOfShares.get("market_size").toString()));
+            if (listOfMapOfShares != null) {
+                for (final Map<String, Object> mapOfShares : listOfMapOfShares) {
+                    if (mapOfShares.get("company_id").toString().equals("-1")) {
+                        builder.setLocalPercent(Double.parseDouble(mapOfShares.get("market_size").toString()));
+                    }
                 }
             }
         } catch (final Exception e) {
