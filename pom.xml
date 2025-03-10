@@ -185,4 +185,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>dockerfile</id>
+            <build>
+                <finalName>VirtaMarketAnalyzer</finalName>
+            </build>
+        </profile>
+    </profiles>
 </project>

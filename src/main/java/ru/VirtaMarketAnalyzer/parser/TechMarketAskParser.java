@@ -2,9 +2,6 @@ package ru.VirtaMarketAnalyzer.parser;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.VirtaMarketAnalyzer.data.*;
@@ -14,15 +11,10 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Created by cobr123 on 20.03.16.
@@ -57,41 +49,52 @@ final public class TechMarketAskParser {
     }
 
     public static List<TechLicenseLvl> getLicenseAskWoBid(final String host, final String realm) throws IOException {
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String dateStr = df.format(new Date());
+        final List<TechLicenseOffer> techLicenseOffers = getTechLicenseOffers(host, realm);
+//        logger.info(Utils.getPrettyGson(techLicenseOffers));
+        logger.info("techLicenseOffers.size() = {}, realm = {}", techLicenseOffers.size(), realm);
 
-        final String url1 = host + realm + "/main/globalreport/technology_target_market/total?old";
-        final List<TechLicenseLvl> techIdAsks = getAskTechLicense(url1);
-//        logger.info(Utils.getPrettyGson(techIdAsks));
-        logger.info("techIdAsks.size() = {}, realm = {}", techIdAsks.size(), realm);
-
-        final List<TechLicenseLvl> licenseAskWoBid = new ArrayList<>();
-        for (final TechLicenseLvl techIdAsk : techIdAsks) {
-            //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/ask
-            final String url2 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/ask?old";
-//            logger.info("url2 = {}", url2);
-            final List<TechLicenseAskBid> techAsks = getTechLicenseAskBids(url2);
-//            logger.info(Utils.getPrettyGson(techAsks));
-//            logger.info("techAsks.size() = {}", techAsks.size());
-
-            //https://virtonomica.ru/olga/main/globalreport/technology/2427/31/target_market_summary/2016-03-21/bid
-            final String url3 = host + realm + "/main/globalreport/technology/" + techIdAsk.getTechId() + "/" + techIdAsk.getLvl() + "/target_market_summary/" + dateStr + "/bid?old";
-//            logger.info("url3 = {}", url3);
-            final List<TechLicenseAskBid> techBids = getTechLicenseAskBids(url3);
-//            logger.info(Utils.getPrettyGson(techBids));
-//            logger.info("techBids.size() = {}", techBids.size());
-            if (!techAsks.isEmpty() && techBids.isEmpty()) {
-                licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, Collections.emptyList()));
-            } else {
-                final List<TechLicenseAskBid> tmp = getAskWoBid(techAsks, techBids);
-                if (!tmp.isEmpty()) {
-                    licenseAskWoBid.add(new TechLicenseLvl(techIdAsk, tmp));
-                }
-            }
-//            throw new IOException("test");
-        }
+        final List<TechLicenseLvl> licenseAskWoBid = techLicenseOffers.stream()
+                .filter(o -> o.getAskCount() > 0)
+                .map(o -> {
+                    try {
+                        final List<TechLicenseLvlPrice> prices = getLicenseLvlPrices(host, realm, o.getUnitTypeID(), o.getLevel());
+                        final List<TechLicenseAskBid> techAsks = prices.stream().filter(p -> p.getAskCount() > 0).map(p -> new TechLicenseAskBid(p.getPrice(), p.getAskCount())).collect(Collectors.toList());
+                        final List<TechLicenseAskBid> techBids = prices.stream().filter(p -> p.getBidCount() > 0).map(p -> new TechLicenseAskBid(p.getPrice(), p.getBidCount())).collect(Collectors.toList());
+                        if (!techAsks.isEmpty() && techBids.isEmpty()) {
+                            return new TechLicenseLvl(o.getUnitTypeID(), o.getLevel(), Collections.emptyList());
+                        } else {
+                            final List<TechLicenseAskBid> tmp = getAskWoBid(techAsks, techBids);
+                            if (!tmp.isEmpty()) {
+                                return new TechLicenseLvl(o.getUnitTypeID(), o.getLevel(), tmp);
+                            } else {
+                                return null;
+                            }
+                        }
+                    } catch (final IOException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
         logger.info("licenseAskWoBid.size() = {}, realm = {}", licenseAskWoBid.size(), realm);
         return licenseAskWoBid;
+    }
+
+    private static List<TechLicenseLvlPrice> getLicenseLvlPrices(final String host, final String realm, final String unitTypeID, final int level) throws IOException {
+        final String url = host + "api/" + realm + "/main/technology/license/stat?unit_type=" + unitTypeID + "&level=" + level + "&format=json";
+        try {
+            final String json = Downloader.getJson(url);
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<TechLicenseLvlPrice[]>() {
+            }.getType();
+            final TechLicenseLvlPrice[] arr = gson.fromJson(json, mapType);
+
+            return Stream.of(arr)
+                    .collect(Collectors.toList());
+        } catch (final IOException e) {
+            logger.error("url = {}", url);
+            throw new IOException(e.getLocalizedMessage(), e);
+        }
     }
 
     private static List<TechLicenseAskBid> getAskWoBid(final List<TechLicenseAskBid> asks, final List<TechLicenseAskBid> bids) {
@@ -112,64 +115,21 @@ final public class TechMarketAskParser {
                 .collect(Collectors.toList());
     }
 
-    private static List<TechLicenseAskBid> getTechLicenseAskBids(final String url) throws IOException {
-        final int maxTryCnt = 3;
-        for (int tryCnt = 1; tryCnt <= maxTryCnt; ++tryCnt) {
-            final Document doc = Downloader.getDoc(url);
-            //итоги
-            final Element table = doc.select("table.list").first();
-            if (table == null) {
-                Downloader.invalidateCache(url);
-                logger.error("На странице '" + url + "' не найдена таблица с классом list");
-                Utils.waitSecond(3);
-                continue;
-            }
-            //сами ставки\предложения
-            final Elements priceAndQty = doc.select("table.list > tbody > tr[class]");
+    private static List<TechLicenseOffer> getTechLicenseOffers(final String host, final String realm) throws IOException {
+        final String url = host + "api/" + realm + "/main/technology/license/offers?type=ask&format=json&wrap=0";
+        try {
+            final String json = Downloader.getJson(url);
+            final Gson gson = new Gson();
+            final Type mapType = new TypeToken<TechLicenseOffer[]>() {
+            }.getType();
+            final TechLicenseOffer[] arr = gson.fromJson(json, mapType);
 
-            return priceAndQty.stream().map(paq -> {
-                final double price = Utils.toDouble(paq.select("> td:eq(0)").text());
-                final int quantity = Utils.toInt(paq.select("> td:eq(1)").text());
-                return new TechLicenseAskBid(price, quantity);
-            }).collect(toList());
+            return Stream.of(arr)
+                    .collect(Collectors.toList());
+        } catch (final IOException e) {
+            logger.error("url = {}", url);
+            throw new IOException(e.getLocalizedMessage(), e);
         }
-        return null;
-    }
-
-    private static List<TechLicenseLvl> getAskTechLicense(final String url) throws IOException {
-        final int maxTryCnt = 3;
-//        logger.info(url);
-//        Downloader.invalidateCache(url);
-        for (int tryCnt = 1; tryCnt <= maxTryCnt; ++tryCnt) {
-            final Document doc = Downloader.getDoc(url);
-            final Element table = doc.select("table.list").first();
-            if (table == null) {
-                Downloader.invalidateCache(url);
-                logger.error("На странице '" + url + "' не найдена таблица с классом list");
-                Utils.waitSecond(3);
-                continue;
-            }
-            final Element footer = doc.select("div.metro_footer").first();
-            if (footer == null) {
-                Downloader.invalidateCache(url);
-                logger.error("На странице '" + url + "' не найден div.metro_footer");
-                Utils.waitSecond(3);
-                continue;
-            }
-            final Elements asks = doc.select("table.list > tbody > tr > td > a:not(:contains(--))");
-
-            //https://virtonomica.ru/olga/main/globalreport/technology/2423/16/target_market_summary/21-03-2016/ask
-            return asks.stream().map(ask -> {
-                final Matcher matcher = tech_lvl_pattern.matcher(ask.attr("href"));
-                if (matcher.find()) {
-                    final String techID = matcher.group(1);
-                    final int lvl = Integer.parseInt(matcher.group(2));
-                    return new TechLicenseLvl(techID, lvl);
-                }
-                return null;
-            }).collect(toList());
-        }
-        return null;
     }
 
     public static List<TechLvl> getTech(final String host, final String realm, final List<TechUnitType> techList) throws IOException {
@@ -184,7 +144,7 @@ final public class TechMarketAskParser {
                 })
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
-                .collect(toList());
+                .collect(Collectors.toList());
     }
 
     public static List<TechLvl> getTech(final String host, final String realm, final String unit_type_id) throws IOException {
@@ -198,7 +158,7 @@ final public class TechMarketAskParser {
 
             return Stream.of(arr)
                     .map(row -> new TechLvl(row.getUnitTypeID(), row.getLevel(), row.getPrice()))
-                    .collect(toList());
+                    .collect(Collectors.toList());
         } catch (final IOException e) {
             logger.error("url = {}", url);
             throw new IOException(e.getLocalizedMessage(), e);

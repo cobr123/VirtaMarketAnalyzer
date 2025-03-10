@@ -11,12 +11,12 @@ final public class TechLicenseAskBid {
     @SerializedName("q")
     final private int quantity;
 
-    public TechLicenseAskBid(final Double price, final int quantity) {
+    public TechLicenseAskBid(final double price, final int quantity) {
         this.price = price;
         this.quantity = quantity;
     }
 
-    public Double getPrice() {
+    public double getPrice() {
         return price;
     }
 
