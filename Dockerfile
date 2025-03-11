@@ -22,6 +22,7 @@ COPY --from=build /build/target/VirtaMarketAnalyzer-jar-with-dependencies.jar /a
 # Copy script which should be run
 COPY run_data_update.sh /run_data_update.sh
 COPY run_trend_update.sh /run_trend_update.sh
+COPY src/main/resources/log4j.properties /log4j.properties
 RUN chmod +x /run_data_update.sh
 RUN chmod +x /run_trend_update.sh
 RUN mkdir /logs
