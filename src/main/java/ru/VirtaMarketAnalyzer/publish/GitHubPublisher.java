@@ -170,7 +170,7 @@ final public class GitHubPublisher {
     }
 
     public static Git getRepo(final File localPathFile) throws IOException, GitAPIException {
-        return getRepo(localPathFile, 3);
+        return getRepo(localPathFile, 99);
     }
 
     public static Git getRepo(final File localPathFile, final int maxTriesCnt) throws IOException, GitAPIException {
