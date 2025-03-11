@@ -26,8 +26,8 @@ COPY src/main/resources/log4j.properties /log4j.properties
 RUN chmod +x /run_data_update.sh
 RUN chmod +x /run_trend_update.sh
 RUN mkdir /logs
-# Run the cron every minute
-RUN echo '0 17 * * MON-FRI    /run_data_update.sh' > /etc/crontabs/root
-RUN echo '0 17 * * SAT    /run_trend_update.sh' >> /etc/crontabs/root
+# Run the cron at 14:00 UTC
+RUN echo '0 14 * * MON-FRI    /run_data_update.sh' > /etc/crontabs/root
+RUN echo '0 14 * * SAT    /run_trend_update.sh' >> /etc/crontabs/root
 RUN echo '# new line' >> /etc/crontabs/root
 CMD ["crond", "-f"]
