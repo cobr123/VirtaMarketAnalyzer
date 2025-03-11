@@ -1,7 +1,7 @@
 version: "3"
 services:
   virta_market_analyzer:
-    build: https://raw.githubusercontent.com/cobr123/VirtaMarketAnalyzer/refs/heads/master/Dockerfile
+    build: https://github.com/cobr123/VirtaMarketAnalyzer.git
     environment:
       - vma_github_remotepath=https://github.com/cobr123/cobr123.github.com.git
       - vma_github_token=
