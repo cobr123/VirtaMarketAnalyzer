@@ -89,10 +89,14 @@ public final class Wizard {
     }
 
     public static void saveImg(final String imgUrl) {
+        saveImg(imgUrl, imgUrl);
+    }
+
+    public static void saveImg(final String imgUrl, final String imgPath) {
         try {
-            final URL imgFullUrl = new URL(host + imgUrl);
-            final File imgFile = new File(Utils.getDir() + imgUrl.replace("/", File.separator));
+            final File imgFile = new File(Utils.getDir() + imgPath.replace("/", File.separator));
             if (!imgFile.exists()) {
+                final URL imgFullUrl = new URL(host + imgUrl);
                 FileUtils.copyURLToFile(imgFullUrl, imgFile);
             }
         } catch (final Exception e) {
@@ -103,8 +107,7 @@ public final class Wizard {
     public static void saveProductImg(final List<Product> products) {
         products.parallelStream()
                 .forEach(product -> {
-                    saveImg(product.getImgUrl());
-                    saveImg(product.getImgUrl().replace("/img/products/", "/img/products/16/"));
+                    saveImg(product.getImgUrl().replace("/img/products/", "/i/app/virtonomica/product/svg/"), product.getImgUrl());
                 });
     }
 

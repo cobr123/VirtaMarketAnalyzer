@@ -23,7 +23,7 @@ public final class Product {
 
     public Product(final String productCategory, final String id, final String caption, final String productCategoryID, final String symbol) {
         this.productCategory = productCategory;
-        this.imgUrl = "/img/products/" + symbol + ".gif";
+        this.imgUrl = "/img/products/" + symbol + ".svg";
         this.id = id;
         this.caption = caption;
         this.productCategoryID = productCategoryID;
