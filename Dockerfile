@@ -17,7 +17,7 @@ RUN mvn package -Dmaven.test.skip
 
 # Run the application (using the JRE, not the JDK)
 # This assumes that your dependencies are packaged in application.jar
-FROM amazoncorretto:21-alpine AS runtime
+FROM amazoncorretto:24-alpine AS runtime
 COPY --from=build /build/target/VirtaMarketAnalyzer-jar-with-dependencies.jar /application.jar
 # Copy script which should be run
 COPY run_data_update.sh /run_data_update.sh

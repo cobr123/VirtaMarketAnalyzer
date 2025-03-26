@@ -7,4 +7,4 @@ services:
       - vma_github_token=
       - vma_login=
       - vma_password=
-      - JAVA_OPTS=-XX:ActiveProcessorCount=6 -Djava.util.Arrays.useLegacyMergeSort=true -Djava.net.preferIPv4Stack=true -Dfile.encoding=utf-8
+      - JAVA_OPTS=-XX:ActiveProcessorCount=6 -Djava.util.Arrays.useLegacyMergeSort=true -Djava.net.preferIPv4Stack=true -Dfile.encoding=utf-8 -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders
