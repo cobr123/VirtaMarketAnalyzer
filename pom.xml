@@ -119,7 +119,7 @@
                     <!-- maven-compiler-plugin defaults to targeting Java 5, but our javac
                          only supports >=6 -->
                     <source>8</source>
-                    <target>24</target>
+                    <target>21</target>
                 </configuration>
                 <dependencies>
                     <dependency>
