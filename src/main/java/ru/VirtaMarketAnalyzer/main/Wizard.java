@@ -47,10 +47,12 @@ public final class Wizard {
         final List<String> parsedRealms = new ArrayList<>();
         for (final String realm : Wizard.realms) {
             try {
-                collectToJsonTradeAtCities(realm);
-                collectToJsonIndustries(realm);
-                collectToJsonTech(realm);
-                parsedRealms.add(realm);
+                if (isParseNeedToday(realm)) {
+                    collectToJsonTradeAtCities(realm);
+                    collectToJsonIndustries(realm);
+                    collectToJsonTech(realm);
+                    parsedRealms.add(realm);
+                }
             } catch (final Exception e) {
                 //видимо на этом реалме пересчета в этот день не было
                 logger.error(e.getLocalizedMessage(), e);
@@ -192,10 +194,6 @@ public final class Wizard {
         final List<RentAtCity> rents = RentAtCityParser.getUnitTypeRent(Wizard.host, realm, cities);
         Utils.writeToGson(baseDir + "rent.json", rents);
         logger.info("rents.size() = {}, realm = {}", rents.size(), realm);
-
-        if (!isParseNeedToday(realm)) {
-            return;
-        }
 
         logger.info("получаем список доступных розничных категорий товаров");
         final List<ProductCategory> product_categories = ProductInitParser.getTradeProductCategories(host, realm);

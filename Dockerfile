@@ -26,8 +26,17 @@ COPY src/main/resources/log4j.properties /log4j.properties
 RUN chmod +x /run_data_update.sh
 RUN chmod +x /run_trend_update.sh
 RUN mkdir /logs
+# Run the cron at 14:05 UTC, mary
+RUN echo '5 14 * * 1    /run_data_update.sh' > /etc/crontabs/root
+# Run the cron at 14:05 UTC, anna
+RUN echo '5 14 * * 2    /run_data_update.sh' > /etc/crontabs/root
+# Run the cron at 14:05 UTC, olga
+RUN echo '5 14 * * 3    /run_data_update.sh' > /etc/crontabs/root
+# Run the cron at 05:05 UTC, vera
+RUN echo '5 5 * * 4    /run_data_update.sh' > /etc/crontabs/root
+# Run the cron at 14:05 UTC, lien, nika
+RUN echo '5 14 * * 5    /run_data_update.sh' > /etc/crontabs/root
 # Run the cron at 14:05 UTC
-RUN echo '5 14 * * MON-FRI    /run_data_update.sh' > /etc/crontabs/root
-RUN echo '5 14 * * SAT    /run_trend_update.sh' >> /etc/crontabs/root
+RUN echo '5 14 * * 6    /run_trend_update.sh' >> /etc/crontabs/root
 RUN echo '# new line' >> /etc/crontabs/root
 CMD ["crond", "-f"]
