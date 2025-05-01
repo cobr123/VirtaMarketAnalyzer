@@ -141,25 +141,21 @@ public final class RetailSalePrediction {
             final String realm
     ) {
         return getAllVersions(git, Wizard.by_trade_at_cities, fileNameStartWith, Optional.of(realm))
-                .map(fileVersion -> {
+                .flatMap(fileVersion -> {
                     try {
                         final TradeAtCity[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), TradeAtCity[].class);
                         return Stream.of(arr)
-                                .peek(ra -> ra.setDate(fileVersion.getDate()))
-                                .collect(toList());
+                                .peek(ra -> ra.setDate(fileVersion.getDate()));
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
-                        return null;
+                        return Stream.empty();
                     }
-                })
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream);
+                });
     }
 
-    public static Set<TradeAtCity> getAllTradeAtCity(final Git git, final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
+    public static Stream<TradeAtCity> getAllTradeAtCity(final Git git, final String fileNameStartWith, final String realm, final String productID) {
         return getAllVersionsTradeAtCity(git, fileNameStartWith, realm)
-                .filter(ra -> productID.equals(ra.getProductId()))
-                .collect(toSet());
+                .filter(ra -> productID.equals(ra.getProductId()));
     }
 
     public static Set<TradeAtCity> getAllTradeAtCity(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
@@ -181,40 +177,27 @@ public final class RetailSalePrediction {
                 .collect(toSet());
     }
 
-    public static final Map<String, List<ProductRemain>> cacheProductRemain = new HashMap<>();
-
-    public static List<ProductRemain> getAllVersionsProductRemain(
+    public static Stream<ProductRemain> getAllVersionsProductRemain(
             final Git git,
             final String fileNameStartWith,
             final String realm
     ) {
-        final String key = realm + "|" + fileNameStartWith;
-        if (!cacheProductRemain.containsKey(key)) {
-            final List<ProductRemain> list = getAllVersions(git, Wizard.industry, fileNameStartWith, Optional.of(realm))
-                    .map(fileVersion -> {
-                        try {
-                            final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
-                            return Stream.of(arr)
-                                    .peek(ra -> ra.setDate(fileVersion.getDate()))
-                                    .collect(toList());
-                        } catch (final Exception e) {
-                            logger.error(e.getLocalizedMessage(), e);
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .flatMap(Collection::stream)
-                    .collect(toList());
-            cacheProductRemain.put(key, list);
-        }
-        return cacheProductRemain.get(key);
+        return getAllVersions(git, Wizard.industry, fileNameStartWith, Optional.of(realm))
+                .flatMap(fileVersion -> {
+                    try {
+                        final ProductRemain[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), ProductRemain[].class);
+                        return Stream.of(arr)
+                                .peek(ra -> ra.setDate(fileVersion.getDate()));
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
+                        return Stream.empty();
+                    }
+                });
     }
 
-    public static Set<ProductRemain> getAllProductRemains(final Git git, final String fileNameStartWith, final String realm, final String productID) throws IOException, GitAPIException {
+    public static Stream<ProductRemain> getAllProductRemains(final Git git, final String fileNameStartWith, final String realm, final String productID) {
         return getAllVersionsProductRemain(git, fileNameStartWith, realm)
-                .stream()
-                .filter(ra -> productID.equals(ra.getProductID()))
-                .collect(toSet());
+                .filter(ra -> productID.equals(ra.getProductID()));
     }
 
     public static Set<ProductRemain> getAllProductRemains(final String fileNameStartWith, final String realm) throws IOException, GitAPIException {
@@ -271,16 +254,14 @@ public final class RetailSalePrediction {
                 .flatMap(Stream::of)
                 .filter(File::isFile)
                 .filter(f -> f.getName().startsWith(fileNameStartWith))
-                .map(file -> {
+                .flatMap(file -> {
                     try {
                         return GitHubPublisher.getAllVersions(git, dirName + "/" + realm.orElse(new File(file.getParent()).getName()) + "/" + file.getName());
                     } catch (final Exception e) {
                         logger.error(e.getLocalizedMessage(), e);
-                        return null;
+                        return Stream.empty();
                     }
-                })
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream);
+                });
     }
 
     public static Stream<RetailAnalytics> getAllRetailAnalytics(final String fileNameStartWith) throws IOException, GitAPIException {

@@ -25,6 +25,9 @@ import ru.VirtaMarketAnalyzer.main.Wizard;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Created by cobr123 on 06.05.2015.
@@ -71,30 +74,30 @@ final public class GitHubPublisher {
         git.close();
     }
 
-    public static List<FileVersion> getAllVersions(final Git git, final String file) throws IOException, GitAPIException {
-        final List<FileVersion> list = new ArrayList<>();
+    public static Stream<FileVersion> getAllVersions(final Git git, final String file) throws IOException, GitAPIException {
         final Iterable<RevCommit> logs = git.log()
                 .add(git.getRepository().resolve(Constants.HEAD))
                 .addPath(file)
                 .call();
         logger.trace("file = {}", file);
 
-        for (final RevCommit rev : logs) {
-            try (final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-                logger.trace("Commit: {}, name: {}, id: {}", rev, rev.getName(), rev.getId().getName());
-                if (getFileFromCommit(os, file, git.getRepository(), rev.getTree())) {
-                    if (file.endsWith(".zip")) {
-                        list.add(new FileVersion(rev.getAuthorIdent().getWhen(), Utils.readFromZip(new File(file).getName().replace(".zip", ""), os)));
-                    } else {
-                        list.add(new FileVersion(rev.getAuthorIdent().getWhen(), os.toString("UTF-8")));
+        return StreamSupport.stream(logs.spliterator(), false)
+                .map(rev -> {
+                    try (final ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                        logger.trace("Commit: {}, name: {}, id: {}", rev, rev.getName(), rev.getId().getName());
+                        if (getFileFromCommit(os, file, git.getRepository(), rev.getTree())) {
+                            if (file.endsWith(".zip")) {
+                                return new FileVersion(rev.getAuthorIdent().getWhen(), Utils.readFromZip(new File(file).getName().replace(".zip", ""), os));
+                            } else {
+                                return new FileVersion(rev.getAuthorIdent().getWhen(), os.toString("UTF-8"));
+                            }
+                        }
+                    } catch (final Exception e) {
+                        logger.error(e.getLocalizedMessage(), e);
                     }
-                }
-            } catch (final Exception e) {
-                logger.error(e.getLocalizedMessage(), e);
-            }
-        }
-        logger.trace("logs.count = {}", list.size());
-        return list;
+                    return null;
+                })
+                .filter(Objects::nonNull);
     }
 
     public static boolean getFileFromCommit(final OutputStream os, final String file, final Repository repo, final RevTree tree) throws IOException, GitAPIException {
@@ -228,11 +231,11 @@ final public class GitHubPublisher {
 
     public static void testGetAllVersions() throws IOException, GitAPIException {
         final Git git = getRepo();
-        final List<FileVersion> list = getAllVersions(git, Wizard.by_trade_at_cities + "/" + "olga" + "/" + "retail_analytics_380000.json");
-        logger.info("getAllVersions.size = {}", list.size());
+        final Stream<FileVersion> list = getAllVersions(git, Wizard.by_trade_at_cities + "/" + "olga" + "/" + "retail_analytics_380000.json");
+//        logger.info("getAllVersions.size = {}", list.size());
         final Set<RetailAnalytics> set = new HashSet<>();
 
-        for (final FileVersion fileVersion : list) {
+        list.forEach(fileVersion -> {
             try {
                 logger.info(fileVersion.getContent());
                 final RetailAnalytics[] arr = new GsonBuilder().create().fromJson(fileVersion.getContent(), RetailAnalytics[].class);
@@ -241,7 +244,7 @@ final public class GitHubPublisher {
             } catch (final Exception e) {
                 logger.error(e.getLocalizedMessage(), e);
             }
-        }
+        });
         logger.info("Set<RetailAnalytics>.size = {}", set.size());
     }
 

@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ru.VirtaMarketAnalyzer.ml.RetailSalePrediction.*;
 
@@ -48,7 +49,7 @@ final public class TrendUpdater {
         updateAllProductRemainTrends(git, realm);
     }
 
-    private static void updateAllRetailTrends(final Git git, final String realm) throws IOException, GitAPIException {
+    private static void updateAllRetailTrends(final Git git, final String realm) throws IOException {
         final String baseDir = Utils.getDir() + Wizard.by_trade_at_cities + File.separator + realm + File.separator;
         logger.info("получаем список доступных розничных товаров");
         final List<Product> products = ProductInitParser.getTradingProducts(Wizard.host, realm);
@@ -59,19 +60,20 @@ final public class TrendUpdater {
             watch.start();
             final Product product = products.get(i);
             logger.info("realm = {}, {} / {} собираем данные продаж товаров в городах, {}", realm, i + 1, products.size(), product.getCaption());
-            final Set<TradeAtCity> set = RetailSalePrediction.getAllTradeAtCity(git, TRADE_AT_CITY_ + product.getId(), realm, product.getId());
+            final Stream<TradeAtCity> stream = RetailSalePrediction.getAllTradeAtCity(git, TRADE_AT_CITY_ + product.getId(), realm, product.getId());
             final String fileNamePath = baseDir + Wizard.retail_trends + File.separator + product.getId() + ".json";
-            Utils.writeToGsonZip(fileNamePath, getRetailTrends(new ArrayList<>(set)));
+            final List<RetailTrend> list = getRetailTrends(stream);
+            Utils.writeToGsonZip(fileNamePath, list);
             watch.stop();
-            logger.info("время выполнения: {}, записей сохранено: {}", watch.toString(), set.size());
+            logger.info("время выполнения: {}, записей сохранено: {}", watch.toString(), list.size());
         }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + Wizard.retail_trends + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
     }
 
-    private static List<RetailTrend> getRetailTrends(final List<TradeAtCity> list) {
-        return list.stream()
+    private static List<RetailTrend> getRetailTrends(final Stream<TradeAtCity> stream) {
+        return stream
                 .collect(Collectors.groupingBy((tac) -> RetailTrend.dateFormat.format(tac.getDate())))
                 .values().stream()
                 .map(e -> getWeighedRetailTrend(groupByTown(e)))
@@ -121,7 +123,7 @@ final public class TrendUpdater {
         );
     }
 
-    private static void updateAllProductRemainTrends(final Git git, final String realm) throws IOException, GitAPIException {
+    private static void updateAllProductRemainTrends(final Git git, final String realm) throws IOException {
         final String baseDir = Utils.getDir() + Wizard.industry + File.separator + realm + File.separator;
         logger.info("получаем список всех доступных товаров и материалов");
         final List<Product> materials = ProductInitParser.getManufactureProducts(Wizard.host, realm);
@@ -132,20 +134,20 @@ final public class TrendUpdater {
             watch.start();
             final Product material = materials.get(i);
             logger.info("realm = {}, {} / {} собираем данные о доступных товарах на оптовом рынке, {}", realm, i + 1, materials.size(), material.getCaption());
-            final Set<ProductRemain> set = RetailSalePrediction.getAllProductRemains(git, PRODUCT_REMAINS_ + material.getId(), realm, material.getId());
+            final Stream<ProductRemain> stream = RetailSalePrediction.getAllProductRemains(git, PRODUCT_REMAINS_ + material.getId(), realm, material.getId());
             final String fileNamePath = baseDir + Wizard.product_remains_trends + File.separator + material.getId() + ".json";
-            Utils.writeToGsonZip(fileNamePath, getProductRemainTrends(new ArrayList<>(set)));
+            final List<ProductRemainTrend> list = getProductRemainTrends(stream);
+            Utils.writeToGsonZip(fileNamePath, list);
             watch.stop();
-            logger.info("время выполнения: {}, записей сохранено: {}", watch.toString(), set.size());
+            logger.info("время выполнения: {}, записей сохранено: {}", watch.toString(), list.size());
         }
         logger.info("запоминаем дату обновления данных");
         final DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
         Utils.writeToGson(baseDir + Wizard.product_remains_trends + File.separator + "updateDate.json", new UpdateDate(df.format(new Date())));
-        cacheProductRemain.clear();
     }
 
-    private static List<ProductRemainTrend> getProductRemainTrends(final List<ProductRemain> list) {
-        return list.stream()
+    private static List<ProductRemainTrend> getProductRemainTrends(final Stream<ProductRemain> stream) {
+        return stream
                 .collect(Collectors.groupingBy((pr) -> RetailTrend.dateFormat.format(pr.getDate())))
                 .values().stream()
                 .map(e -> getWeighedProductRemainTrend(groupByUnit(e)))
