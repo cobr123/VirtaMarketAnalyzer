@@ -12,7 +12,6 @@ import ru.VirtaMarketAnalyzer.scrapper.Downloader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by cobr123 on 16.10.2016.
@@ -23,20 +22,6 @@ public final class ProductHistoryParser {
     public static List<ProductHistory> getHistory(final String host, final String realm, final List<Product> materials) throws IOException {
         final String url = host + realm + "/main/globalreport/product_history/";
         final List<ProductHistory> productsHistory = new ArrayList<>(materials.size());
-
-        logger.info("греем кэш: {}", url);
-        materials.stream()
-                .map(material -> url + material.getId())
-                .collect(Collectors.toList())
-                .parallelStream()
-                .forEach(s -> {
-                    try {
-                        Downloader.getDoc(s);
-                    } catch (final IOException e) {
-                        logger.error("Ошибка:", e);
-                        Downloader.invalidateCache(s);
-                    }
-                });
 
         logger.info("парсим обзорный отчет по производству: {}, {}", materials.size(), url);
         for (final Product material : materials) {
