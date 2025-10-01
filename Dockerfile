@@ -1,6 +1,6 @@
 # Cache maven dependencies as an intermediate docker image
 # (This only happens when pom.xml changes or you clear your docker image cache)
-FROM maven:3-amazoncorretto-24-alpine AS dependencies
+FROM maven:3-amazoncorretto-25-alpine AS dependencies
 COPY pom.xml /build/
 WORKDIR /build/
 RUN mvn --batch-mode dependency:go-offline dependency:resolve-plugins
@@ -8,7 +8,7 @@ RUN mvn --batch-mode dependency:go-offline dependency:resolve-plugins
 # Build the app using Maven and the cached dependencies
 # (This only happens when your source code changes or you clear your docker image cache)
 # Should work offline, but https://issues.apache.org/jira/browse/MDEP-82
-FROM maven:3-amazoncorretto-24-alpine AS build
+FROM maven:3-amazoncorretto-25-alpine AS build
 COPY --from=dependencies /root/.m2 /root/.m2
 COPY pom.xml /build/
 COPY src /build/src
@@ -17,7 +17,7 @@ RUN mvn package -Dmaven.test.skip
 
 # Run the application (using the JRE, not the JDK)
 # This assumes that your dependencies are packaged in application.jar
-FROM amazoncorretto:24-alpine AS runtime
+FROM amazoncorretto:25-alpine AS runtime
 COPY --from=build /build/target/VirtaMarketAnalyzer-jar-with-dependencies.jar /application.jar
 # Copy script which should be run
 COPY run_data_update.sh /run_data_update.sh
