@@ -37,6 +37,6 @@ RUN echo '5 5 * * 4    /run_data_update.sh' >> /etc/crontabs/root
 # Run the cron at 14:05 UTC, lien, nika
 RUN echo '5 14 * * 5    /run_data_update.sh' >> /etc/crontabs/root
 # Run the cron at 14:05 UTC, once a month
-RUN echo '5 14 1-7 * 6    /run_trend_update.sh' >> /etc/crontabs/root
+RUN echo '5 14 * * 6    /run_trend_update.sh' >> /etc/crontabs/root
 RUN echo '# new line' >> /etc/crontabs/root
 CMD ["crond", "-f"]
