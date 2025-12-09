@@ -8,5 +8,3 @@ services:
       - vma_login=
       - vma_password=
       - JAVA_OPTS=-XX:ActiveProcessorCount=6 -Djava.util.Arrays.useLegacyMergeSort=true -Djava.net.preferIPv4Stack=true -Dfile.encoding=utf-8 -XX:+UnlockExperimentalVMOptions -XX:+UseCompactObjectHeaders
-      - json_cache_size=500
-      - html_cache_size=500

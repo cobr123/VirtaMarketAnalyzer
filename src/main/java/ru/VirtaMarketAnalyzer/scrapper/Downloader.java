@@ -22,11 +22,11 @@ public final class Downloader {
     private static final Logger logger = LoggerFactory.getLogger(Downloader.class);
 
     private static final Cache<String, String> jsonCache = Caffeine.newBuilder()
-            .maximumSize(Long.parseLong(System.getenv().getOrDefault("json_cache_size", "500")))
+            .maximumSize(500)
             .build();
 
     private static final Cache<String, Document> htmlCache = Caffeine.newBuilder()
-            .maximumSize(Long.parseLong(System.getenv().getOrDefault("html_cache_size", "500")))
+            .maximumSize(500)
             .build();
 
     public static void invalidateCache(final String url) {
