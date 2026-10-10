@@ -92,36 +92,6 @@
             </resource>
         </resources>
         <plugins>
-
-            <!-- Set a JDK compiler level -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
-                <configuration>
-                    <compilerId>javac-with-errorprone</compilerId>
-                    <forceLegacyJavacApi>true</forceLegacyJavacApi>
-                    <!-- maven-compiler-plugin defaults to targeting Java 5, but our javac
-                         only supports >=6 -->
-                    <source>21</source>
-                    <target>27</target>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.codehaus.plexus</groupId>
-                        <artifactId>plexus-compiler-javac-errorprone</artifactId>
-                        <version>2.17.1</version>
-                    </dependency>
-                    <!-- override plexus-compiler-javac-errorprone's dependency on
-                         Error Prone with the latest version -->
-                    <dependency>
-                        <groupId>com.google.errorprone</groupId>
-                        <artifactId>error_prone_core</artifactId>
-                        <version>2.50.0</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
             <!-- Make this jar executable -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
